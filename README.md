@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AgriQ System - Productos Cacciamano
+
+This [Next.js](https://nextjs.org) project is part of a final project aimed at optimizing the operations of **Productos Cacciamano**, an agricultural company specializing in the cultivation, packaging, and commercialization of aromatic herbs and specialty vegetables.
+
+## Project Overview
+
+**Productos Cacciamano** manages the entire process from planting and harvesting in rural zones to packaging and storing in the warehouse, and finally, selling at the "Mercado de Abasto." 
+
+**AgriQ** streamlines these processes by tracking product flow, from the field to storage and sales, through an intuitive interface for monitoring, recording, and optimizing production, inventory, and sales data.
+
+## Features
+
+- **Field Management**: Track crop progress from planting to harvest.
+- **Inventory Control**: Manage packaging and storage in the warehouse.
+- **Sales Integration**: Monitor and manage product sales.
+- **Reports & Analytics**: Generate detailed production, inventory, and sales reports.
+
+## Tech Stack
+
+- **Next.js**: Framework for building scalable applications.
+- **TypeScript**: Ensures type safety and scalability.
+- **Tailwind CSS**: Modern, responsive UI styling.
+- **SQLite**: Robust database for large-scale data handling.
+- **NextUI**: Accessible and reusable UI components.
+- **Vercel**: Deployment platform for optimized performance.
 
 ## Getting Started
 
-First, run the development server:
+To run the project locally:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Install dependencies:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. Start the development server:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+    ```bash
+    npm run dev
+    ```
+
+3. Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+You can edit the project by modifying `app/page.tsx`. The app will auto-update with changes.
+
+## Fonts
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to optimize and load the [Geist](https://vercel.com/font) font.
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+- [Next.js Documentation](https://nextjs.org/docs) - Explore features and APIs.
+- [Learn Next.js](https://nextjs.org/learn) - Interactive Next.js tutorial.
+- [Next.js GitHub](https://github.com/vercel/next.js) - Contribute and provide feedback.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Deploy easily with [Vercel](https://vercel.com/new). For more information, see the [Next.js Deployment Documentation](https://nextjs.org/docs/app/building-your-application/deploying).
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
