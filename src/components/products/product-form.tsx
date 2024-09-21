@@ -48,7 +48,6 @@ export default function ProductForm({ product }: ProductFormProps) {
     formData.append("active", data.active ? "true" : "false");
     if (data.image) formData.append("image", data.image);
 
-
     setIsloading(true);
     let response;
     if (isEditing && product?.id) {
@@ -62,7 +61,7 @@ export default function ProductForm({ product }: ProductFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="h-[70vh] flex flex-col gap-4">
+      <div className="h-[70dvh] flex flex-col gap-4">
         <Controller
           name="name"
           control={control}

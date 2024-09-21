@@ -8,11 +8,9 @@ interface UserListProps {
   users: User[];
 }
 
-
-
 export default function UserList({ users }: UserListProps) {
   return (
-    <ScrollShadow className="h-[70vh]">
+    <ScrollShadow className="h-[70dvh]">
       <ul className="flex gap-2 flex-col">
         {users.map((user) => (
           <li key={user.id}>

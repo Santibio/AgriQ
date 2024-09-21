@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
-import Header from "@/components/header";
+import Header from "./_header";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -25,8 +25,8 @@ export const viewport: Viewport = {
  
 
 export const metadata: Metadata = {
-  title: "AgroQ",
-  description: "Un aplicacion mobile para dar seguimiento a ",
+  title: "AgriQ",
+  description: "Un aplicacion mobile para dar seguimiento a productos",
 };
 
 export default function RootLayout({
@@ -34,6 +34,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
     <html lang="en">
       <body

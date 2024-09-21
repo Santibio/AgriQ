@@ -47,7 +47,7 @@ export default function UserForm({ user }: UserFormProps) {
       confirmPassword: "",
       lastName: user?.lastName || "",
       name: user?.name || "",
-      avatar: undefined ,
+      avatar: undefined,
     },
   });
 
@@ -89,7 +89,7 @@ export default function UserForm({ user }: UserFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="h-[70vh] flex flex-col gap-4">
+      <div className="h-[70dvh] flex flex-col gap-4">
         <div className="flex gap-2">
           <Controller
             name="username"
@@ -132,7 +132,7 @@ export default function UserForm({ user }: UserFormProps) {
                       ref={ref}
                       className="hidden"
                     />
-                    {(value || preview) ? (
+                    {value || preview ? (
                       <Avatar src={preview} fallback />
                     ) : (
                       <Camera className="stroke-slate-300" />

@@ -16,7 +16,7 @@ interface ProductsListProps {
 
 export default function ProductsList({ products }: ProductsListProps) {
   return (
-    <ScrollShadow className="h-[70vh] pb-1">
+    <ScrollShadow className="h-[70dvh] pb-1">
       <div className="gap-6 grid grid-cols-2 sm:grid-cols-4">
         {products.map((product) => (
           <Link
@@ -24,10 +24,7 @@ export default function ProductsList({ products }: ProductsListProps) {
             href={paths.productEdit(product.id.toString())}
             className=" w-full"
           >
-            <Card
-              shadow="sm"
-              isPressable
-            >
+            <Card shadow="sm" isPressable>
               <CardBody className="overflow-visible p-0">
                 <Image
                   shadow="sm"
