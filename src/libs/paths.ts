@@ -2,6 +2,9 @@ const paths = {
   home() {
     return "/";
   },
+  login() {
+    return `/login`;
+  },
   users() {
     return `/users`;
   },

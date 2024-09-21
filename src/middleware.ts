@@ -1,24 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose"; // Importar funciones de jose
+import { validateRequest } from "./auth";
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
+function redirectToLogin(request: NextRequest): NextResponse {
+  return NextResponse.redirect(new URL("/login", request.url));
+}
 
-export async function middleware(request: NextRequest) {
-  const token = request.cookies.get("token")?.value;
+function isProtectedRoute(pathname: string): Array<string> {
+  const protectedRoutes: Record<string, Array<string>> = {
+    "/production": ["administrator", "deposit"],
+    "/discards": ["administrator", "deposit"],
+    "/shipments": ["administrator", "deposit"],
+    "/returns-reception": ["administrator", "deposit"],
+    "/sales": ["administrator", "sells"],
+    "/shipment-reception": ["administrator", "sells"],
+    "/returns": ["administrator", "sells"],
+    "/reports": ["administrator", "deposit", "sells"],
+    "/users": ["administrator"],
+    "/products": ["administrator"],
+  };
 
-  const response = NextResponse.next();
-  response.headers.set("x-debug-token", token || "No token");
-  response.headers.set("x-debug-path", request.nextUrl.pathname);
+  return protectedRoutes[pathname] || [];
+}
 
+function hasAccess(userRole: string, allowedRoles: Array<string>): boolean {
+  return allowedRoles.includes(userRole);
+}
+
+export async function middleware(request: NextRequest): Promise<NextResponse> {
   try {
-    const secret = new TextEncoder().encode(JWT_SECRET);
-    await jwtVerify(token!, secret);
+    const { userId, userRole, isExpired } = await validateRequest();
+
+    if (isExpired) {
+      console.log("Token expirado");
+      return redirectToLogin(request);
+    }
+
+    if (!userId || !userRole) {
+      console.log("No se encontró el id del usuario");
+      return redirectToLogin(request);
+    }
+
+    const { pathname } = request.nextUrl;
+    const allowedRoles = isProtectedRoute(pathname);
+
+    if (allowedRoles.length > 0 && !hasAccess(userRole, allowedRoles)) {
+      console.log("Acceso denegado para el rol: ", userRole);
+      return NextResponse.redirect(new URL("/not-found", request.url));
+    }
   } catch (error) {
-    console.log("error: ", error);
-    return NextResponse.redirect(new URL("/login", request.url));
+    console.log("Error: ", error);
+    return redirectToLogin(request);
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
