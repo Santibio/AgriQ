@@ -3,7 +3,7 @@
 import { useForm, Controller } from "react-hook-form";
 import { addUser, editUser } from "@/actions/users";
 import { Avatar, Button, Input, Select, SelectItem } from "@nextui-org/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Camera, Eye, EyeOff } from "lucide-react";
 import type { User } from "@prisma/client";
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/libs/schemas/users";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
+import { usernameGenerator } from "@/libs/helpers/user";
 
 const roles = [
   { id: "administrator", label: "Administrador" },
@@ -38,6 +39,8 @@ export default function UserForm({ user }: UserFormProps) {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<FormInputs>({
     resolver: zodResolver(isEditing ? UserEditFormSchema : UserAddFormSchema),
     defaultValues: {
@@ -58,6 +61,16 @@ export default function UserForm({ user }: UserFormProps) {
 
   const [isLoading, setIsloading] = useState<boolean>(false);
   const [preview, setPreview] = useState<string>(user?.avatar || "");
+
+  // Effect to update username whenever name or lastName changes
+  useEffect(() => {
+    console.log("watch name: ", watch("name"));
+    const name = watch("name");
+    const lastName = watch("lastName");
+    const username = usernameGenerator(name, lastName); 
+    setValue("username", username); 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watch("name"), watch("lastName")]);
 
   const onSubmit = async (data: FormInputs) => {
     try {
@@ -90,78 +103,32 @@ export default function UserForm({ user }: UserFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="h-[70dvh] flex flex-col gap-4">
-        <div className="flex gap-2">
-          <Controller
-            name="username"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="Usuario"
-                placeholder="Ingresar nombre usuario"
-                isRequired
-                isInvalid={!!errors.username}
-                errorMessage={errors.username?.message}
-                isDisabled={isEditing}
-              />
-            )}
-          />
-          <Controller
-            name="avatar"
-            control={control}
-            render={({ field: { onChange, onBlur, ref, value } }) => {
-              return (
-                <Button
-                  isIconOnly
-                  variant="flat"
-                  className="h-full w min-w-[50px] bg-default-100"
-                >
-                  <label className="">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          onChange(file); // Asigna el archivo al estado del formulario
-                          const objectUrl = URL.createObjectURL(file); // Crea una URL de objeto para la imagen
-                          setPreview(objectUrl); // Almacena la URL para mostrarla en el avatar
-                        }
-                      }}
-                      onBlur={onBlur}
-                      ref={ref}
-                      className="hidden"
-                    />
-                    {value || preview ? (
-                      <Avatar src={preview} fallback />
-                    ) : (
-                      <Camera className="stroke-slate-300" />
-                    )}
-                  </label>
-                </Button>
-              );
-            }}
-          />
-        </div>
         <Controller
-          name="role"
+          name="name"
           control={control}
           render={({ field }) => (
-            <Select
+            <Input
               {...field}
-              label="Rol"
-              placeholder="Tipo de usuario"
+              label="Nombre"
+              placeholder="Ingresar nombre"
               isRequired
-              isInvalid={!!errors.role}
-              errorMessage={errors.role?.message}
-              selectedKeys={[field.value]}
-            >
-              {roles.map((role) => (
-                <SelectItem key={role.id} value={role.id}>
-                  {role.label}
-                </SelectItem>
-              ))}
-            </Select>
+              isInvalid={!!errors.name}
+              errorMessage={errors.name?.message}
+            />
+          )}
+        />
+        <Controller
+          name="lastName"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              label="Apellido"
+              placeholder="Ingresar apellido"
+              isRequired
+              isInvalid={!!errors.lastName}
+              errorMessage={errors.lastName?.message}
+            />
           )}
         />
         <div className="flex gap-4">
@@ -239,33 +206,82 @@ export default function UserForm({ user }: UserFormProps) {
           />
         </div>
         <Controller
-          name="lastName"
+          name="role"
           control={control}
           render={({ field }) => (
-            <Input
+            <Select
               {...field}
-              label="Apellido"
-              placeholder="Ingresar apellido"
+              label="Rol"
+              placeholder="Tipo de usuario"
               isRequired
-              isInvalid={!!errors.lastName}
-              errorMessage={errors.lastName?.message}
-            />
+              isInvalid={!!errors.role}
+              errorMessage={errors.role?.message}
+              selectedKeys={[field.value]}
+            >
+              {roles.map((role) => (
+                <SelectItem key={role.id} value={role.id}>
+                  {role.label}
+                </SelectItem>
+              ))}
+            </Select>
           )}
         />
-        <Controller
-          name="name"
-          control={control}
-          render={({ field }) => (
-            <Input
-              {...field}
-              label="Nombre"
-              placeholder="Ingresar nombre"
-              isRequired
-              isInvalid={!!errors.name}
-              errorMessage={errors.name?.message}
-            />
-          )}
-        />
+        <div className="flex gap-2">
+          <Controller
+            name="username"
+            control={control}
+            render={({ field }) => {
+              console.log("field: ", field);
+              return (
+                <Input
+                  {...field}
+                  isDisabled
+                  label="Usuario"
+                  placeholder="Se genera automaticamente"
+                  isInvalid={!!errors.username}
+                  errorMessage={errors.username?.message}
+                />
+              );
+            }}
+          />
+
+          <Controller
+            name="avatar"
+            control={control}
+            render={({ field: { onChange, onBlur, ref, value } }) => {
+              return (
+                <Button
+                  isIconOnly
+                  variant="flat"
+                  className="h-full w min-w-[50px] bg-default-100"
+                >
+                  <label className="">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          onChange(file); // Asigna el archivo al estado del formulario
+                          const objectUrl = URL.createObjectURL(file); // Crea una URL de objeto para la imagen
+                          setPreview(objectUrl); // Almacena la URL para mostrarla en el avatar
+                        }
+                      }}
+                      onBlur={onBlur}
+                      ref={ref}
+                      className="hidden"
+                    />
+                    {value || preview ? (
+                      <Avatar src={preview} fallback />
+                    ) : (
+                      <Camera className="stroke-slate-300" />
+                    )}
+                  </label>
+                </Button>
+              );
+            }}
+          />
+        </div>
       </div>
       <Button
         isLoading={isLoading}
