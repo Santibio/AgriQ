@@ -1,8 +1,8 @@
-import PageTitle from "@/components/common/page-title";
-import ProductForm from "@/components/products/product-form";
+import PageTitle from "@/components/page-title";
 import db from "@/libs/db";
 import { notFound } from "next/navigation";
 import React from "react";
+import ProductForm from "../components/product-form";
 
 interface ProductEditPageProps {
   params: {

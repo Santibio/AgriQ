@@ -6,8 +6,10 @@ import db from "@/libs/db";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { saveImage } from "@/libs/helpers/images";
-import { AddProductFormSchema, EditProductFormSchema } from "@/libs/schemas/products";
-
+import {
+  AddProductFormSchema,
+  EditProductFormSchema,
+} from "@/libs/schemas/products";
 
 // Estado del formulario de producto
 interface ProductFormState {
@@ -80,9 +82,15 @@ export async function editProduct(
     const image = formData.get("image") as File | null;
 
     // Validar los datos del formulario usando el esquema de Zod
-    const parseResult = EditProductFormSchema.safeParse({ name, active, image });
+    const parseResult = EditProductFormSchema.safeParse({
+      name,
+      active,
+      ...(image ? { image } : {}),
+    });
+    
     if (!parseResult.success) {
       const errors = parseResult.error.flatten().fieldErrors;
+      console.log("errors: ", errors);
       return {
         errors: {
           name: errors.name || [],

@@ -1,4 +1,4 @@
-import PageTitle from "@/components/common/page-title";
+import PageTitle from "@/components/page-title";
 import UserForm from "@/app/users/components/user-form";
 import db from "@/libs/db";
 import { notFound } from "next/navigation";

@@ -1,6 +1,6 @@
-import PageTitle from "@/components/common/page-title";
-import ProductForm from "@/components/products/product-form";
+import PageTitle from "@/components/page-title";
 import React from "react";
+import ProductForm from "../components/product-form";
 
 export default function UserEditPage() {
   return (
