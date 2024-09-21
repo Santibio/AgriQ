@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
-import { addUser, editUser } from "@/actions/users";
 import { Avatar, Button, Input, Select, SelectItem } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Camera, Eye, EyeOff } from "lucide-react";
@@ -15,6 +14,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { usernameGenerator } from "@/libs/helpers/user";
+import { addUser, editUser } from "../actions";
 
 const roles = [
   { id: "administrator", label: "Administrador" },
@@ -67,9 +67,9 @@ export default function UserForm({ user }: UserFormProps) {
     console.log("watch name: ", watch("name"));
     const name = watch("name");
     const lastName = watch("lastName");
-    const username = usernameGenerator(name, lastName); 
-    setValue("username", username); 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    const username = usernameGenerator(name, lastName);
+    setValue("username", username);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watch("name"), watch("lastName")]);
 
   const onSubmit = async (data: FormInputs) => {

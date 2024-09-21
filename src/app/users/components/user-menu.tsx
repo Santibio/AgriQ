@@ -1,5 +1,4 @@
 "use client";
-import { deleteUser } from "@/actions/users";
 import paths from "@/libs/paths";
 import {
   Dropdown,
@@ -11,6 +10,7 @@ import {
 import { EllipsisVertical, Pencil, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { deleteUser } from "../actions";
 
 interface UserMenuProps {
   userId: number;

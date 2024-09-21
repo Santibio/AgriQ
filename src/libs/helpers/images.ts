@@ -24,3 +24,19 @@ export async function saveImage(
   // Devolver la ruta relativa de la imagen para guardarla en la base de datos
   return `/images/${folder}/${imageName}`;
 }
+
+// Función para borrar una imagen en la carpeta 'public/images/avatars'
+export async function deleteImage(username: string, folder: string = "avatars"): Promise<void> {
+  // Generar el nombre de la imagen a eliminar
+  const imageName = `${username}.jpg`;
+  const imagePath = path.join(process.cwd(), "public", "images", folder, imageName);
+
+  try {
+    // Eliminar el archivo
+    await fs.unlink(imagePath);
+    console.log(`Imagen ${imageName} eliminada con éxito.`);
+  } catch (error) {
+    console.error(`Error al eliminar la imagen: ${error}`);
+    throw new Error(`No se pudo eliminar la imagen: ${imageName}`);
+  }
+}

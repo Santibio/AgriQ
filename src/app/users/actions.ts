@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { UserAddFormSchema, UserEditFormSchema } from "@/libs/schemas/users";
-import { saveImage } from "@/libs/helpers/images";
+import { deleteImage, saveImage } from "@/libs/helpers/images";
 
 interface UserFormState {
   errors: {
@@ -30,7 +30,7 @@ interface UpdatedUserData {
 }
 
 export async function addUser(formData: FormData): Promise<UserFormState> {
-  let username = formData.get("username") as string;
+  const username = formData.get("username") as string;
   const role = formData.get("role") as string;
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
@@ -46,7 +46,6 @@ export async function addUser(formData: FormData): Promise<UserFormState> {
   }
 
   try {
-    username = name.toLowerCase().trim();
     const hashedPassword = await bcrypt.hash(result.data.password, 10);
     let avatarPath = "";
 
@@ -131,11 +130,12 @@ interface deleteUserResponse {
 
 export async function deleteUser(userId: number): Promise<deleteUserResponse> {
   try {
-    await db.user.delete({
+    const user = await db.user.delete({
       where: {
         id: userId,
       },
     });
+    await deleteImage(user.username, "avatars");
     revalidatePath(paths.users());
     return {};
   } catch (error: unknown) {
