@@ -17,7 +17,7 @@ interface NavbarItemsListProps {
 
 export default function NavbarItemsList({ itemsWithPermission }: NavbarItemsListProps) {
   return (
-    <div className="gap-6 grid grid-cols-2">
+    <div className="gap-6 grid grid-cols-2 pb-4">
       {itemsWithPermission.map((item) => (
         <Link key={item.name} href={item.href} className="w-full">
           <Card

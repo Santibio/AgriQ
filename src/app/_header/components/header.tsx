@@ -30,7 +30,7 @@ export default function Header({ user }: HeaderProps) {
 
   return (
     <header
-      className={` max-w-[600px] m-auto flex justify-between items-center mb-6 sticky top-0 bg-white dark:bg-black z-50 transition-shadow py-4 px-2 ${
+      className={` max-w-[600px] m-auto flex justify-between items-center mb-4 sticky top-0 bg-white dark:bg-black z-50 transition-shadow py-2 px-2 ${
         isScrolled ? "shadow-md" : ""
       }`}
     >
