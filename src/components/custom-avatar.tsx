@@ -30,6 +30,7 @@ const CustomAvatar = ({
             src={src}
             alt={alt}
             fill
+            sizes="100%"
             className="rounded-full" // Asegura que la imagen tenga bordes redondeados
             priority // Optimiza la carga de la imagen
           />

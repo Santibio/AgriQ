@@ -40,7 +40,6 @@ export default function ProductForm({ product }: ProductFormProps) {
       image: undefined,
     },
   });
-  console.log("errors: ", errors);
 
   const [isLoading, setIsloading] = useState<boolean>(false);
 
@@ -53,7 +52,6 @@ export default function ProductForm({ product }: ProductFormProps) {
     setIsloading(true);
     let response;
     if (isEditing && product?.id) {
-      console.log('ENTRO');
       response = await editProduct(product.id, formData);
     } else {
       response = await addProduct(formData);
