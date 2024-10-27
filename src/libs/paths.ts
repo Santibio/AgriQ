@@ -29,6 +29,12 @@ const paths = {
   shipmentAdd() {
     return `/shipments/add`;
   },
+  production() {
+    return `/production`;
+  },
+  productionAdd() {
+    return `/production/add`;
+  },
 };
 
 export default paths;

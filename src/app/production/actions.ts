@@ -6,6 +6,7 @@ import {
   CreateProductionFormSchema,
 } from "@/libs/schemas/production";
 import { getCurrentUser } from "@/libs/session";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 interface ProductionFormState {
@@ -57,5 +58,6 @@ export async function createProduction(
     return { errors: { _form: ["Something went wrong..."] } };
   }
 
-  redirect(paths.home());
+  revalidatePath(paths.production());
+  redirect(paths.production());
 }
