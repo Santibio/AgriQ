@@ -23,6 +23,12 @@ const paths = {
   productEdit(productId: string) {
     return `/products/${productId}`;
   },
+  shipments() {
+    return `/shipments`;
+  },
+  shipmentAdd() {
+    return `/shipments/add`;
+  },
 };
 
 export default paths;

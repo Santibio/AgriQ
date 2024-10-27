@@ -9,7 +9,6 @@ export default async function Home() {
   const user = await getCurrentUser();
   if (!user) return notFound();
 
-
   const currentRole = user.role as Role;
 
   // Si el rol no existe en los permisos, devolvemos un 404

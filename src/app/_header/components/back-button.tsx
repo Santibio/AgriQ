@@ -6,10 +6,10 @@ import { ChevronLeft } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 export default function BackButton() {
-  const path = usePathname();
-  const isHome = path === paths.home();
-  const router = useRouter();
   const pathname = usePathname();
+  
+  const isHome = pathname === paths.home();
+  const router = useRouter();
 
   const handleGoBack = () => {
     const pathArray = pathname.split("/");

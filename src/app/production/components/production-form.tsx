@@ -33,7 +33,7 @@ export default function ProductionForm({ products }: ProductionFormProps) {
     resolver: zodResolver(CreateProductionFormSchema),
     defaultValues: {
       product: "",
-      cuantity: undefined,
+      quantity: undefined,
     },
   });
 
@@ -88,7 +88,7 @@ export default function ProductionForm({ products }: ProductionFormProps) {
           )}
         />
         <Controller
-          name="cuantity"
+          name="quantity"
           control={control}
           render={({ field }) => (
             <Input
@@ -98,8 +98,8 @@ export default function ProductionForm({ products }: ProductionFormProps) {
               placeholder="Ingresar cantidad"
               value={field.value?.toString() ?? ""}
               onChange={(e) => field.onChange(Number(e.target.value))}
-              isInvalid={!!errors.cuantity}
-              errorMessage={errors.cuantity?.message}
+              isInvalid={!!errors.quantity}
+              errorMessage={errors.quantity?.message}
             />
           )}
         />

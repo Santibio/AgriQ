@@ -5,9 +5,9 @@ import paths from "@/libs/paths";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import { comparedHash } from "@/libs/helpers/encryptions";
 
 const loginSchema = z.object({
   username: z
@@ -56,7 +56,7 @@ export async function login(
     };
   }
 
-  const passwordMatch = await bcrypt.compare(password, user.password);
+  const passwordMatch = comparedHash(password, user.password);
 
   if (!passwordMatch) {
     return {

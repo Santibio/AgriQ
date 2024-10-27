@@ -4,9 +4,10 @@ import db from "@/libs/db";
 import paths from "@/libs/paths";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import bcrypt from "bcryptjs";
 import { UserAddFormSchema, UserEditFormSchema } from "@/libs/schemas/users";
 import { deleteImage, saveImage } from "@/libs/helpers/images";
+import { encrypt } from "@/libs/helpers/encryptions";
+
 
 interface UserFormState {
   errors: {
@@ -46,7 +47,7 @@ export async function addUser(formData: FormData): Promise<UserFormState> {
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(result.data.password, 10);
+    const hashedPassword = await encrypt(result.data.password);
     let avatarPath = "";
 
     if (avatar) {
@@ -104,7 +105,7 @@ export async function editUser(
       lastName: result.data.lastName,
     };
 
-    if (password) updatedData.password = await bcrypt.hash(password, 10);
+    if (password) updatedData.password = await encrypt(password);
     if (avatar)  updatedData.avatar = await saveImage(avatar, username, "avatars");
 
 

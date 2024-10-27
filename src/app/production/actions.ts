@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 interface ProductionFormState {
   errors?: {
     product?: string[];
-    cuantity?: string[];
+    quantity?: string[];
     _form?: string[];
   };
   success?: boolean;
@@ -28,7 +28,7 @@ export async function createProduction(
       return {
         errors: {
           product: errors.product || [],
-          cuantity: errors.cuantity || [],
+          quantity: errors.quantity || [],
         },
       };
     }
@@ -44,7 +44,8 @@ export async function createProduction(
 
     await db.production.create({
       data: {
-        cuantity: parseResult.data.cuantity,
+        quantity: parseResult.data.quantity,
+        remainingQuantity: parseResult.data.quantity,
         productId: parseInt(parseResult.data.product),
         userId: user.id,
       },
