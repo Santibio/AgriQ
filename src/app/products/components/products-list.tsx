@@ -31,7 +31,7 @@ export default function ProductsList({ products }: ProductsListProps) {
                   radius="lg"
                   width={200}
                   alt={product.name}
-                  className="w-full object-cover h-[140px]"
+                  className="object-cover h-[140px] w-[200px]"
                   src={product.image}
                 />
               </CardBody>
