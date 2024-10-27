@@ -10,6 +10,7 @@ const initialUsers = [
     name: "Eve",
     lastName: "Perez",
     avatar: "/images/avatars/eve.perez.jpg",
+    active: true,
   },
   {
     username: "fabri.perez",
@@ -18,6 +19,7 @@ const initialUsers = [
     name: "Fabri",
     lastName: "Perez",
     avatar: "/images/avatars/fabri.perez.jpg",
+    active: true,
   },
   {
     username: "santiago.perez",
@@ -26,6 +28,7 @@ const initialUsers = [
     name: "Santiago",
     lastName: "Perez",
     avatar: "/images/avatars/santiago.perez.jpg",
+    active: true,
   },
 ];
 

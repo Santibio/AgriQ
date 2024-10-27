@@ -90,7 +90,6 @@ export async function editProduct(
     
     if (!parseResult.success) {
       const errors = parseResult.error.flatten().fieldErrors;
-      console.log("errors: ", errors);
       return {
         errors: {
           name: errors.name || [],

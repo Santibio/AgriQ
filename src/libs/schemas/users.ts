@@ -9,6 +9,7 @@ export const UserAddFormSchema = z
     lastName: z.string().min(1, { message: "Campo requerido" }),
     name: z.string().min(1, { message: "Campo requerido" }),
     avatar: z.instanceof(File).optional(),
+    active: z.boolean().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",
@@ -26,6 +27,7 @@ export const UserEditFormSchema = z
     lastName: z.string().min(1, { message: "Campo requerido" }),
     name: z.string().min(1, { message: "Campo requerido" }),
     avatar: z.instanceof(File).optional(),
+    active: z.boolean().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",

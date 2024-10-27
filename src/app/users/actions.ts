@@ -8,7 +8,6 @@ import { UserAddFormSchema, UserEditFormSchema } from "@/libs/schemas/users";
 import { deleteImage, saveImage } from "@/libs/helpers/images";
 import { encrypt } from "@/libs/helpers/encryptions";
 
-
 interface UserFormState {
   errors: {
     username?: string[];
@@ -28,6 +27,7 @@ interface UpdatedUserData {
   lastName: string;
   password?: string;
   avatar?: string;
+  active?: boolean;
 }
 
 export async function addUser(formData: FormData): Promise<UserFormState> {
@@ -38,8 +38,17 @@ export async function addUser(formData: FormData): Promise<UserFormState> {
   const lastName = formData.get("lastName") as string;
   const name = formData.get("name") as string;
   const avatar = formData.get("avatar") as File;
+  const active = formData.get("active") === "true";
 
-  const data = { username, role, password, confirmPassword, lastName, name };
+  const data = {
+    username,
+    role,
+    password,
+    confirmPassword,
+    lastName,
+    name,
+    active,
+  };
   const result = UserAddFormSchema.safeParse(data);
 
   if (!result.success) {
@@ -63,6 +72,7 @@ export async function addUser(formData: FormData): Promise<UserFormState> {
         name: result.data.name,
         lastName: result.data.lastName,
         avatar: avatarPath,
+        active: result.data.active,
       },
     });
   } catch (err) {
@@ -90,8 +100,17 @@ export async function editUser(
   const lastName = formData.get("lastName") as string;
   const name = formData.get("name") as string;
   const avatar = formData.get("avatar") as File;
+  const active = formData.get("active") === "true";
 
-  const data = { username, role, password, confirmPassword, lastName, name };
+  const data = {
+    username,
+    role,
+    password,
+    confirmPassword,
+    lastName,
+    name,
+    active,
+  };
   const result = UserEditFormSchema.safeParse(data);
 
   if (!result.success) {
@@ -103,11 +122,12 @@ export async function editUser(
       role: result.data.role,
       name: result.data.name,
       lastName: result.data.lastName,
+      active: result.data.active,
     };
 
     if (password) updatedData.password = await encrypt(password);
-    if (avatar)  updatedData.avatar = await saveImage(avatar, username, "avatars");
-
+    if (avatar)
+      updatedData.avatar = await saveImage(avatar, username, "avatars");
 
     await db.user.update({
       where: { id: userId },
@@ -131,12 +151,38 @@ interface deleteUserResponse {
 
 export async function deleteUser(userId: number): Promise<deleteUserResponse> {
   try {
-    const user = await db.user.delete({
+    await db.user.update({
       where: {
         id: userId,
       },
+      data: {
+        active: false,
+      },
     });
-    await deleteImage(user.username, "avatars");
+    // await deleteImage(user.username, "avatars");
+    revalidatePath(paths.users());
+    return {};
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return {
+        error: error.message,
+      };
+    }
+    return {
+      error: "Something went wrong",
+    };
+  }
+}
+export async function activeUser(userId: number): Promise<deleteUserResponse> {
+  try {
+    await db.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        active: true,
+      },
+    });
     revalidatePath(paths.users());
     return {};
   } catch (error: unknown) {

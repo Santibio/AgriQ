@@ -1,7 +1,14 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
-import { Avatar, Button, Input, Select, SelectItem } from "@nextui-org/react";
+import {
+  Avatar,
+  Button,
+  Input,
+  Select,
+  SelectItem,
+  Switch,
+} from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Camera, Eye, EyeOff } from "lucide-react";
 import type { User } from "@prisma/client";
@@ -51,6 +58,7 @@ export default function UserForm({ user }: UserFormProps) {
       lastName: user?.lastName || "",
       name: user?.name || "",
       avatar: undefined,
+      active: user?.active,
     },
   });
 
@@ -64,7 +72,6 @@ export default function UserForm({ user }: UserFormProps) {
 
   // Effect to update username whenever name or lastName changes
   useEffect(() => {
-    console.log("watch name: ", watch("name"));
     const name = watch("name");
     const lastName = watch("lastName");
     const username = usernameGenerator(name, lastName);
@@ -81,6 +88,7 @@ export default function UserForm({ user }: UserFormProps) {
       formData.append("confirmPassword", data.confirmPassword);
       formData.append("lastName", data.lastName);
       formData.append("name", data.name);
+      formData.append("active", data.active ? "true" : "false");
       if (data.avatar) formData.append("avatar", data.avatar);
 
       setIsloading(true);
@@ -231,7 +239,6 @@ export default function UserForm({ user }: UserFormProps) {
             name="username"
             control={control}
             render={({ field }) => {
-              console.log("field: ", field);
               return (
                 <Input
                   {...field}
@@ -244,7 +251,6 @@ export default function UserForm({ user }: UserFormProps) {
               );
             }}
           />
-
           <Controller
             name="avatar"
             control={control}
@@ -282,6 +288,23 @@ export default function UserForm({ user }: UserFormProps) {
             }}
           />
         </div>
+        <Controller
+          name="active"
+          control={control}
+          render={({ field: { value, onChange, ...field } }) => {
+            return (
+              <div className="flex items-center gap-2 justify-between">
+                <p className=" font-semibold">Activo</p>
+                <Switch
+                  {...field}
+                  isSelected={value}
+                  onValueChange={(newValue) => onChange(newValue)}
+                  size="sm"
+                />
+              </div>
+            );
+          }}
+        />
       </div>
       <Button
         isLoading={isLoading}

@@ -20,6 +20,7 @@ model User {
   avatar   String
   products Production[]
   Shipment Shipment[]
+  active   Boolean      @default(true)
   
 }
 

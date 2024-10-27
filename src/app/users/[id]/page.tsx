@@ -12,7 +12,6 @@ interface UserEditPageProps {
 
 export default async function UserEditPage({ params }: UserEditPageProps) {
   const userId = parseInt(params.id);
-  console.log("userId: ", userId);
 
   const user = await db.user.findUnique({
     where: { id: userId },
