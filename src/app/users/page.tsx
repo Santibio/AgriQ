@@ -6,7 +6,16 @@ import paths from "@/libs/paths";
 import UserList from "./components/users-list";
 
 export default async function UsersPage() {
-  const users = await db.user.findMany();
+  const users = await db.user.findMany({
+    orderBy: [
+      {
+        active: "desc",
+      },
+      {
+        lastName: "asc",
+      },
+    ],
+  });
   return (
     <section className="flex flex-col justify-between gap-6">
       <PageTitle>Lista de usuarios</PageTitle>
