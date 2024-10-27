@@ -1,4 +1,3 @@
-
 import { ScrollShadow } from "@nextui-org/react";
 import {
   Shipment,
@@ -9,16 +8,13 @@ import {
 } from "@prisma/client";
 import { CheckCheck } from "lucide-react";
 import moment from "moment";
-import "moment/locale/es"; 
-
-moment.locale("es");
 
 interface ShipmentsListProps {
   shipments: ShipmentWithRelations[];
 }
 
 type ShipmentWithRelations = Shipment & {
-  user: User; 
+  user: User;
   shipments: (ShipmentProduction & {
     production: Production & {
       product: Product;
@@ -27,8 +23,6 @@ type ShipmentWithRelations = Shipment & {
 };
 
 export default function ShipmentsList({ shipments }: ShipmentsListProps) {
-  console.log("shipments: ", shipments);
-
   return (
     <ScrollShadow className="h-[70dvh]">
       <ul className="flex gap-2 flex-col">
@@ -45,7 +39,7 @@ export default function ShipmentsList({ shipments }: ShipmentsListProps) {
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-xl">{`Envio #${shipment.id}`}</span>
                     <span className="text-slate-500 text-sm">
-                      {moment(shipment?.createdAt).startOf("hour").fromNow()}
+                      {moment(shipment?.createdAt).fromNow()}
                     </span>
                   </div>
                   <div className="flex gap-2 items-center text-sm flex-wrap">
