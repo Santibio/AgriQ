@@ -58,7 +58,7 @@ export default function UserForm({ user }: UserFormProps) {
       lastName: user?.lastName || "",
       name: user?.name || "",
       avatar: undefined,
-      active: user?.active,
+      active: isEditing ? user?.active : true,
     },
   });
 
@@ -288,23 +288,25 @@ export default function UserForm({ user }: UserFormProps) {
             }}
           />
         </div>
-        <Controller
-          name="active"
-          control={control}
-          render={({ field: { value, onChange, ...field } }) => {
-            return (
-              <div className="flex items-center gap-2 justify-between">
-                <p className=" font-semibold">Activo</p>
-                <Switch
-                  {...field}
-                  isSelected={value}
-                  onValueChange={(newValue) => onChange(newValue)}
-                  size="sm"
-                />
-              </div>
-            );
-          }}
-        />
+        {isEditing && (
+          <Controller
+            name="active"
+            control={control}
+            render={({ field: { value, onChange, ...field } }) => {
+              return (
+                <div className="flex items-center gap-2 justify-between">
+                  <p className=" font-semibold">Activo</p>
+                  <Switch
+                    {...field}
+                    isSelected={value}
+                    onValueChange={(newValue) => onChange(newValue)}
+                    size="sm"
+                  />
+                </div>
+              );
+            }}
+          />
+        )}
       </div>
       <Button
         isLoading={isLoading}

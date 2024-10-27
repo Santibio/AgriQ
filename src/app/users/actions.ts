@@ -5,7 +5,7 @@ import paths from "@/libs/paths";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { UserAddFormSchema, UserEditFormSchema } from "@/libs/schemas/users";
-import { deleteImage, saveImage } from "@/libs/helpers/images";
+import { saveImage } from "@/libs/helpers/images";
 import { encrypt } from "@/libs/helpers/encryptions";
 
 interface UserFormState {
