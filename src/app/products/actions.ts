@@ -10,6 +10,7 @@ import {
   AddProductFormSchema,
   EditProductFormSchema,
 } from "@/libs/schemas/products";
+import { generateNextProductCode } from "@/libs/helpers/products";
 
 // Estado del formulario de producto
 interface ProductFormState {
@@ -37,6 +38,7 @@ export async function addProduct(
       active,
       image,
     });
+    
     if (!parseResult.success) {
       const errors = parseResult.error.flatten().fieldErrors;
       return {
@@ -60,7 +62,7 @@ export async function addProduct(
         name: formattedName,
         active,
         image: imagePath,
-        code: "todo", // Pendiente de generar el código
+        code: await generateNextProductCode(),
       },
     });
   } catch (err) {
