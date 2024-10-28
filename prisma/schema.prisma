@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
 }
 
 model User {
@@ -21,7 +21,6 @@ model User {
   products Production[]
   Shipment Shipment[]
   active   Boolean      @default(true)
-  
 }
 
 model Product {
