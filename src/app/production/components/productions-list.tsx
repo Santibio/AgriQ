@@ -1,7 +1,7 @@
 import { Product, Production } from "@prisma/client";
-import { ScrollShadow } from "@nextui-org/react";
+import { ScrollShadow, Image } from "@nextui-org/react";
 import moment from "moment";
-import Image from "next/image";
+// import Image from "next/image";
 import { capitalize } from "@/libs/helpers/text";
 
 interface ProductionsListProps {

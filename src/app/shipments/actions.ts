@@ -35,6 +35,7 @@ export async function createShipment(
       };
     }
 
+    const shipmentProductions = []; // Almacenará los datos para el nuevo Shipment
     // Procesa cada producto en formInput
     for (const input of formInput) {
       let quantityToShip = input.quantity; // Cantidad que se debe enviar
@@ -52,7 +53,6 @@ export async function createShipment(
         },
       });
 
-      const shipmentProductions = []; // Almacenará los datos para el nuevo Shipment
 
       // Itera sobre las producciones más antiguas y resta cantidades
       for (const production of oldProductions) {
@@ -90,16 +90,16 @@ export async function createShipment(
         };
       }
 
-      // Crea el nuevo envío (Shipment) con las producciones utilizadas
-      await db.shipment.create({
-        data: {
-          userId: user.id, // Asocia el envío con el usuario actual
-          shipments: {
-            create: shipmentProductions, // Crea las relaciones con las producciones usadas
-          },
-        },
-      });
     }
+    // Crea el nuevo envío (Shipment) con las producciones utilizadas
+    await db.shipment.create({
+      data: {
+        userId: user.id, // Asocia el envío con el usuario actual
+        shipments: {
+          create: shipmentProductions, // Crea las relaciones con las producciones usadas
+        },
+      },
+    });
 
     // Redirige a la página de envíos tras la creación exitosa
     revalidatePath(paths.shipments());

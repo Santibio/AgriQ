@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-import { comparedHash } from "@/libs/helpers/encryptions";
+import { compareHash } from "@/libs/helpers/encryptions";
 
 const loginSchema = z.object({
   username: z
@@ -56,7 +56,7 @@ export async function login(
     };
   }
 
-  const passwordMatch = comparedHash(password, user.password);
+  const passwordMatch = await compareHash(password, user.password);
 
   if (!passwordMatch) {
     return {

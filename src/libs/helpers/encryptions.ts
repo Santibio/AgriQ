@@ -4,6 +4,6 @@ export const encrypt = async (string: string) => {
   return await bcrypt.hash(string, 10);
 };
 
-export const comparedHash = (string: string, hash: string) => {
-  return bcrypt.compare(string, hash);
+export const compareHash = async (string: string, hash: string) => {
+  return await bcrypt.compare(string, hash);
 };
