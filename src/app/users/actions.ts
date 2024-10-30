@@ -61,7 +61,7 @@ export async function addUser(formData: FormData): Promise<UserFormState> {
 
     if (avatar) {
       // Usar la función reutilizable para guardar la imagen
-      avatarPath = await saveImage(avatar, username, "avatars");
+      avatarPath = await saveImage(avatar);
     }
 
     await db.user.create({
@@ -127,7 +127,7 @@ export async function editUser(
 
     if (password) updatedData.password = await encrypt(password);
     if (avatar)
-      updatedData.avatar = await saveImage(avatar, username, "avatars");
+      updatedData.avatar = await saveImage(avatar);
 
     await db.user.update({
       where: { id: userId },

@@ -53,7 +53,7 @@ export async function addProduct(
 
     // Guardar la imagen usando la función `saveImage`
     const imagePath = image
-      ? await saveImage(image, formattedName, "products")
+      ? await saveImage(image)
       : "";
 
     // Crear el producto en la base de datos
@@ -119,7 +119,7 @@ export async function editProduct(
 
     // Si hay una nueva imagen, guardarla
     if (image) {
-      imagePath = await saveImage(image, formattedName, "products");
+      imagePath = await saveImage(image);
     }
 
     // Actualizar el producto en la base de datos

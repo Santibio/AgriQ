@@ -5,29 +5,29 @@ const prisma = new PrismaClient();
 const initialUsers = [
   {
     username: "eve.perez",
-    password: "eve@prisma.io",
+    password: "$2a$10$V8/J106/FqipLrC9lAQgweyylLXR3l0iNw4XaFyQ8OMYBPZd/hp06",
     role: "administrator",
     name: "Eve",
     lastName: "Perez",
-    avatar: "/images/avatars/eve.perez.jpg",
+    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730323872/cszbndvswdehdcllgkje.jpg`,
     active: true,
   },
   {
     username: "fabri.perez",
-    password: "fabri@prisma.io",
+    password: "$2a$10$V8/J106/FqipLrC9lAQgweyylLXR3l0iNw4XaFyQ8OMYBPZd/hp06",
     role: "sells",
     name: "Fabri",
     lastName: "Perez",
-    avatar: "/images/avatars/fabri.perez.jpg",
+    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730323872/hu4lguwldlcjhqdxr7rv.jpg`,
     active: true,
   },
   {
     username: "santiago.perez",
-    password: "santiago@prisma.io",
+    password: "$2a$10$V8/J106/FqipLrC9lAQgweyylLXR3l0iNw4XaFyQ8OMYBPZd/hp06",
     role: "administrator",
     name: "Santiago",
     lastName: "Perez",
-    avatar: "/images/avatars/santiago.perez.jpg",
+    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730323872/kbhi0ukhcmwuxynf1tau.jpg`,
     active: true,
   },
 ];
@@ -36,37 +36,44 @@ const initialProducts = [
   {
     code: "001",
     name: "lechuga",
-    image: "/images/products/lettuce.jpg",
+    image:
+      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/tpaofrarv6lcw2ahnbzl.jpg`,
   },
   {
     code: "002",
     name: "tomate",
-    image: "/images/products/tomato.jpg",
+    image:
+      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324326/mhsrhwlkr4s3zv8tmiss.jpg`,
   },
   {
     code: "003",
     name: "papa",
-    image: "/images/products/potato.jpg",
+    image:
+      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/skxg67laz7kk21ag70g9.jpg`,
   },
   {
     code: "004",
     name: "zanahoria",
-    image: "/images/products/carrot.jpg",
+    image:
+      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/muzep6wexjsgmhdoficj.jpg`,
   },
   {
     code: "005",
     name: "cebolla",
-    image: "/images/products/onion.jpg",
+    image:
+      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/w29nmrto31z7nk2ydrlt.jpg`,
   },
   {
     code: "006",
     name: "menta",
-    image: "/images/products/mint.jpg",
+    image:
+      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/dbtyadni9jnfzsgyiwee.jpg`,
   },
   {
     code: "007",
     name: "acelga",
-    image: "/images/products/chard.jpg",
+    image:
+      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/eqlmib8p1ddglsh5szeb.jpg`,
   },
 ];
 
