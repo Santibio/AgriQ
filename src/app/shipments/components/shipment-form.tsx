@@ -20,8 +20,9 @@ import {
 // import { createProduction } from "../actions";
 import { useState } from "react";
 import { createShipment } from "../actions";
-import toast from "react-hot-toast";
-// import toast from "react-hot-toast";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import paths from "@/libs/paths";
 
 interface GroupedProductQuantity {
   productId: number; // o string, dependiendo de cómo manejes el tipo de ID
@@ -45,6 +46,8 @@ export default function ShipmentForm({
   products,
   groupedProductQuantities,
 }: ProductionFormProps) {
+  const router = useRouter();
+
   const {
     control,
     handleSubmit,
@@ -118,11 +121,24 @@ export default function ShipmentForm({
   };
 
   const handleCreateShipment = async () => {
-    setIsloading(true);
-    const response = await createShipment(addedProducts);
-    setIsloading(false);
-    if (response?.success) return toast.success("Envío creado correctamente");
-    if (response?.errors?._form) toast.error(response.errors._form[0]);
+    try {
+      setIsloading(true);
+      const response = await createShipment(addedProducts);
+      if (response?.errors) {
+        const errorMessage =
+          response.errors._form?.[0] || "An unexpected error occurred.";
+        toast.error(errorMessage);
+      } else {
+        toast.success("Envío creado correctamente");
+        router.push(paths.shipments());
+      }
+    } catch (error) {
+      console.log("Error: ", error);
+      // Optionally handle unexpected errors
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setIsloading(false);
+    }
   };
 
   return (

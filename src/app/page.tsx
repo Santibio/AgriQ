@@ -1,4 +1,4 @@
-import NavbarItemsList from "@/app/components/navbar-items-list";
+import NavbarItemsList from "@/components/navbar-items-list";
 import config from "@/config";
 import { getCurrentUser } from "@/libs/session";
 import { notFound } from "next/navigation";

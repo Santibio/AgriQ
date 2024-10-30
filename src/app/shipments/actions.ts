@@ -5,12 +5,13 @@ import { getCurrentUser } from "@/libs/session";
 import { revalidatePath } from "next/cache";
 
 interface ProductionFormState {
-  errors?: {
-    product?: string[];
-    quantity?: string[];
-    _form?: string[];
-  };
-  success?: boolean;
+  errors?:
+    | {
+        product?: string[];
+        quantity?: string[];
+        _form?: string[];
+      }
+    | false;
 }
 
 interface AddedProduct {
@@ -53,7 +54,6 @@ export async function createShipment(
         },
       });
 
-
       // Itera sobre las producciones más antiguas y resta cantidades
       for (const production of oldProductions) {
         if (quantityToShip <= 0) break; // Si ya hemos asignado toda la cantidad a enviar, terminamos
@@ -89,7 +89,6 @@ export async function createShipment(
           },
         };
       }
-
     }
     // Crea el nuevo envío (Shipment) con las producciones utilizadas
     await db.shipment.create({
@@ -103,7 +102,7 @@ export async function createShipment(
 
     // Redirige a la página de envíos tras la creación exitosa
     revalidatePath(paths.shipments());
-    return { success: true };
+    return { errors: false };
   } catch (error) {
     // Manejo de errores
     if (error instanceof Error) {
@@ -121,4 +120,3 @@ export async function createShipment(
     }
   }
 }
-

@@ -7,15 +7,16 @@ import {
 } from "@/libs/schemas/production";
 import { getCurrentUser } from "@/libs/session";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
 
 interface ProductionFormState {
-  errors?: {
-    product?: string[];
-    quantity?: string[];
-    _form?: string[];
-  };
-  success?: boolean;
+  errors?:
+    | {
+        product?: string[];
+        quantity?: string[];
+        _form?: string[];
+      }
+    | false;
 }
 
 export async function createProduction(
@@ -59,5 +60,7 @@ export async function createProduction(
   }
 
   revalidatePath(paths.production());
-  redirect(paths.production());
+  return { errors: false };
+
+  // redirect(paths.production());
 }

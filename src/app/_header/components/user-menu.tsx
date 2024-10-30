@@ -10,7 +10,7 @@ import { useTheme } from "next-themes";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { logout } from "@/app/login/actions";
 import { User } from "@prisma/client";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import CustomAvatar from "@/components/custom-avatar";
 
 interface UserMenuProps {

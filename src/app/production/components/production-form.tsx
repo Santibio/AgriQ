@@ -18,13 +18,17 @@ import {
 } from "@/libs/schemas/production";
 import { createProduction } from "../actions";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import paths from "@/libs/paths";
 
 interface ProductionFormProps {
   products: Product[];
 }
 
 export default function ProductionForm({ products }: ProductionFormProps) {
+  const router = useRouter();
+
   const {
     control,
     handleSubmit,
@@ -43,12 +47,17 @@ export default function ProductionForm({ products }: ProductionFormProps) {
     try {
       setIsloading(true);
       const response = await createProduction(data);
-      if (response?.errors?._form) toast.error(response.errors._form[0]);
-    } catch (error) {
-      if (error instanceof Error) {
-        return toast.error(error.message);
+      if (response?.errors) {
+        const errorMessage =
+          response.errors._form?.[0] || "An unexpected error occurred.";
+        toast.error(errorMessage);
+      } else {
+        toast.success("Lote creado correctamente");
+        router.push(paths.production());
       }
-      return toast.error("Something went wrong...");
+    } catch (error) {
+      console.log("Error: ", error);
+      toast.error("An unexpected error occurred.");
     } finally {
       setIsloading(false);
     }

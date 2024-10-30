@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import paths from "@/libs/paths";
 import db from "@/libs/db";
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { saveImage } from "@/libs/helpers/images";
 import {
@@ -14,13 +14,14 @@ import { generateNextProductCode } from "@/libs/helpers/products";
 
 // Estado del formulario de producto
 interface ProductFormState {
-  errors?: {
-    name?: string[];
-    image?: string[];
-    active?: string[];
-    _form?: string[];
-  };
-  success?: boolean;
+  errors?:
+    | {
+        name?: string[];
+        image?: string[];
+        active?: string[];
+        _form?: string[];
+      }
+    | false;
 }
 
 export async function addProduct(
@@ -38,7 +39,7 @@ export async function addProduct(
       active,
       image,
     });
-    
+
     if (!parseResult.success) {
       const errors = parseResult.error.flatten().fieldErrors;
       return {
@@ -52,9 +53,7 @@ export async function addProduct(
     const formattedName = name.toLowerCase().trim();
 
     // Guardar la imagen usando la función `saveImage`
-    const imagePath = image
-      ? await saveImage(image)
-      : "";
+    const imagePath = image ? await saveImage(image) : "";
 
     // Crear el producto en la base de datos
     await db.product.create({
@@ -70,7 +69,8 @@ export async function addProduct(
   }
   // Revalidar la ruta y redirigir
   revalidatePath(paths.products());
-  redirect(paths.products());
+  // redirect(paths.products());
+  return { errors: false };
 }
 
 export async function editProduct(
@@ -89,7 +89,7 @@ export async function editProduct(
       active,
       ...(image ? { image } : {}),
     });
-    
+
     if (!parseResult.success) {
       const errors = parseResult.error.flatten().fieldErrors;
       return {
@@ -136,7 +136,8 @@ export async function editProduct(
   }
   // Revalidar la ruta y redirigir
   revalidatePath(paths.products());
-  redirect(paths.products());
+  // redirect(paths.products());
+  return { errors: false };
 }
 
 // Función para manejar errores de la base de datos

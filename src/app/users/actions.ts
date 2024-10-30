@@ -3,24 +3,24 @@
 import db from "@/libs/db";
 import paths from "@/libs/paths";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
 import { UserAddFormSchema, UserEditFormSchema } from "@/libs/schemas/users";
 import { saveImage } from "@/libs/helpers/images";
 import { encrypt } from "@/libs/helpers/encryptions";
 
 interface UserFormState {
-  errors: {
-    username?: string[];
-    role?: string[];
-    password?: string[];
-    confirmPassword?: string[];
-    lastName?: string[];
-    name?: string[];
-    _form?: string[];
-  };
-  success?: boolean;
+  errors?:
+    | {
+        username?: string[];
+        role?: string[];
+        password?: string[];
+        confirmPassword?: string[];
+        lastName?: string[];
+        name?: string[];
+        _form?: string[];
+      }
+    | false;
 }
-
 interface UpdatedUserData {
   role: string;
   name: string;
@@ -84,7 +84,8 @@ export async function addUser(formData: FormData): Promise<UserFormState> {
 
   const userPath = paths.users();
   revalidatePath(userPath);
-  redirect(userPath);
+  return { errors: false };
+  // redirect(userPath);
 }
 
 export async function editUser(
@@ -126,8 +127,7 @@ export async function editUser(
     };
 
     if (password) updatedData.password = await encrypt(password);
-    if (avatar)
-      updatedData.avatar = await saveImage(avatar);
+    if (avatar) updatedData.avatar = await saveImage(avatar);
 
     await db.user.update({
       where: { id: userId },
@@ -142,7 +142,8 @@ export async function editUser(
 
   const userPath = paths.users();
   revalidatePath(userPath);
-  redirect(userPath);
+  // redirect(userPath);
+  return { errors: false };
 }
 
 interface deleteUserResponse {
@@ -173,6 +174,7 @@ export async function deleteUser(userId: number): Promise<deleteUserResponse> {
     };
   }
 }
+
 export async function activeUser(userId: number): Promise<deleteUserResponse> {
   try {
     await db.user.update({

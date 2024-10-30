@@ -9,7 +9,7 @@ import {
 } from "@nextui-org/react";
 import { EllipsisVertical, Pencil, Trash, UserRoundCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { deleteUser, activeUser } from "../actions";
 
 interface UserMenuProps {

@@ -1,7 +1,7 @@
 "use client";
 
 import { NextUIProvider } from "@nextui-org/react";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { useRouter } from "next/navigation";
 // import { useRef } from "react";
@@ -23,7 +23,7 @@ export default function Providers({ children }: ProvidersProps) {
     // <Provider store={storeRef.current}>
     <NextUIProvider locale="es-ES" navigate={router.push}>
       <NextThemesProvider attribute="class" defaultTheme="light">
-        <Toaster position="top-center" />
+        <Toaster position="top-center" richColors />
         {children}
       </NextThemesProvider>
     </NextUIProvider>

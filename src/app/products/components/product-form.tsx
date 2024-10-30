@@ -6,7 +6,7 @@ import { useState } from "react";
 import { CloudUpload } from "lucide-react";
 import type { Product } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import {
   AddProductFormSchema,
   AddProductInputs,
@@ -15,6 +15,8 @@ import {
 } from "@/libs/schemas/products";
 import { addProduct, editProduct } from "../actions";
 import { capitalize } from "@/libs/helpers/text";
+import { useRouter } from "next/navigation";
+import paths from "@/libs/paths";
 
 interface ProductFormProps {
   product?: Product;
@@ -25,6 +27,8 @@ export default function ProductForm({ product }: ProductFormProps) {
   type FormInputs = typeof isEditing extends boolean
     ? AddProductInputs
     : EditProductInputs;
+
+  const router = useRouter();
 
   const {
     control,
@@ -43,21 +47,37 @@ export default function ProductForm({ product }: ProductFormProps) {
 
   const [isLoading, setIsloading] = useState<boolean>(false);
 
-  const onSubmit = async (data: AddProductInputs) => {
+  const onSubmit = async ({ name, active, image }: AddProductInputs) => {
     const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("active", data.active ? "true" : "false");
-    if (data.image) formData.append("image", data.image);
+    formData.append("name", name);
+    formData.append("active", String(active));
+    if (image) formData.append("image", image);
 
     setIsloading(true);
-    let response;
-    if (isEditing && product?.id) {
-      response = await editProduct(product.id, formData);
-    } else {
-      response = await addProduct(formData);
+    try {
+      const response =
+        isEditing && product?.id
+          ? await editProduct(product.id, formData)
+          : await addProduct(formData);
+      if (response?.errors) {
+        console.error(response.errors);
+        toast.error(
+          response.errors._form?.[0] || "An unexpected error occurred."
+        );
+      } else {
+        toast.success(
+          isEditing
+            ? "Producto actualizado correctamente"
+            : "Producto creado correctamente"
+        );
+        router.push(paths.products());
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setIsloading(false);
     }
-    if (response?.errors?._form) toast.error(response.errors._form[0]);
-    setIsloading(false);
   };
 
   return (
@@ -106,11 +126,23 @@ export default function ProductForm({ product }: ProductFormProps) {
                   }`}
                 >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <CloudUpload className={`text-gray-500 ${isError ? "text-red-600" : ""}`} />
-                    <p className={`mb-2 text-sm text-gray-500 dark:text-gray-400 ${isError ? "text-red-600" : ""}`}>
+                    <CloudUpload
+                      className={`text-gray-500 ${
+                        isError ? "text-red-600" : ""
+                      }`}
+                    />
+                    <p
+                      className={`mb-2 text-sm text-gray-500 dark:text-gray-400 ${
+                        isError ? "text-red-600" : ""
+                      }`}
+                    >
                       <span className="font-semibold">Click to upload</span>
                     </p>
-                    <p className={`text-xs text-gray-500 dark:text-gray-400 ${isError ? "text-red-600" : ""}`}>
+                    <p
+                      className={`text-xs text-gray-500 dark:text-gray-400 ${
+                        isError ? "text-red-600" : ""
+                      }`}
+                    >
                       JPG Format (MAX. 800x400px)
                     </p>
                     {value?.name && (

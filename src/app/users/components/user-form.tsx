@@ -19,9 +19,11 @@ import {
   UserEditFormSchema,
 } from "@/libs/schemas/users";
 import { zodResolver } from "@hookform/resolvers/zod";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { usernameGenerator } from "@/libs/helpers/user";
 import { addUser, editUser } from "../actions";
+import paths from "@/libs/paths";
+import { useRouter } from "next/navigation";
 
 const roles = [
   { id: "administrator", label: "Administrador" },
@@ -41,6 +43,8 @@ interface VisibilityState {
 export default function UserForm({ user }: UserFormProps) {
   const isEditing = Boolean(user);
   type FormInputs = typeof isEditing extends boolean ? AddInputs : EditInputs;
+
+  const router = useRouter();
 
   const {
     control,
@@ -80,29 +84,43 @@ export default function UserForm({ user }: UserFormProps) {
   }, [watch("name"), watch("lastName")]);
 
   const onSubmit = async (data: FormInputs) => {
+    const formData = new FormData();
+    const fields = [
+      ["username", data.username],
+      ["role", data.role],
+      ["password", data.password],
+      ["confirmPassword", data.confirmPassword],
+      ["lastName", data.lastName],
+      ["name", data.name],
+      ["active", data.active ? "true" : "false"],
+    ];
+
+    fields.forEach(([key, value]) => formData.append(key, value));
+    if (data.avatar) formData.append("avatar", data.avatar);
+
+    setIsloading(true);
+
     try {
-      const formData = new FormData();
-      formData.append("username", data.username);
-      formData.append("role", data.role);
-      formData.append("password", data.password);
-      formData.append("confirmPassword", data.confirmPassword);
-      formData.append("lastName", data.lastName);
-      formData.append("name", data.name);
-      formData.append("active", data.active ? "true" : "false");
-      if (data.avatar) formData.append("avatar", data.avatar);
+      const response =
+        isEditing && user?.id
+          ? await editUser(user.id, formData)
+          : await addUser(formData);
 
-      setIsloading(true);
-
-      let response;
-      if (isEditing && user?.id) {
-        response = await editUser(user.id, formData);
-      } else {
-        response = await addUser(formData);
+      if (response?.errors) {
+        const errorMessage =
+          response.errors._form?.[0] || "An unexpected error occurred.";
+        return toast.error(errorMessage);
       }
 
-      if (response?.errors?._form) return toast.error(response.errors._form[0]);
+      toast.success(
+        isEditing
+          ? "Usuario actualizado correctamente"
+          : "Usuario creado correctamente"
+      );
+      router.push(paths.users());
     } catch (error) {
-      console.log("error: ", error);
+      console.error("Error: ", error);
+      toast.error("An unexpected error occurred.");
     } finally {
       setIsloading(false);
     }
