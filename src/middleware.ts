@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateRequest } from "./auth";
+import { Role } from "@prisma/client";
 
 function redirectToLogin(request: NextRequest): NextResponse {
   return NextResponse.redirect(new URL("/login", request.url));
@@ -7,16 +8,16 @@ function redirectToLogin(request: NextRequest): NextResponse {
 
 function isProtectedRoute(pathname: string): Array<string> {
   const protectedRoutes: Record<string, Array<string>> = {
-    "/production": ["administrator", "deposit"],
-    "/discards": ["administrator", "deposit"],
-    "/shipments": ["administrator", "deposit"],
-    "/returns-reception": ["administrator", "deposit"],
-    "/sales": ["administrator", "sells"],
-    "/shipment-reception": ["administrator", "sells"],
-    "/returns": ["administrator", "sells"],
-    "/reports": ["administrator", "deposit", "sells"],
-    "/users": ["administrator"],
-    "/products": ["administrator"],
+    "/production": [Role.ADMIN, Role.DEPOSIT],
+    "/discards": [Role.ADMIN, Role.DEPOSIT],
+    "/shipments": [Role.ADMIN, Role.DEPOSIT],
+    "/returns-reception": [Role.ADMIN, Role.DEPOSIT],
+    "/sales": [Role.ADMIN, Role.SELLER],
+    "/shipment-reception": [Role.ADMIN, Role.SELLER],
+    "/returns": [Role.ADMIN, Role.SELLER],
+    "/reports": [Role.ADMIN, Role.DEPOSIT, Role.SELLER],
+    "/users": [Role.ADMIN],
+    "/products": [Role.ADMIN],
   };
 
   return protectedRoutes[pathname] || [];

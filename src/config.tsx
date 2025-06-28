@@ -11,6 +11,8 @@ import {
   Undo2,
   UserCog,
 } from "lucide-react";
+import { Role as PrismaRole } from "@prisma/client";
+
 
 // Definir la interfaz para los elementos de navegación
 interface NavItem {
@@ -23,9 +25,9 @@ interface NavItem {
 
 // Definir la interfaz para los permisos por rol
 interface RolePermissions {
-  administrator: string[];
-  deposit: string[];
-  sells: string[];
+  ADMIN: string[];
+  DEPOSIT: string[];
+  SELLER: string[];
 }
 
 // Definir la interfaz para los roles
@@ -115,12 +117,12 @@ const config: Config = {
     },
   ],
   roles: [
-    { id: "administrator", label: "Administrador" },
-    { id: "deposit", label: "Depósito" },
-    { id: "sells", label: "Ventas" },
+    { id: PrismaRole.ADMIN, label: "Administrador" },
+    { id: PrismaRole.DEPOSIT, label: "Depósito" },
+    { id: PrismaRole.SELLER, label: "Ventas" },
   ],
   rolePermissions: {
-    administrator: [
+    [PrismaRole.ADMIN]: [
       "production",
       "discards",
       "shipments",
@@ -132,14 +134,14 @@ const config: Config = {
       "users",
       "products",
     ],
-    deposit: [
+    [PrismaRole.DEPOSIT]: [
       "production",
       "discards",
       "shipments",
       "returns-reception",
       "reports",
     ],
-    sells: ["sells", "shipment-reception", "returns", "reports"],	
+    [PrismaRole.SELLER]: ["sales", "shipment-reception", "return", "reports"],
   },
 };
 

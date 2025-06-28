@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { UserAddFormSchema, UserEditFormSchema } from "@/libs/schemas/users";
 import { saveImage } from "@/libs/helpers/images";
 import { encrypt } from "@/libs/helpers/encryptions";
+import { Role } from "@prisma/client";
 
 interface UserFormState {
   errors?:
@@ -22,7 +23,7 @@ interface UserFormState {
     | false;
 }
 interface UpdatedUserData {
-  role: string;
+  role: Role;
   name: string;
   lastName: string;
   password?: string;
@@ -32,7 +33,7 @@ interface UpdatedUserData {
 
 export async function addUser(formData: FormData): Promise<UserFormState> {
   const username = formData.get("username") as string;
-  const role = formData.get("role") as string;
+  const role = formData.get("role") as string as Role;
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
   const lastName = formData.get("lastName") as string;
@@ -68,7 +69,7 @@ export async function addUser(formData: FormData): Promise<UserFormState> {
       data: {
         username: result.data.username,
         password: hashedPassword,
-        role: result.data.role,
+        role: result.data.role as Role,
         name: result.data.name,
         lastName: result.data.lastName,
         avatar: avatarPath,
@@ -95,7 +96,7 @@ export async function editUser(
   if (!userId) return { errors: { _form: ["No se envió el ID del usuario"] } };
 
   const username = formData.get("username") as string;
-  const role = formData.get("role") as string;
+  const role = formData.get("role") as Role;
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
   const lastName = formData.get("lastName") as string;
@@ -120,7 +121,7 @@ export async function editUser(
 
   try {
     const updatedData: UpdatedUserData = {
-      role: result.data.role,
+      role: result.data.role as Role,
       name: result.data.name,
       lastName: result.data.lastName,
       active: result.data.active,

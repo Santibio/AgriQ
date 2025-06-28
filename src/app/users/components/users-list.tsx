@@ -3,33 +3,28 @@ import { Avatar, ScrollShadow } from "@nextui-org/react";
 import UserMenu from "./user-menu";
 import Link from "next/link";
 import paths from "@/libs/paths";
-import clsx from 'clsx';
+import clsx from "clsx";
+import config from "@/config";
 
 interface UserListProps {
   users: User[];
 }
-
-// TODO: Mejorar
-type UserRole = "administrator" | "deposit" | "sells";
-
-const roleMap: Record<UserRole, string> = {
-  administrator: "Administrador",
-  deposit: "Depósito",
-  sells: "Ventas",
-};
 
 export default function UserList({ users }: UserListProps) {
   return (
     <ScrollShadow className="h-[70dvh]">
       <ul className="flex gap-2 flex-col">
         {users.map((user) => {
-          const roleLabel = roleMap[user.role as UserRole] || "Rol desconocido";
+          const roleLabel = config.roles.find((r) => r.id === user.role)?.label;
+
           return (
             <li key={user.id}>
-              <div className={clsx(
-                "flex border rounded-md p-1 gap-2 items-center justify-between",
-                !user.active && "opacity-50"
-              )}>
+              <div
+                className={clsx(
+                  "flex border rounded-md p-1 gap-2 items-center justify-between",
+                  !user.active && "opacity-50"
+                )}
+              >
                 {user.active ? (
                   <Link
                     href={paths.userEdit(user.id.toString())}
@@ -52,7 +47,7 @@ export default function UserList({ users }: UserListProps) {
   );
 }
 
-function UserInfo({ user, roleLabel }: { user: User; roleLabel: string }) {
+function UserInfo({ user, roleLabel }: { user: User; roleLabel?: string }) {
   return (
     <div className="flex gap-4 items-center">
       <Avatar src={user.avatar} showFallback />
@@ -60,7 +55,7 @@ function UserInfo({ user, roleLabel }: { user: User; roleLabel: string }) {
         <h3 className="text-md text-primary font-medium capitalize">
           {`${user.lastName} ${user.name}`}
         </h3>
-        <p className="text-slate-500 capitalize">{roleLabel}</p>
+        <p className="text-slate-500 capitalize">{roleLabel || "---"}</p>
       </div>
     </div>
   );

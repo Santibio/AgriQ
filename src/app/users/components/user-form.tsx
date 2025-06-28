@@ -24,12 +24,8 @@ import { usernameGenerator } from "@/libs/helpers/user";
 import { addUser, editUser } from "../actions";
 import paths from "@/libs/paths";
 import { useRouter } from "next/navigation";
+import config from "@/config";
 
-const roles = [
-  { id: "administrator", label: "Administrador" },
-  { id: "deposit", label: "Deposito" },
-  { id: "sells", label: "Ventas" },
-];
 
 interface UserFormProps {
   user?: User;
@@ -244,7 +240,7 @@ export default function UserForm({ user }: UserFormProps) {
               errorMessage={errors.role?.message}
               selectedKeys={[field.value]}
             >
-              {roles.map((role) => (
+              {config.roles.map((role) => (
                 <SelectItem key={role.id} value={role.id}>
                   {role.label}
                 </SelectItem>
