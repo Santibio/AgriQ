@@ -10,11 +10,17 @@ datasource db {
   url      = env("POSTGRES_URL")
 }
 
+enum Role {
+  ADMIN
+  DEPOSIT
+  SELLER
+}
+
 model User {
   id       Int        @id @default(autoincrement())
   username String     @unique
   password String
-  role     String
+  role     Role
   lastName String
   name     String
   avatar   String
