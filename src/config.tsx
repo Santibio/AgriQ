@@ -27,6 +27,7 @@ interface NavItem {
   id: string;
   icon: ReactNode;
   label: string;
+  link: string; // Href opcional para enlaces de navegación
 }
 
 // Definir la interfaz para los permisos por rol
@@ -51,22 +52,36 @@ interface Config {
 
 const config: Config = {
   navItems: [
-    { id: "home", icon: <Home className="w-5 h-5" />, label: "Inicio" },
+    {
+      id: "home",
+      icon: <Home className="w-5 h-5" />,
+      label: "Inicio",
+      link: "/",
+    },
     {
       id: "production",
       icon: <Package className="w-5 h-5" />,
       label: "Producción",
+      link: "/production",
     },
-    { id: "sales", icon: <TrendingUp className="w-5 h-5" />, label: "Ventas" },
+    {
+      id: "sales",
+      icon: <TrendingUp className="w-5 h-5" />,
+      label: "Ventas",
+      link: "/sales",
+    },
+
     {
       id: "reports",
       icon: <BarChart3 className="w-5 h-5" />,
       label: "Reportes",
+      link: "/reports",
     },
     {
       id: "settings",
       icon: <Settings className="w-5 h-5" />,
       label: "Ajustes",
+      link: "/settings",
     },
   ],
   /*   navItems: [
