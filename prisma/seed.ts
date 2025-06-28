@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from "@prisma/client";
+import { PrismaClient, Product, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -32,60 +32,88 @@ const initialUsers = [
   },
 ];
 
-/* const initialProducts = [
+const initialProducts: Product[] = [
   {
+    id: 1,
     code: "001",
     name: "lechuga",
-    image:
-      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/tpaofrarv6lcw2ahnbzl.jpg`,
+    active: true,
+    price: 100,
+    image: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/tpaofrarv6lcw2ahnbzl.jpg`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
+    id: 2,
     code: "002",
     name: "tomate",
-    image:
-      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324326/mhsrhwlkr4s3zv8tmiss.jpg`,
+    active: true,
+    price: 120,
+    image: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324326/mhsrhwlkr4s3zv8tmiss.jpg`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
+    id: 3,
     code: "003",
     name: "papa",
-    image:
-      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/skxg67laz7kk21ag70g9.jpg`,
+    active: true,
+    price: 80,
+    image: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/skxg67laz7kk21ag70g9.jpg`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
+    id: 4,
     code: "004",
     name: "zanahoria",
-    image:
-      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/muzep6wexjsgmhdoficj.jpg`,
+    active: true,
+    price: 90,
+    image: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/muzep6wexjsgmhdoficj.jpg`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
+    id: 5,
     code: "005",
     name: "cebolla",
-    image:
-      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/w29nmrto31z7nk2ydrlt.jpg`,
+    active: true,
+    price: 70,
+    image: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/w29nmrto31z7nk2ydrlt.jpg`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
+    id: 6,
     code: "006",
     name: "menta",
-    image:
-      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/dbtyadni9jnfzsgyiwee.jpg`,
+    active: true,
+    price: 110,
+    image: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/dbtyadni9jnfzsgyiwee.jpg`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
+    id: 7,
     code: "007",
     name: "acelga",
-    image:
-      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/eqlmib8p1ddglsh5szeb.jpg`,
+    active: true,
+    price: 95,
+    image: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/eqlmib8p1ddglsh5szeb.jpg`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
-]; */
+];
 
 async function main() {
   console.log("Start seeding...");
 
   // Eliminar registros existentes
-/*   await prisma.shipmentProduction.deleteMany();
+  /*   await prisma.shipmentProduction.deleteMany();
   await prisma.shipment.deleteMany();
   await prisma.production.deleteMany(); */
   await prisma.user.deleteMany();
- /*  await prisma.product.deleteMany(); */
+  await prisma.product.deleteMany();
 
   // Crear usuarios
   await prisma.user.createMany({
@@ -93,12 +121,12 @@ async function main() {
   });
 
   // Crear productos
-/*   await prisma.product.createMany({
+  await prisma.product.createMany({
     data: initialProducts,
-  }); */
+  });
 
   // Obtener los primeros IDs de usuarios y productos creados
-/*   const userEve = await prisma.user.findFirst({
+ /*  const userEve = await prisma.user.findFirst({
     where: { username: "eve.perez" },
   });
   const userFabri = await prisma.user.findFirst({
@@ -112,7 +140,7 @@ async function main() {
   }); */
 
   // Crear producciones
- /*  await prisma.production.createMany({
+  /*  await prisma.production.createMany({
     data: [
       {
         quantity: 100,
@@ -144,7 +172,7 @@ async function main() {
   }); */
 
   // Crear envíos
- /*  await prisma.shipment.createMany({
+  /*  await prisma.shipment.createMany({
     data: [
       {
         userId: userEve?.id as number, // ID del usuario Eve
@@ -156,7 +184,7 @@ async function main() {
   });
  */
   // Obtener los IDs de los envíos recién creados
- /*  const shipmentEve = await prisma.shipment.findFirst({
+  /*  const shipmentEve = await prisma.shipment.findFirst({
     where: { userId: userEve?.id as number },
   });
   const shipmentFabri = await prisma.shipment.findFirst({

@@ -40,6 +40,7 @@ export default function ProductForm({ product }: ProductFormProps) {
     ),
     defaultValues: {
       name: capitalize(product?.name) || "",
+      price: product?.price || 0,
       active: product?.active !== undefined ? product.active : true,
       image: undefined,
     },
@@ -47,10 +48,12 @@ export default function ProductForm({ product }: ProductFormProps) {
 
   const [isLoading, setIsloading] = useState<boolean>(false);
 
-  const onSubmit = async ({ name, active, image }: AddProductInputs) => {
+  const onSubmit = async ({ name, active, image, price }: AddProductInputs) => {
+    console.log("price: ", price);
     const formData = new FormData();
     formData.append("name", name);
     formData.append("active", String(active));
+    formData.append("price", String(price));
     if (image) formData.append("image", image);
 
     setIsloading(true);
@@ -94,7 +97,31 @@ export default function ProductForm({ product }: ProductFormProps) {
               isRequired
               isInvalid={!!errors.name}
               errorMessage={errors.name?.message}
-              isDisabled={isEditing}
+            />
+          )}
+        />
+        <Controller
+          name="price"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              value={field.value !== undefined ? String(field.value) : ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                field.onChange(value === "" ? "" : Number(value));
+              }}
+              label="Precio x unidad"
+              placeholder="Ingresar precio del producto"
+              isRequired
+              isInvalid={!!errors.price}
+              errorMessage={errors.price?.message}
+              startContent={
+                <div className="pointer-events-none flex items-center">
+                  <span className="text-default-400 text-small">$</span>
+                </div>
+              }
+              type="number"
             />
           )}
         />

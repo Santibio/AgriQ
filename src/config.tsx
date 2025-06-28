@@ -110,7 +110,7 @@ const config: Config = {
     },
     {
       id: "products",
-      name: "Producto",
+      name: "Productos",
       href: "/products",
       icon: <ScanBarcode className="stroke-primary" />,
       description: "Gestión de inventario de productos",

@@ -32,6 +32,9 @@ const paths = {
   production() {
     return `/production`;
   },
+  productionEdit(productionId: string) {
+    return `/production/${productionId}`;
+  },
   productionAdd() {
     return `/production/add`;
   },

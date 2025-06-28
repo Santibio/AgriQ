@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import paths from "@/libs/paths";
 import db from "@/libs/db";
-// import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { saveImage } from "@/libs/helpers/images";
 import {
@@ -12,13 +11,13 @@ import {
 } from "@/libs/schemas/products";
 import { generateNextProductCode } from "@/libs/helpers/products";
 
-// Estado del formulario de producto
 interface ProductFormState {
   errors?:
     | {
         name?: string[];
         image?: string[];
         active?: string[];
+        price?: string[];
         _form?: string[];
       }
     | false;
@@ -32,12 +31,14 @@ export async function addProduct(
     const name = formData.get("name") as string;
     const active = formData.get("active") === "true";
     const image = formData.get("image") as File | null;
+    const price = Number(formData.get("price") as string) || 0;
 
     // Validar los datos del formulario usando el esquema de Zod
     const parseResult = AddProductFormSchema.safeParse({
       name,
       active,
       image,
+      price,
     });
 
     if (!parseResult.success) {
@@ -46,6 +47,7 @@ export async function addProduct(
         errors: {
           name: errors.name || [],
           image: errors.image || [],
+          price: errors.price || [],
         },
       };
     }
@@ -62,6 +64,7 @@ export async function addProduct(
         active,
         image: imagePath,
         code: await generateNextProductCode(),
+        price: price,
       },
     });
   } catch (err) {
@@ -82,12 +85,14 @@ export async function editProduct(
     const name = formData.get("name") as string;
     const active = formData.get("active") === "true";
     const image = formData.get("image") as File | null;
+    const price = Number(formData.get("price") as string);
 
     // Validar los datos del formulario usando el esquema de Zod
     const parseResult = EditProductFormSchema.safeParse({
       name,
       active,
       ...(image ? { image } : {}),
+      price,
     });
 
     if (!parseResult.success) {
@@ -96,6 +101,7 @@ export async function editProduct(
         errors: {
           name: errors.name || [],
           image: errors.image || [],
+          price: errors.price || [],
         },
       };
     }
@@ -129,6 +135,7 @@ export async function editProduct(
         name: formattedName,
         active,
         image: imagePath,
+        price,
       },
     });
   } catch (err: unknown) {

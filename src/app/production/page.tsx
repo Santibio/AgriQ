@@ -7,7 +7,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@nextui-org/react";
 
 export default async function ProductionPage() {
-  const productions = await db.production.findMany({
+  const productions = await db.batch.findMany({
     include: {
       product: true,
     },

@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
-import { Product } from "@prisma/client";
+import { Batch, Product } from "@prisma/client";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -16,7 +16,7 @@ import {
   AddProductionInputs,
   CreateProductionFormSchema,
 } from "@/libs/schemas/production";
-import { createProduction } from "../actions";
+import { createProduction, editProduction } from "../actions";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -24,20 +24,31 @@ import paths from "@/libs/paths";
 
 interface ProductionFormProps {
   products: Product[];
+  batch?: Batch;
 }
 
-export default function ProductionForm({ products }: ProductionFormProps) {
+export default function ProductionForm({
+  products,
+  batch,
+}: ProductionFormProps) {
+  console.log("batch: ", batch);
   const router = useRouter();
+
+  const isEditing = Boolean(batch);
+
+  type FormInputs = typeof isEditing extends boolean
+    ? AddProductionInputs
+    : AddProductionInputs;
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<AddProductionInputs>({
+  } = useForm<FormInputs>({
     resolver: zodResolver(CreateProductionFormSchema),
     defaultValues: {
-      product: "",
-      quantity: undefined,
+      product: String(batch?.productId) || "",
+      quantity: batch?.initialQuantity || undefined,
     },
   });
 
@@ -46,7 +57,9 @@ export default function ProductionForm({ products }: ProductionFormProps) {
   const onSubmit = async (data: AddProductionInputs) => {
     try {
       setIsloading(true);
-      const response = await createProduction(data);
+      const response = isEditing
+        ? await editProduction(Number(batch?.id), data)
+        : await createProduction(data);
       if (response?.errors) {
         const errorMessage =
           response.errors._form?.[0] || "An unexpected error occurred.";
@@ -80,6 +93,7 @@ export default function ProductionForm({ products }: ProductionFormProps) {
               defaultItems={products}
               isInvalid={!!errors.product}
               errorMessage={errors.product?.message}
+              defaultSelectedKey={batch?.productId?.toString() || ""}
               startContent={
                 <Search
                   className="text-default-400"
