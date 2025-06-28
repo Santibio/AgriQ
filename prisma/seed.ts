@@ -1,30 +1,30 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 const initialUsers = [
   {
-    username: "eve.perez",
+    username: "admin",
     password: "$2a$10$V8/J106/FqipLrC9lAQgweyylLXR3l0iNw4XaFyQ8OMYBPZd/hp06",
-    role: "administrator",
+    role: Role.ADMIN,
     name: "Eve",
     lastName: "Perez",
     avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730323872/cszbndvswdehdcllgkje.jpg`,
     active: true,
   },
   {
-    username: "fabri.perez",
+    username: "seller",
     password: "$2a$10$V8/J106/FqipLrC9lAQgweyylLXR3l0iNw4XaFyQ8OMYBPZd/hp06",
-    role: "sells",
+    role: Role.SELLER,
     name: "Fabri",
     lastName: "Perez",
     avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730323872/hu4lguwldlcjhqdxr7rv.jpg`,
     active: true,
   },
   {
-    username: "santiago.perez",
+    username: "deposit",
     password: "$2a$10$V8/J106/FqipLrC9lAQgweyylLXR3l0iNw4XaFyQ8OMYBPZd/hp06",
-    role: "administrator",
+    role: Role.DEPOSIT,
     name: "Santiago",
     lastName: "Perez",
     avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730323872/kbhi0ukhcmwuxynf1tau.jpg`,
@@ -32,7 +32,7 @@ const initialUsers = [
   },
 ];
 
-const initialProducts = [
+/* const initialProducts = [
   {
     code: "001",
     name: "lechuga",
@@ -75,17 +75,17 @@ const initialProducts = [
     image:
       `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730324325/eqlmib8p1ddglsh5szeb.jpg`,
   },
-];
+]; */
 
 async function main() {
   console.log("Start seeding...");
 
   // Eliminar registros existentes
-  await prisma.shipmentProduction.deleteMany();
+/*   await prisma.shipmentProduction.deleteMany();
   await prisma.shipment.deleteMany();
-  await prisma.production.deleteMany();
+  await prisma.production.deleteMany(); */
   await prisma.user.deleteMany();
-  await prisma.product.deleteMany();
+ /*  await prisma.product.deleteMany(); */
 
   // Crear usuarios
   await prisma.user.createMany({
@@ -93,12 +93,12 @@ async function main() {
   });
 
   // Crear productos
-  await prisma.product.createMany({
+/*   await prisma.product.createMany({
     data: initialProducts,
-  });
+  }); */
 
   // Obtener los primeros IDs de usuarios y productos creados
-  const userEve = await prisma.user.findFirst({
+/*   const userEve = await prisma.user.findFirst({
     where: { username: "eve.perez" },
   });
   const userFabri = await prisma.user.findFirst({
@@ -109,10 +109,10 @@ async function main() {
   });
   const productTomato = await prisma.product.findFirst({
     where: { name: "tomate" },
-  });
+  }); */
 
   // Crear producciones
-  await prisma.production.createMany({
+ /*  await prisma.production.createMany({
     data: [
       {
         quantity: 100,
@@ -127,10 +127,10 @@ async function main() {
         userId: userFabri?.id as number, // ID del usuario Fabri
       },
     ],
-  });
+  }); */
 
   // Obtener los IDs de las producciones recién creadas
-  const productionLettuce = await prisma.production.findFirst({
+  /* const productionLettuce = await prisma.production.findFirst({
     where: {
       productId: productLettuce?.id as number,
       userId: userEve?.id as number,
@@ -141,10 +141,10 @@ async function main() {
       productId: productTomato?.id as number,
       userId: userFabri?.id as number,
     },
-  });
+  }); */
 
   // Crear envíos
-  await prisma.shipment.createMany({
+ /*  await prisma.shipment.createMany({
     data: [
       {
         userId: userEve?.id as number, // ID del usuario Eve
@@ -154,9 +154,9 @@ async function main() {
       },
     ],
   });
-
+ */
   // Obtener los IDs de los envíos recién creados
-  const shipmentEve = await prisma.shipment.findFirst({
+ /*  const shipmentEve = await prisma.shipment.findFirst({
     where: { userId: userEve?.id as number },
   });
   const shipmentFabri = await prisma.shipment.findFirst({
@@ -181,7 +181,7 @@ async function main() {
         currentQuantity: 50, // Cantidad restante
       },
     ],
-  });
+  }); */
 
   console.log("Finish seeding");
 }
