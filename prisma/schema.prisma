@@ -11,55 +11,76 @@ datasource db {
 }
 
 model User {
-  id       Int          @id @default(autoincrement())
-  username String       @unique
+  id       Int        @id @default(autoincrement())
+  username String     @unique
   password String
   role     String
   lastName String
   name     String
   avatar   String
-  products Production[]
-  Shipment Shipment[]
-  active   Boolean      @default(true)
+  movement Movement[]
+  active   Boolean    @default(true)
 }
 
 model Product {
-  id        Int          @id @default(autoincrement())
-  code      String       @unique
-  name      String       @unique
-  active    Boolean      @default(true)
-  createdAt DateTime     @default(now())
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String   @unique
+  active    Boolean  @default(true)
+  price     Float
   image     String
-  products  Production[]
+  products  Batch[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Production {
-  id                Int                  @id @default(autoincrement())
-  quantity          Int
-  remainingQuantity Int // Cantidad total de este producto
-  product           Product              @relation(fields: [productId], references: [id])
+model Batch {
+  id                Int              @id @default(autoincrement())
+  code              String           @unique
+  initialQuantity   Int
+  depositQuantity   Int
+  marketQuantity    Int
+  sentQuantity      Int
+  receivedQuantity  Int
+  discardedQuantity Int
+  reservedQuantity  Int
+  soltQuantity      Int
   productId         Int
-  createdAt         DateTime             @default(now())
-  user              User                 @relation(fields: [userId], references: [id])
-  userId            Int
-  shipments         ShipmentProduction[] // Relación muchos a muchos con Shipment a través de ShipmentProduction
+  product           Product          @relation(fields: [productId], references: [id])
+  movementDetail    MovementDetail[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 }
 
-model Shipment {
-  id        Int                  @id @default(autoincrement())
-  createdAt DateTime             @default(now())
-  shipments ShipmentProduction[] // Relación muchos a muchos con Production a través de ShipmentProduction
-  user      User                 @relation(fields: [userId], references: [id])
-  userId    Int
+enum MovementType {
+  STORED
+  DISCARDED
+  SENT
+  EDITED
+  RECEIVED_MARKET
+  AVAILABLE
+  ORDERED
+  SOLD
+  CANCELED
+  DELIVERED
+  NOT_DELIVERED
+  RETURNED
 }
 
-model ShipmentProduction {
-  id              Int        @id @default(autoincrement())
-  shipment        Shipment   @relation(fields: [shipmentId], references: [id])
-  shipmentId      Int
-  production      Production @relation(fields: [productionId], references: [id])
-  productionId    Int
-  initialQuantity Int
-  recivedQuantity Int
-  currentQuantity Int
+model Movement {
+  id             Int              @id @default(autoincrement())
+  movementDetail MovementDetail[]
+  user           User             @relation(fields: [userId], references: [id])
+  userId         Int
+  createdAt      DateTime         @default(now())
+  type           MovementType
+}
+
+model MovementDetail {
+  id         Int      @id @default(autoincrement())
+  movementId Int
+  movement   Movement @relation(fields: [movementId], references: [id])
+  bacthId    Int
+  batch      Batch    @relation(fields: [bacthId], references: [id])
+  quantity   Int
 }
