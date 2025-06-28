@@ -4,7 +4,7 @@ import ProductionsList from "./components/productions-list";
 import paths from "@/libs/paths";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 
 export default async function ProductionPage() {
   const productions = await db.batch.findMany({

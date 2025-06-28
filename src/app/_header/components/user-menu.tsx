@@ -5,7 +5,7 @@ import {
   DropdownMenu,
   DropdownItem,
   Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { useTheme } from "next-themes";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { logout } from "@/app/login/actions";

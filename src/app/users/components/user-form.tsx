@@ -8,7 +8,7 @@ import {
   Select,
   SelectItem,
   Switch,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { useEffect, useState } from "react";
 import { Camera, Eye, EyeOff } from "lucide-react";
 import type { User } from "@prisma/client";

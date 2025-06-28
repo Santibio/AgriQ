@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardFooter } from "@nextui-org/react";
+import { Card, CardFooter } from "@heroui/react";
 import { useRouter } from "next/navigation";
 
 interface NavbarItem {

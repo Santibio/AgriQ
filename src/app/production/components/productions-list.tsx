@@ -1,5 +1,5 @@
 import { Product, Batch } from "@prisma/client";
-import { ScrollShadow, Image } from "@nextui-org/react";
+import { ScrollShadow, Image } from "@heroui/react";
 import moment from "moment";
 // import Image from "next/image";
 import { capitalize } from "@/libs/helpers/text";
