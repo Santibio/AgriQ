@@ -1,4 +1,8 @@
 import NavbarItemsList from "@/components/navbar-items-list";
+import QuickActions from "@/components/quick-actions";
+import RecentMovements from "@/components/recent-movements";
+import StatsCards from "@/components/stats-cards";
+import WelcomeBanner from "@/components/welcom-banner";
 import config from "@/config";
 import { getCurrentUser } from "@/libs/session";
 import { notFound } from "next/navigation";
@@ -20,9 +24,11 @@ export default async function Home() {
   }));
 
   return (
-    <section className="">
-      <h1 className="text-3xl font-semibold mb-8">Inicio</h1>
-      <NavbarItemsList itemsWithPermission={itemsWithPermission} />
+    <section className="pb-20 px-4 space-y-6 bg-slate-50 pt-4">
+      <WelcomeBanner name={user.name} />
+      <StatsCards />
+      <QuickActions />
+      <RecentMovements />
     </section>
   );
 }

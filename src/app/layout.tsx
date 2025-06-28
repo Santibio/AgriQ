@@ -5,6 +5,7 @@ import Providers from "./providers";
 import Header from "./_header";
 import moment from "moment";
 import "moment/locale/es";
+import NavBar from "./_navbar";
 
 moment.locale("es");
 
@@ -19,14 +20,12 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-
 export const viewport: Viewport = {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  }
- 
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: "AgriQ",
@@ -38,7 +37,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -46,7 +44,8 @@ export default function RootLayout({
       >
         <Providers>
           <Header />
-          <main className="max-w-[600px] m-auto p-2">{children}</main>
+          <main className="max-w-[600px] m-auto">{children}</main>
+          <NavBar />
         </Providers>
       </body>
     </html>

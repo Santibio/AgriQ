@@ -19,7 +19,7 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
   if (!user) return notFound();
 
   return (
-    <section className="pt-6 flex flex-col justify-between gap-6">
+    <section className="flex flex-col justify-between gap-6">
       <PageTitle>Editar Usuario</PageTitle>
       <UserForm user={user} />
     </section>

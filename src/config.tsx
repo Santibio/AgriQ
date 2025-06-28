@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import {
+/* import {
   CalendarCheck,
   CalendarCheck2,
   CircleDollarSign,
@@ -10,17 +10,23 @@ import {
   Truck,
   Undo2,
   UserCog,
-} from "lucide-react";
+} from "lucide-react"; */
+import { BarChart3, Home, Package, Settings, TrendingUp } from "lucide-react";
+
 import { Role as PrismaRole } from "@prisma/client";
 
-
 // Definir la interfaz para los elementos de navegación
-interface NavItem {
+/* interface NavItem {
   id: string;
   name: string;
   href: string;
   icon: ReactNode;
   description: string;
+} */
+interface NavItem {
+  id: string;
+  icon: ReactNode;
+  label: string;
 }
 
 // Definir la interfaz para los permisos por rol
@@ -45,6 +51,25 @@ interface Config {
 
 const config: Config = {
   navItems: [
+    { id: "home", icon: <Home className="w-5 h-5" />, label: "Inicio" },
+    {
+      id: "production",
+      icon: <Package className="w-5 h-5" />,
+      label: "Producción",
+    },
+    { id: "sales", icon: <TrendingUp className="w-5 h-5" />, label: "Ventas" },
+    {
+      id: "reports",
+      icon: <BarChart3 className="w-5 h-5" />,
+      label: "Reportes",
+    },
+    {
+      id: "settings",
+      icon: <Settings className="w-5 h-5" />,
+      label: "Ajustes",
+    },
+  ],
+  /*   navItems: [
     {
       id: "production",
       name: "Producción",
@@ -115,7 +140,7 @@ const config: Config = {
       icon: <ScanBarcode className="stroke-primary" />,
       description: "Gestión de inventario de productos",
     },
-  ],
+  ], */
   roles: [
     { id: PrismaRole.ADMIN, label: "Administrador" },
     { id: PrismaRole.DEPOSIT, label: "Depósito" },
