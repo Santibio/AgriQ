@@ -241,7 +241,7 @@ export default function UserForm({ user }: UserFormProps) {
               selectedKeys={[field.value]}
             >
               {config.roles.map((role) => (
-                <SelectItem key={role.id} value={role.id}>
+                <SelectItem key={role.id}>
                   {role.label}
                 </SelectItem>
               ))}
