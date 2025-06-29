@@ -42,12 +42,12 @@ export async function createShipment(
       let quantityToShip = input.quantity; // Cantidad que se debe enviar
 
       // Obtener las producciones más antiguas de este producto, ordenadas por fecha de creación (FIFO)
-      const oldProductions = await db.production.findMany({
+      const oldProductions = await db.batch.findMany({
         where: {
           productId: input.id, // Filtra por el producto
-          remainingQuantity: {
+        /*   remainingQuantity: {
             gt: 0, // Solo producciones con cantidad restante mayor a 0
-          },
+          }, */
         },
         orderBy: {
           createdAt: "asc", // Ordena por las más antiguas primero
@@ -58,16 +58,16 @@ export async function createShipment(
       for (const production of oldProductions) {
         if (quantityToShip <= 0) break; // Si ya hemos asignado toda la cantidad a enviar, terminamos
 
-        const availableQuantity = production.remainingQuantity;
+        const availableQuantity = 0;
 
         // Verifica cuánto de la producción podemos usar en este envío
         const quantityToUse = Math.min(availableQuantity, quantityToShip);
 
         // Actualiza el remainingQuantity de esta producción
-        await db.production.update({
+    /*     await db.production.update({
           where: { id: production.id },
           data: { remainingQuantity: availableQuantity - quantityToUse },
-        });
+        }); */
 
         // Añade esta producción al nuevo envío
         shipmentProductions.push({
@@ -91,14 +91,14 @@ export async function createShipment(
       }
     }
     // Crea el nuevo envío (Shipment) con las producciones utilizadas
-    await db.shipment.create({
+    /* await db.shipment.create({
       data: {
         userId: user.id, // Asocia el envío con el usuario actual
         shipments: {
           create: shipmentProductions, // Crea las relaciones con las producciones usadas
         },
       },
-    });
+    }); */
 
     // Redirige a la página de envíos tras la creación exitosa
     revalidatePath(paths.shipments());

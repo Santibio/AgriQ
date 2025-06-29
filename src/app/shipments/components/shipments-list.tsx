@@ -1,31 +1,31 @@
 import { ScrollShadow } from "@heroui/react";
-import {
+/* import {
   Shipment,
   User,
   ShipmentProduction,
   Product,
   Production,
-} from "@prisma/client";
-import { CheckCheck } from "lucide-react";
+} from "@prisma/client";  */
+/* import { CheckCheck } from "lucide-react";
 import moment from "moment";
-
-interface ShipmentsListProps {
+ */
+/* interface ShipmentsListProps {
   shipments: ShipmentWithRelations[];
 }
-
-type ShipmentWithRelations = Shipment & {
+ */
+/* type ShipmentWithRelations = Shipment & {
   user: User;
   shipments: (ShipmentProduction & {
     production: Production & {
       product: Product;
     };
   })[];
-};
+}; */
 
-export default function ShipmentsList({ shipments }: ShipmentsListProps) {
+export default function ShipmentsList() {
   return (
     <ScrollShadow className="h-[70dvh]">
-      <ul className="flex gap-2 flex-col">
+     {/*  <ul className="flex gap-2 flex-col">
         {shipments.map((shipment) => (
           <li key={shipment.id}>
             <div className="flex border rounded-md p-2 gap-2">
@@ -56,8 +56,9 @@ export default function ShipmentsList({ shipments }: ShipmentsListProps) {
               </div>
             </div>
           </li>
-        ))}
+        ))} 
       </ul>
+         */}
     </ScrollShadow>
   );
 }
