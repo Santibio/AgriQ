@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Switch } from "@nextui-org/react";
+import { Button, Input, Switch } from "@heroui/react";
 import { useState } from "react";
 import { CloudUpload } from "lucide-react";
 import type { Product } from "@prisma/client";

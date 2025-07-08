@@ -6,7 +6,7 @@ import {
   Card,
   CardFooter,
   Image,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import Link from "next/link";
 import paths from "@/libs/paths";
 import EmptyListMsg from "@/components/empty-list";

@@ -3,7 +3,7 @@
 import { useState, useActionState } from "react";
 import { CircleUser, Eye, EyeOff, KeyRound } from "lucide-react";
 
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 import LoginButton from "./login-button";
 import { login } from "../actions";
 

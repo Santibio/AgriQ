@@ -8,7 +8,7 @@ import {
   Button,
   Input,
   ScrollShadow,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { capitalize } from "@/libs/helpers/text";
 
 import { zodResolver } from "@hookform/resolvers/zod";

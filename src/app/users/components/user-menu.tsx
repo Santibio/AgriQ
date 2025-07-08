@@ -6,7 +6,7 @@ import {
   DropdownMenu,
   DropdownItem,
   Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { EllipsisVertical, Pencil, Trash, UserRoundCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

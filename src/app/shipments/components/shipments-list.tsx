@@ -1,11 +1,11 @@
-import { ScrollShadow } from "@nextui-org/react";
+import { ScrollShadow } from "@heroui/react";
 /* import {
   Shipment,
   User,
   ShipmentProduction,
   Product,
   Production,
-} from "@prisma/client"; */
+} from "@prisma/client";  */
 /* import { CheckCheck } from "lucide-react";
 import moment from "moment";
  */

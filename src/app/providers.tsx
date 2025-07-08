@@ -1,6 +1,6 @@
 "use client";
 
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import { Toaster } from "sonner";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -21,12 +21,12 @@ export default function Providers({ children }: ProvidersProps) {
   // }
   return (
     // <Provider store={storeRef.current}>
-    <NextUIProvider locale="es-ES" navigate={router.push}>
+    // </Provider>
+    <HeroUIProvider locale="es-ES" navigate={router.push}>
       <NextThemesProvider attribute="class" defaultTheme="light">
         <Toaster position="top-center" richColors />
         {children}
       </NextThemesProvider>
-    </NextUIProvider>
-    // </Provider>
+    </HeroUIProvider>
   );
 }

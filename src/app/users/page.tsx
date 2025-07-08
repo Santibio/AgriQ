@@ -1,6 +1,6 @@
 import db from "@/libs/db";
 import { Plus } from "lucide-react";
-import { Button, Link } from "@nextui-org/react";
+import { Button, Link } from "@heroui/react";
 import PageTitle from "@/components/page-title";
 import paths from "@/libs/paths";
 import UserList from "./components/users-list";

@@ -1,4 +1,4 @@
-import { Button, Link } from "@nextui-org/react";
+import { Button, Link } from "@heroui/react";
 import { Plus } from "lucide-react";
 import React from "react";
 
