@@ -40,11 +40,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased bg-slate-50`}
       >
         <Providers>
           <Header />
-          <main className="max-w-[600px] m-auto p-2">{children}</main>
+          <main className="max-w-[600px] m-auto  pt-4">{children}</main>
           <NavBar />
         </Providers>
       </body>

@@ -24,7 +24,7 @@ export default async function Home() {
   })); */
 
   return (
-    <section className="pb-20 px-4 space-y-6 bg-slate-50 pt-4">
+    <section className="pb-20 px-4 space-y-6 ">
       <WelcomeBanner name={user.name} />
       <StatsCards />
       <QuickActions />

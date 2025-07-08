@@ -12,19 +12,20 @@ export default async function ProductionPage() {
       product: true,
     },
     orderBy: {
-      createdAt: 'desc',
+      createdAt: "desc",
     },
   });
   return (
-    <section className="flex flex-col justify-between gap-6">
+    <section className="flex flex-col justify-between gap-6 p-2">
       <PageTitle>Producción</PageTitle>
       <ProductionsList productions={productions} />
       <Button
         color="primary"
-        className="w-full"
+        className="absolute bottom-24 right-2"
         href={paths.productionAdd()}
         as={Link}
         startContent={<Plus className="h-[20px]" />}
+        variant="shadow"
       >
         Agregar lote
       </Button>
