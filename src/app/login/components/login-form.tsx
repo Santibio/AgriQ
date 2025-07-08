@@ -1,16 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useActionState } from "react";
 import { CircleUser, Eye, EyeOff, KeyRound } from "lucide-react";
 
 import { Input } from "@nextui-org/react";
-import { useFormState } from "react-dom";
 import LoginButton from "./login-button";
 import { login } from "../actions";
 
 export default function LoginForm() {
   const [isVisible, setIsVisible] = useState(false);
-  const [formState, action] = useFormState(login, { errors: {} });
+  const [formState, action] = useActionState(login, { errors: {} });
 
   const toggleVisibility = () => setIsVisible(!isVisible);
 

@@ -5,14 +5,13 @@ import React from "react";
 import ProductForm from "../components/product-form";
 
 interface ProductEditPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default async function ProductEditPage({
-  params,
-}: ProductEditPageProps) {
+export default async function ProductEditPage(props: ProductEditPageProps) {
+  const params = await props.params;
   const productId = parseInt(params.id);
 
   const product = await db.product.findUnique({

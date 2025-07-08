@@ -70,7 +70,7 @@ export async function login(
   const token = jwt.sign({ userId: user.id, userRole: user.role }, JWT_SECRET, { expiresIn: "30d" });
 
   // Configurar la cookie con el JWT
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   cookieStore.set({
     name: "token",
     value: token,
@@ -83,7 +83,7 @@ export async function login(
 }
 
 export async function logout() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   cookieStore.delete("token");
   revalidatePath("/");
   redirect(paths.login());

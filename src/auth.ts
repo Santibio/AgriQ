@@ -8,7 +8,7 @@ export const validateRequest = async (): Promise<{
   isExpired: boolean;
   userRole: string | null;
 }> => {
-  const token = cookies().get("token")?.value ?? null;
+  const token = (await cookies()).get("token")?.value ?? null;
 
   if (!token) {
     return {

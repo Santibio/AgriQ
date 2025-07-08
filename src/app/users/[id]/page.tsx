@@ -4,12 +4,13 @@ import db from "@/libs/db";
 import { notFound } from "next/navigation";
 
 interface UserEditPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default async function UserEditPage({ params }: UserEditPageProps) {
+export default async function UserEditPage(props: UserEditPageProps) {
+  const params = await props.params;
   const userId = parseInt(params.id);
 
   const user = await db.user.findUnique({
