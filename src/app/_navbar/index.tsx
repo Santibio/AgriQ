@@ -25,6 +25,7 @@ const NavBar = () => {
         aria-label="Options"
         variant="underlined"
         className="max-w-xl w-full justify-center"
+        color="primary"
       >
         {config.navItems.map((item) => (
           <Tab
