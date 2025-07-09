@@ -136,6 +136,14 @@ export default function UserForm({ user }: UserFormProps) {
               isRequired
               isInvalid={!!errors.name}
               errorMessage={errors.name?.message}
+              onChange={(e) => {
+                const onlyLetters = e.target.value.replace(
+                  /[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g,
+                  ""
+                );
+                e.target.value = onlyLetters;
+                field.onChange(e);
+              }}
             />
           )}
         />
@@ -150,6 +158,14 @@ export default function UserForm({ user }: UserFormProps) {
               isRequired
               isInvalid={!!errors.lastName}
               errorMessage={errors.lastName?.message}
+              onChange={(e) => {
+                const onlyLetters = e.target.value.replace(
+                  /[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g,
+                  ""
+                );
+                e.target.value = onlyLetters;
+                field.onChange(e);
+              }}
             />
           )}
         />
