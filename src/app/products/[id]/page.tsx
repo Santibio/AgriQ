@@ -22,7 +22,7 @@ export default async function ProductEditPage({
   if (!product) return notFound();
   return (
     <section className="flex flex-col justify-between gap-6">
-      <PageTitle>Agregar Producto</PageTitle>
+      <PageTitle>Editar Producto</PageTitle>
       <ProductForm product={product} />
     </section>
   );
