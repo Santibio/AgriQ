@@ -46,12 +46,12 @@ export async function login(
 
   const { username, password } = result.data;
 
-  const user = await db.user.findUnique({ where: { username } });
+  const user = await db.user.findUnique({ where: { username, active: true } });
 
   if (!user) {
     return {
       errors: {
-        username: ["No se encontro el usuario"],
+        username: ["No se encontro el usuario, contacte al administrador"],
       },
     };
   }

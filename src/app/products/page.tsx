@@ -6,7 +6,7 @@ import paths from "@/libs/paths";
 import ProductsList from "@/app/products/components/products-list";
 
 export default async function ProductsPage() {
-  const products = await db.product.findMany();
+  const products = await db.product.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }, ] });
   return (
     <section className="flex flex-col justify-between gap-6">
       <PageTitle>Productos</PageTitle>

@@ -23,7 +23,8 @@ export default function UserMenu({ user }: UserMenuProps) {
   const logoutHandler = async () => {
     try {
       await logout();
-    } catch {
+    } catch(error) {
+      console.log("Error al cerrar sesión:", error);
       toast.error("Error al cerrar sesión");
     }
   };

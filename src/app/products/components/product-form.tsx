@@ -49,7 +49,6 @@ export default function ProductForm({ product }: ProductFormProps) {
   const [isLoading, setIsloading] = useState<boolean>(false);
 
   const onSubmit = async ({ name, active, image, price }: AddProductInputs) => {
-    console.log("price: ", price);
     const formData = new FormData();
     formData.append("name", name);
     formData.append("active", String(active));
@@ -145,6 +144,39 @@ export default function ProductForm({ product }: ProductFormProps) {
           control={control}
           render={({ field: { onChange, onBlur, ref, value } }) => {
             const isError = errors.image;
+            // Validación de formato y tamaño
+            const handleFileChange = (
+              e: React.ChangeEvent<HTMLInputElement>
+            ) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const validTypes = [
+                  "image/jpeg",
+                  "image/png",
+                  "image/webp",
+                  "image/jpg",
+                ];
+                const maxSize = 1024 * 1024 * 2; // 2MB
+                const img = new window.Image();
+                const url = URL.createObjectURL(file);
+                img.onload = function () {
+                  if (file.size > maxSize) {
+                    toast.error("La imagen supera el tamaño máximo de 2MB.");
+                    return;
+                  }
+                  if (!validTypes.includes(file.type)) {
+                    toast.error("Formato de imagen no soportado.");
+                    return;
+                  }
+                  onChange(file);
+                };
+                img.onerror = function () {
+                  toast.error("No se pudo cargar la imagen.");
+                };
+                img.src = url;
+                toast.success("Imagen cargada correctamente.");
+              }
+            };
             return (
               <div className="flex items-center justify-center w-full">
                 <label
@@ -170,7 +202,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                         isError ? "text-red-600" : ""
                       }`}
                     >
-                      JPG Format (MAX. 800x400px)
+                      Formatos soportados: JPG, JPEG, PNG, WEBP (MAX 2MB)
                     </p>
                     {value?.name && (
                       <p className="text-xs text-gray-500">
@@ -181,10 +213,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      onChange(file); // Asigna el archivo seleccionado al estado del formulario
-                    }}
+                    onChange={handleFileChange}
                     onBlur={onBlur}
                     ref={ref}
                     className="hidden"

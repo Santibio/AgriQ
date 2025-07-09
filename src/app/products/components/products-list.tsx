@@ -24,9 +24,9 @@ export default function ProductsList({ products }: ProductsListProps) {
             <Link
               key={product.id}
               href={paths.productEdit(product.id.toString())}
-              className=" w-full"
+              className="w-full"
             >
-              <Card shadow="sm" isPressable>
+              <Card shadow="sm" isPressable isDisabled={!product.active}>
                 <CardBody className="overflow-visible p-0">
                   <Image
                     shadow="sm"

@@ -26,7 +26,6 @@ import paths from "@/libs/paths";
 import { useRouter } from "next/navigation";
 import config from "@/config";
 
-
 interface UserFormProps {
   user?: User;
 }
@@ -48,8 +47,10 @@ export default function UserForm({ user }: UserFormProps) {
     formState: { errors },
     setValue,
     watch,
+    trigger,
   } = useForm<FormInputs>({
     resolver: zodResolver(isEditing ? UserEditFormSchema : UserAddFormSchema),
+    mode: "onChange",
     defaultValues: {
       username: user?.username || "",
       role: user?.role || "",
@@ -72,14 +73,19 @@ export default function UserForm({ user }: UserFormProps) {
 
   // Effect to update username whenever name or lastName changes
   useEffect(() => {
-    const name = watch("name");
-    const lastName = watch("lastName");
-    const username = usernameGenerator(name, lastName);
-    setValue("username", username);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watch("name"), watch("lastName")]);
+    if (!isEditing) {
+      const name = watch("name");
+      const lastName = watch("lastName");
+      const username = usernameGenerator(name, lastName);
+      setValue("username", username);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
+  }, [watch("name"), watch("lastName"), isEditing]);
 
   const onSubmit = async (data: FormInputs) => {
+    const isValid = await trigger();
+    if (!isValid) return; // Si hay errores, no envía el form
+
     const formData = new FormData();
     const fields = [
       ["username", data.username],
@@ -103,9 +109,9 @@ export default function UserForm({ user }: UserFormProps) {
           : await addUser(formData);
 
       if (response?.errors) {
-        const errorMessage =
-          response.errors._form?.[0] || "An unexpected error occurred.";
-        return toast.error(errorMessage);
+        return toast.error(
+          "Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe."
+        );
       }
 
       toast.success(
@@ -116,7 +122,9 @@ export default function UserForm({ user }: UserFormProps) {
       router.push(paths.users());
     } catch (error) {
       console.error("Error: ", error);
-      toast.error("An unexpected error occurred.");
+      toast.error(
+        "Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe."
+      );
     } finally {
       setIsloading(false);
     }
@@ -136,6 +144,14 @@ export default function UserForm({ user }: UserFormProps) {
               isRequired
               isInvalid={!!errors.name}
               errorMessage={errors.name?.message}
+              onChange={(e) => {
+                const onlyLetters = e.target.value.replace(
+                  /[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g,
+                  ""
+                );
+                e.target.value = onlyLetters;
+                field.onChange(e);
+              }}
             />
           )}
         />
@@ -150,6 +166,14 @@ export default function UserForm({ user }: UserFormProps) {
               isRequired
               isInvalid={!!errors.lastName}
               errorMessage={errors.lastName?.message}
+              onChange={(e) => {
+                const onlyLetters = e.target.value.replace(
+                  /[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g,
+                  ""
+                );
+                e.target.value = onlyLetters;
+                field.onChange(e);
+              }}
             />
           )}
         />
@@ -166,7 +190,7 @@ export default function UserForm({ user }: UserFormProps) {
                     ? "Ingresar nueva contraseña"
                     : "Ingresar  contraseña"
                 }
-                isRequired
+                isRequired={!isEditing}
                 type={isVisible.password ? "text" : "password"}
                 isInvalid={!!errors.password}
                 errorMessage={errors.password?.message}
@@ -200,7 +224,7 @@ export default function UserForm({ user }: UserFormProps) {
                 {...field}
                 label="Confirmar contraseña"
                 placeholder="Confirmar contraseña"
-                isRequired
+                isRequired={!isEditing}
                 type={isVisible.confirmPassword ? "text" : "password"}
                 isInvalid={!!errors.confirmPassword}
                 errorMessage={errors.confirmPassword?.message}
