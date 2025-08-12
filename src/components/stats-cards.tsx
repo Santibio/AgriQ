@@ -37,7 +37,7 @@ const StatsCards = () => {
         >
           <CardBody className="p-4">
             <div className="flex items-center justify-between">
-              <div className="space-y-1">
+              <div className="space-y-1" suppressHydrationWarning>
                 <p className="text-sm text-gray-600">{stat.title}</p>
                 <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
               </div>
