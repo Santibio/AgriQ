@@ -10,8 +10,7 @@ export default function CustomerForm() {
     email: "",
     phone: "",
   });
-  
-  console.log("customerForm: ", customerForm);
+
 
   const handleOnchange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -21,8 +20,12 @@ export default function CustomerForm() {
   const handleSubmit = (e: any) => {
     e.preventDefault();
 
+    /* TODO: Ver como mandar a la DB - tip usar las actions */
     console.log("Mandar esto a la DB: ", customerForm);
   };
+
+  /* TODO: Darle estilos */
+  /* TODO: Agregar validaciones */
 
   return (
     <div>
