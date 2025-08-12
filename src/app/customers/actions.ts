@@ -3,199 +3,129 @@
 import db from "@/libs/db";
 import paths from "@/libs/paths";
 import { revalidatePath } from "next/cache";
-// import { redirect } from "next/navigation";
-import { UserAddFormSchema, UserEditFormSchema } from "@/libs/schemas/users";
-import { saveImage } from "@/libs/helpers/images";
-import { encrypt } from "@/libs/helpers/encryptions";
-import { Role } from "@prisma/client";
+import {
+  CustomerAddFormSchema,
+  CustomerEditFormSchema,
+} from "@/libs/schemas/customers";
 
-interface UserFormState {
+interface CustomerFormState {
   errors?:
     | {
-        username?: string[];
-        role?: string[];
-        password?: string[];
-        confirmPassword?: string[];
-        lastName?: string[];
         name?: string[];
+        lastName?: string[];
+        phone?: string[];
+        email?: string[];
+        fiscalCondition?: string[];
+        active?: string[];
         _form?: string[];
       }
     | false;
 }
-interface UpdatedUserData {
-  role: Role;
-  name: string;
-  lastName: string;
-  password?: string;
-  avatar?: string;
-  active?: boolean;
-}
 
-export async function addUser(formData: FormData): Promise<UserFormState> {
-  const username = formData.get("username") as string;
-  const role = formData.get("role") as string as Role;
-  const password = formData.get("password") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
-  const lastName = formData.get("lastName") as string;
+export async function addCustomer(formData: FormData): Promise<CustomerFormState> {
   const name = formData.get("name") as string;
-  const avatar = formData.get("avatar") as File;
+  const lastName = formData.get("lastName") as string;
+  const phone = formData.get("phone") as string;
+  const email = formData.get("email") as string;
+  const fiscalCondition = formData.get("fiscalCondition") as string;
   const active = formData.get("active") === "true";
 
-  const data = {
-    username,
-    role,
-    password,
-    confirmPassword,
-    lastName,
-    name,
-    active,
-  };
-  const result = UserAddFormSchema.safeParse(data);
+  const data = { name, lastName, phone, email, fiscalCondition, active };
+  const result = CustomerAddFormSchema.safeParse(data);
 
   if (!result.success) {
     return { errors: result.error.flatten().fieldErrors };
   }
 
   try {
-    const hashedPassword = await encrypt(result.data.password);
-    let avatarPath = "";
-
-    if (avatar) {
-      // Usar la función reutilizable para guardar la imagen
-      avatarPath = await saveImage(avatar);
-    }
-
-    await db.user.create({
+    await db.customer.create({
       data: {
-        username: result.data.username,
-        password: hashedPassword,
-        role: result.data.role as Role,
         name: result.data.name,
         lastName: result.data.lastName,
-        avatar: avatarPath,
-        active: result.data.active,
+        phone: result.data.phone || "",
+        email: result.data.email || "",
+        fiscalCondition: result.data.fiscalCondition,
+        active: result.data.active ?? true,
       },
     });
   } catch (err) {
-    if (err instanceof Error) {
-      return { errors: { _form: [err.message] } };
-    }
-    return { errors: { _form: ["Something went wrong..."] } };
+    if (err instanceof Error) return { errors: { _form: [err.message] } };
+    return { errors: { _form: ["Something went wrong"] } };
   }
 
-  const userPath = paths.users();
-  revalidatePath(userPath);
+  revalidatePath(paths.customers());
   return { errors: false };
-  // redirect(userPath);
 }
 
-export async function editUser(
-  userId: number,
+export async function editCustomer(
+  customerId: number,
   formData: FormData
-): Promise<UserFormState> {
-  if (!userId) return { errors: { _form: ["No se envió el ID del usuario"] } };
+): Promise<CustomerFormState> {
+  if (!customerId) return { errors: { _form: ["No se envió el ID del cliente"] } };
 
-  const username = formData.get("username") as string;
-  const role = formData.get("role") as Role;
-  const password = formData.get("password") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
-  const lastName = formData.get("lastName") as string;
   const name = formData.get("name") as string;
-  const avatar = formData.get("avatar") as File;
+  const lastName = formData.get("lastName") as string;
+  const phone = formData.get("phone") as string;
+  const email = formData.get("email") as string;
+  const fiscalCondition = formData.get("fiscalCondition") as string;
   const active = formData.get("active") === "true";
 
-  const data = {
-    username,
-    role,
-    password,
-    confirmPassword,
-    lastName,
-    name,
-    active,
-  };
-  const result = UserEditFormSchema.safeParse(data);
+  const data = { name, lastName, phone, email, fiscalCondition, active };
+  const result = CustomerEditFormSchema.safeParse(data);
 
   if (!result.success) {
     return { errors: result.error.flatten().fieldErrors };
   }
 
   try {
-    const updatedData: UpdatedUserData = {
-      role: result.data.role as Role,
-      name: result.data.name,
-      lastName: result.data.lastName,
-      active: result.data.active,
-    };
-
-    if (password) updatedData.password = await encrypt(password);
-    if (avatar) updatedData.avatar = await saveImage(avatar);
-
-    await db.user.update({
-      where: { id: userId },
-      data: updatedData,
+    await db.customer.update({
+      where: { id: customerId },
+      data: {
+        name: result.data.name,
+        lastName: result.data.lastName,
+        phone: result.data.phone || "",
+        email: result.data.email || "",
+        fiscalCondition: result.data.fiscalCondition,
+        active: result.data.active ?? true,
+      },
     });
   } catch (err) {
-    if (err instanceof Error) {
-      return { errors: { _form: [err.message] } };
-    }
-    return { errors: { _form: ["Something went wrong..."] } };
+    if (err instanceof Error) return { errors: { _form: [err.message] } };
+    return { errors: { _form: ["Something went wrong"] } };
   }
 
-  const userPath = paths.users();
-  revalidatePath(userPath);
-  // redirect(userPath);
+  revalidatePath(paths.customers());
   return { errors: false };
 }
 
-interface deleteUserResponse {
+interface ActionResponse {
   error?: string;
 }
 
-export async function deleteUser(userId: number): Promise<deleteUserResponse> {
+export async function deleteCustomer(customerId: number): Promise<ActionResponse> {
   try {
-    await db.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        active: false,
-      },
+    await db.customer.update({
+      where: { id: customerId },
+      data: { active: false },
     });
-    // await deleteImage(user.username, "avatars");
-    revalidatePath(paths.users());
+    revalidatePath(paths.customers());
     return {};
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return {
-        error: error.message,
-      };
-    }
-    return {
-      error: "Something went wrong",
-    };
+  } catch (err: unknown) {
+    if (err instanceof Error) return { error: err.message };
+    return { error: "Something went wrong" };
   }
 }
 
-export async function activeUser(userId: number): Promise<deleteUserResponse> {
+export async function activeCustomer(customerId: number): Promise<ActionResponse> {
   try {
-    await db.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        active: true,
-      },
+    await db.customer.update({
+      where: { id: customerId },
+      data: { active: true },
     });
-    revalidatePath(paths.users());
+    revalidatePath(paths.customers());
     return {};
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return {
-        error: error.message,
-      };
-    }
-    return {
-      error: "Something went wrong",
-    };
+  } catch (err: unknown) {
+    if (err instanceof Error) return { error: err.message };
+    return { error: "Something went wrong" };
   }
 }
