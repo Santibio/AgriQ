@@ -1,7 +1,6 @@
 import { Product, Batch } from "@prisma/client";
 import { ScrollShadow, Image } from "@heroui/react";
 import moment from "moment";
-// import Image from "next/image";
 import { capitalize } from "@/libs/helpers/text";
 import EmptyListMsg from "@/components/empty-list";
 import Link from "next/link";

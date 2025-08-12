@@ -16,12 +16,12 @@ export default async function ProductionPage() {
     },
   });
   return (
-    <section className="flex flex-col justify-between gap-6 p-2">
+    <section className="flex flex-col justify-between gap-6 p-2 relative">
       <PageTitle>Producción</PageTitle>
       <ProductionsList productions={productions} />
       <Button
         color="primary"
-        className="absolute bottom-24 right-2"
+        className="absolute bottom-2 right-2"
         href={paths.productionAdd()}
         as={Link}
         startContent={<Plus className="h-[20px]" />}
