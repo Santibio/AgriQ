@@ -10,7 +10,6 @@ import { useTheme } from "next-themes";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { logout } from "@/app/login/actions";
 import { User } from "@prisma/client";
-import { toast } from "sonner";
 import CustomAvatar from "@/components/custom-avatar";
 
 interface UserMenuProps {
@@ -21,12 +20,7 @@ export default function UserMenu({ user }: UserMenuProps) {
   const { theme, setTheme } = useTheme();
 
   const logoutHandler = async () => {
-    try {
-      await logout();
-    } catch(error) {
-      console.log("Error al cerrar sesión:", error);
-      toast.error("Error al cerrar sesión");
-    }
+    await logout();
   };
   const handleSwitchTheme = () =>
     setTheme(theme === "light" ? "dark" : "light");
