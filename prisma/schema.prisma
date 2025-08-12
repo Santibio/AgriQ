@@ -90,3 +90,22 @@ model MovementDetail {
   batch      Batch    @relation(fields: [batchId], references: [id])
   quantity   Int
 }
+
+model Customer {
+  id               Int              @id @default(autoincrement())
+  lastName         String
+  name             String
+  phone            String          @db.VarChar(13)
+  email            String          @unique
+  fiscalCondition  FiscalCondition
+  active           Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+ 
+}
+
+enum FiscalCondition {
+  RESPONSIBLE
+  MONOTAX
+  FINAL_CONSUMER
+  EXEMPT
+}

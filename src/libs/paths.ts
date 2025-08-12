@@ -38,6 +38,15 @@ const paths = {
   productionAdd() {
     return `/production/add`;
   },
+    customers() {
+    return `/customers`;
+  },
+  customerAdd() {
+    return `/customers/add`;
+  },
+  customerEdit(customerId: string) {
+    return `/customers/${customerId}`;
+  },
 };
 
 export default paths;

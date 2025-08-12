@@ -115,6 +115,14 @@ const config: Config = {
       icon: <ScanBarcode className="stroke-primary" />,
       description: "Gestión de inventario de productos",
     },
+    {
+      id: "customers",
+      name: "Clientes",
+      href: "/customers",
+      icon: <UserCog className="stroke-primary" />,
+      description: "Gestión de clientes",
+    },
+
   ],
   roles: [
     { id: PrismaRole.ADMIN, label: "Administrador" },
@@ -133,6 +141,7 @@ const config: Config = {
       "reports",
       "users",
       "products",
+      "customers",
     ],
     [PrismaRole.DEPOSIT]: [
       "production",
@@ -141,7 +150,7 @@ const config: Config = {
       "returns-reception",
       "reports",
     ],
-    [PrismaRole.SELLER]: ["sales", "shipment-reception", "return", "reports"],
+    [PrismaRole.SELLER]: ["sales", "shipment-reception", "return", "reports", "customers"],
   },
 };
 
