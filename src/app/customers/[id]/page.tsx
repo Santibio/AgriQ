@@ -1,27 +1,31 @@
 import PageTitle from "@/components/page-title";
-import UserForm from "@/app/users/components/user-form";
 import db from "@/libs/db";
 import { notFound } from "next/navigation";
+import CustomerForm from "../components/customer-form";
 
-interface UserEditPageProps {
+interface CustomerEditPageProps {
   params: {
     id: string;
   };
 }
 
-export default async function UserEditPage({ params }: UserEditPageProps) {
-  const userId = parseInt(params.id);
+export default async function CustomerEditPage({
+  params,
+}: CustomerEditPageProps) {
+  // Espera params antes de usar sus propiedades
+  const awaitedParams = await params;
+  const customerId = parseInt(awaitedParams.id);
 
-  const user = await db.user.findUnique({
-    where: { id: userId },
+  const customer = await db.customer.findUnique({
+    where: { id: customerId },
   });
 
-  if (!user) return notFound();
+  if (!customer) return notFound();
 
   return (
     <section className="pt-6 flex flex-col justify-between gap-6">
-      <PageTitle>Editar Usuario</PageTitle>
-      <UserForm user={user} />
+      <PageTitle>Editar Cliente</PageTitle>
+      <CustomerForm customer={customer} />
     </section>
   );
 }

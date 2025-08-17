@@ -1,49 +1,90 @@
 "use client";
 
-import { Button, Input } from "@heroui/react";
+import { Button, Input, Select, SelectItem } from "@heroui/react";
 import { useState } from "react";
+import { addCustomer, editCustomer } from "../actions";
+import { toast } from "sonner";
+import paths from "@/libs/paths";
+import { useRouter } from "next/navigation";
+import config from "@/config";
+import { Customer } from "@prisma/client";
 
-export default function CustomerForm() {
+interface CustomerFormProps {
+  customer?: Customer;
+}
+
+export default function CustomerForm({ customer }: CustomerFormProps) {
+  const isEditing = Boolean(customer);
+
+  const router = useRouter();
+
   const [customerForm, setCustmerForm] = useState({
-    name: "",
-    lastName: "",
-    email: "",
-    phone: "",
+    name: customer?.name || "",
+    lastName: customer?.lastName || "",
+    email: customer?.email || "",
+    phone: customer?.phone || "",
+    fiscalCondition: customer?.fiscalCondition || "",
   });
+  const [isLoading, setIsloading] = useState<boolean>(false);
 
-
-  const handleOnchange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleOnchange = (e: any) => {
     const { name, value } = e.target;
     setCustmerForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setIsloading(true);
 
-    /* TODO: Ver como mandar a la DB - tip usar las actions */
-    console.log("Mandar esto a la DB: ", customerForm);
+    const formData = new FormData();
+    formData.append("name", customerForm.name);
+    formData.append("lastName", customerForm.lastName);
+    formData.append("email", customerForm.email);
+    formData.append("phone", customerForm.phone);
+    formData.append("fiscalCondition", customerForm.fiscalCondition);
+
+    try {
+      const response = isEditing
+        ? await editCustomer(Number(customer?.id), formData)
+        : await addCustomer(formData);
+
+      if (response?.errors) {
+        return toast.error("Ocurrió un error al procesar la solicitud.");
+      }
+
+      toast.success("Cliente agregado correctamente");
+
+      router.push(paths.customers());
+    } catch (error) {
+      console.error("Error: ", error);
+      toast.error(
+        "Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe."
+      );
+    }
+    finally {
+      setIsloading(false);
+    }
   };
-
-  /* TODO: Darle estilos */
-  /* TODO: Agregar validaciones */
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
-        <Input
-          label="Nombre"
-          placeholder="Ingresar nombre"
-          name="name"
-          onChange={handleOnchange}
-          value={customerForm.name}
-        />
-        <Input
-          label="Apellido"
-          placeholder="Ingresar nombre"
-          name="lastName"
-          onChange={handleOnchange}
-          value={customerForm.lastName}
-        />
+      <form onSubmit={handleSubmit} className="h-[70dvh] flex flex-col gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Nombre"
+            placeholder="Ingresar nombre"
+            name="name"
+            onChange={handleOnchange}
+            value={customerForm.name}
+          />
+          <Input
+            label="Apellido"
+            placeholder="Ingresar apellido"
+            name="lastName"
+            onChange={handleOnchange}
+            value={customerForm.lastName}
+          />
+        </div>
         <Input
           label="Email"
           placeholder="Ingresar email"
@@ -58,8 +99,28 @@ export default function CustomerForm() {
           onChange={handleOnchange}
           value={customerForm.phone}
         />
-        <Button type="submit" className="mt-4">
-          Guardar Cliente
+        <Select
+          label="Información fiscal"
+          labelPlacement="outside"
+          name="fiscalCondition"
+          placeholder="Selecciona la condición fiscal"
+          value={customerForm.fiscalCondition}
+          onChange={handleOnchange}
+          defaultSelectedKeys={[customerForm.fiscalCondition]}
+          className="mt-5"
+        >
+          {config.ficalInformation.map((info) => (
+            <SelectItem key={info.id}>{info.label}</SelectItem>
+          ))}
+        </Select>
+        <Button
+          isLoading={isLoading}
+          type="submit"
+          color="primary"
+          variant="ghost"
+          className="w-full mt-auto"
+        >
+          {isEditing ? "Editar Cliente" : "Agregar Cliente"}
         </Button>
       </form>
     </div>

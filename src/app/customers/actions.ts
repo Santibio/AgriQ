@@ -3,78 +3,41 @@
 import db from "@/libs/db";
 import paths from "@/libs/paths";
 import { revalidatePath } from "next/cache";
-// import { redirect } from "next/navigation";
-import { UserAddFormSchema, UserEditFormSchema } from "@/libs/schemas/users";
-import { saveImage } from "@/libs/helpers/images";
-import { encrypt } from "@/libs/helpers/encryptions";
-import { Role } from "@prisma/client";
+import { FiscalCondition } from "@prisma/client";
 
-interface UserFormState {
+interface CustomerFormState {
   errors?:
     | {
-        username?: string[];
-        role?: string[];
-        password?: string[];
-        confirmPassword?: string[];
-        lastName?: string[];
         name?: string[];
+        lastName?: string[];
+        email?: string[];
+        phone?: string[];
+        fiscalCondition?: string[];
         _form?: string[];
       }
     | false;
 }
-interface UpdatedUserData {
-  role: Role;
-  name: string;
-  lastName: string;
-  password?: string;
-  avatar?: string;
-  active?: boolean;
-}
 
-export async function addUser(formData: FormData): Promise<UserFormState> {
-  const username = formData.get("username") as string;
-  const role = formData.get("role") as string as Role;
-  const password = formData.get("password") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
-  const lastName = formData.get("lastName") as string;
+export async function addCustomer(
+  formData: FormData
+): Promise<CustomerFormState> {
   const name = formData.get("name") as string;
-  const avatar = formData.get("avatar") as File;
-  const active = formData.get("active") === "true";
+  const lastName = formData.get("lastName") as string as string;
+  const email = formData.get("email") as string;
+  const phone = formData.get("phone") as string;
+  const fiscalCondition = formData.get("fiscalCondition") as FiscalCondition;
 
   const data = {
-    username,
-    role,
-    password,
-    confirmPassword,
-    lastName,
     name,
-    active,
+    lastName,
+    email,
+    phone,
+    fiscalCondition,
   };
-  const result = UserAddFormSchema.safeParse(data);
-
-  if (!result.success) {
-    return { errors: result.error.flatten().fieldErrors };
-  }
 
   try {
-    const hashedPassword = await encrypt(result.data.password);
-    let avatarPath = "";
-
-    if (avatar) {
-      // Usar la función reutilizable para guardar la imagen
-      avatarPath = await saveImage(avatar);
-    }
-
-    await db.user.create({
-      data: {
-        username: result.data.username,
-        password: hashedPassword,
-        role: result.data.role as Role,
-        name: result.data.name,
-        lastName: result.data.lastName,
-        avatar: avatarPath,
-        active: result.data.active,
-      },
+    await db.customer.create({
+      data,
     });
   } catch (err) {
     if (err instanceof Error) {
@@ -83,56 +46,33 @@ export async function addUser(formData: FormData): Promise<UserFormState> {
     return { errors: { _form: ["Something went wrong..."] } };
   }
 
-  const userPath = paths.users();
+  const userPath = paths.customers();
   revalidatePath(userPath);
   return { errors: false };
-  // redirect(userPath);
 }
 
-export async function editUser(
+export async function editCustomer(
   userId: number,
   formData: FormData
-): Promise<UserFormState> {
-  if (!userId) return { errors: { _form: ["No se envió el ID del usuario"] } };
-
-  const username = formData.get("username") as string;
-  const role = formData.get("role") as Role;
-  const password = formData.get("password") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
-  const lastName = formData.get("lastName") as string;
+): Promise<CustomerFormState> {
   const name = formData.get("name") as string;
-  const avatar = formData.get("avatar") as File;
-  const active = formData.get("active") === "true";
+  const lastName = formData.get("lastName") as string as string;
+  const email = formData.get("email") as string;
+  const phone = formData.get("phone") as string;
+  const fiscalCondition = formData.get("fiscalCondition") as FiscalCondition;
 
   const data = {
-    username,
-    role,
-    password,
-    confirmPassword,
-    lastName,
     name,
-    active,
+    lastName,
+    email,
+    phone,
+    fiscalCondition,
   };
-  const result = UserEditFormSchema.safeParse(data);
-
-  if (!result.success) {
-    return { errors: result.error.flatten().fieldErrors };
-  }
 
   try {
-    const updatedData: UpdatedUserData = {
-      role: result.data.role as Role,
-      name: result.data.name,
-      lastName: result.data.lastName,
-      active: result.data.active,
-    };
-
-    if (password) updatedData.password = await encrypt(password);
-    if (avatar) updatedData.avatar = await saveImage(avatar);
-
-    await db.user.update({
+    await db.customer.update({
       where: { id: userId },
-      data: updatedData,
+      data,
     });
   } catch (err) {
     if (err instanceof Error) {
@@ -141,9 +81,9 @@ export async function editUser(
     return { errors: { _form: ["Something went wrong..."] } };
   }
 
-  const userPath = paths.users();
-  revalidatePath(userPath);
-  // redirect(userPath);
+  const customerPath = paths.customers();
+  revalidatePath(customerPath);
+
   return { errors: false };
 }
 

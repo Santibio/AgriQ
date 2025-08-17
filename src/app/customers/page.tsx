@@ -12,12 +12,12 @@ export default async function CustomersPage() {
 
   return (
     <section className="flex flex-col justify-between gap-6 p-2 relative">
-      <PageTitle>Lista de clientes</PageTitle>
+      <PageTitle>Clientes</PageTitle>
       <CustomerList customers={customers} />
       <Button
         color="primary"
         className="absolute bottom-2 right-2"
-        href={paths.productionAdd()}
+        href={paths.customerAdd()}
         as={Link}
         startContent={<Plus className="h-[20px]" />}
         variant="shadow"
