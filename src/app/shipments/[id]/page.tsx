@@ -45,10 +45,8 @@ export default async function ShipmentEditPage({
     },
   });
 
-  if (!filteredMovement) return notFound();
-
   // Unifica los batchs a editar con los nuevos, sin repetir
-  const batchsToEdit = filteredMovement.movementDetail.map((detail) => ({
+  const batchsToEdit = filteredMovement!.movementDetail.map((detail) => ({
     ...detail.batch,
     sentQuantity: detail.quantity,
   }));
@@ -63,12 +61,17 @@ export default async function ShipmentEditPage({
       .map((batch) => ({ ...batch, filtered: true })),
   ];
 
+  const canEdit = filteredMovement!.shipment?.status === "PENDING";
+
   return (
     <section className="pt-6 flex flex-col justify-between gap-6 px-6">
-      <PageTitle>{`Editar envio #${movementId}`}</PageTitle>
+      <PageTitle>
+        {canEdit ? `Editar envío #${movementId}` : `Envío #${movementId}`}
+      </PageTitle>
       <CustomerForm
         batchs={allBatchs}
-        movementId={movementId} 
+        movementId={movementId}
+        canEdit={canEdit}
       />
     </section>
   );

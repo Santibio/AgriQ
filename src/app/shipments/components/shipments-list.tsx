@@ -10,6 +10,7 @@ import {
   Shipment,
 } from "@prisma/client";
 import paths from "@/libs/paths";
+import { JSX } from "react";
 
 interface ShipmentsListProps {
   filteredMovements: MovementWithRelations[];
@@ -24,10 +25,22 @@ type MovementWithRelations = Movement & {
   shipment: Shipment | null;
 };
 
-const STATUS_MAP: Record<string, React.ReactNode> = {
-  PENDING: <CalendarArrowUp className="h-[20px] w-[20px] text-success" />,
-  RECEIVED_OK: <CheckCheck className="h-[20px] w-[20px] text-primary" />,
-  RECEIVED_NO_OK: <CircleX className="h-[20px] w-[20px] text-error" />,
+const STATUS_MAP: Record<
+  Shipment["status"],
+  { icon: JSX.Element; gradient: string }
+> = {
+  PENDING: {
+    icon: <CalendarArrowUp className="h-6 w-6 text-white" />,
+    gradient: "from-success to-success/50",
+  },
+  RECEIVED_OK: {
+    icon: <CheckCheck className="h-6 w-6 text-white" />,
+    gradient: "from-primary to-primary/50",
+  },
+  RECEIVED_NO_OK: {
+    icon: <CircleX className="h-6 w-6 text-white" />,
+    gradient: "from-error to-error/50",
+  },
 };
 
 export default function ShipmentsList({
@@ -38,9 +51,16 @@ export default function ShipmentsList({
       <ul className="flex gap-2 flex-col">
         {filteredMovements.map((movement) => (
           <li key={movement.id}>
-            <div className="flex border rounded-md p-2 gap-2">
-              <div className="mt-2">
-                  {STATUS_MAP[movement!.shipment!.status] }
+            <Link
+              href={paths.shipmentEdit(movement.id.toString())}
+              className="flex border rounded-md p-2 gap-2"
+            >
+              <div
+                className={`w-12 h-12 rounded-xl bg-gradient-to-r ${
+                  STATUS_MAP?.[movement?.shipment?.status || "PENDING"].gradient
+                } flex items-center justify-center `}
+              >
+                {STATUS_MAP[movement!.shipment!.status].icon}
               </div>
               <div className="flex-1">
                 <div className="flex flex-col gap-2">
@@ -62,14 +82,7 @@ export default function ShipmentsList({
                   </div>
                 </div>
               </div>
-              <div>
-              </div>
-                {movement?.shipment?.status === "PENDING" && (
-                  <Link href={paths.shipmentEdit(movement.id.toString())}>
-                    Editar
-                  </Link>
-                )}
-            </div>
+            </Link>
           </li>
         ))}
       </ul>

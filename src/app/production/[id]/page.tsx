@@ -10,7 +10,9 @@ interface ProductionEditPageProps {
   }>;
 }
 
-export default async function ProductionEditPage(props: ProductionEditPageProps) {
+export default async function ProductionEditPage(
+  props: ProductionEditPageProps
+) {
   const params = await props.params;
   const batchId = parseInt(params.id);
 
@@ -22,10 +24,23 @@ export default async function ProductionEditPage(props: ProductionEditPageProps)
 
   if (!batch) return notFound();
 
+  const hasMovement = Boolean(
+    batch.marketQuantity ||
+      batch.sentQuantity ||
+      batch.discardedQuantity ||
+      batch.receivedQuantity ||
+      batch.soltQuantity ||
+      batch.reservedQuantity
+  );
+
   return (
     <section className="flex flex-col justify-between gap-6">
       <PageTitle>Editar Lote</PageTitle>
-      <ProductionForm products={products} batch={batch} />
+      <ProductionForm
+        products={products}
+        batch={batch}
+        canEdit={!hasMovement}
+      />
     </section>
   );
 }
