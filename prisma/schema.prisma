@@ -81,6 +81,7 @@ model Movement {
   createdAt      DateTime         @default(now())
   type           MovementType
   shipment       Shipment?
+  discard        Discard?
 }
 
 model MovementDetail {
@@ -120,6 +121,21 @@ enum ShipmentStatus {
 model Shipment {
   id         Int            @id @default(autoincrement())
   status     ShipmentStatus @default(PENDING)
+  movementId Int            @unique
+  movement   Movement       @relation(fields: [movementId], references: [id])
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+}
+
+enum DiscardReason {
+  DAMAGED
+  EXPIRED
+  OTHER
+}
+
+model Discard {
+  id         Int            @id @default(autoincrement())
+  reason     DiscardReason
   movementId Int            @unique
   movement   Movement       @relation(fields: [movementId], references: [id])
   createdAt  DateTime       @default(now())

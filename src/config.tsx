@@ -48,12 +48,18 @@ interface FiscalInformation {
   label: string;
 }
 
+interface DiscardReason {
+  id: string;
+  label: string;
+}
+
 // Definir la interfaz para el objeto de configuración
 interface Config {
   navItems: NavItem[];
   roles: Role[];
   rolePermissions: RolePermissions;
   ficalInformation: FiscalInformation[];
+  conditionsToDiscard: DiscardReason[];
 }
 
 const config: Config = {
@@ -122,6 +128,11 @@ const config: Config = {
     { id: "MONOTAX", label: "Monotributista" },
     { id: "FINAL_CONSUMER", label: "Consumidor Final" },
     { id: "EXEMPT", label: "Exento" },
+  ],
+  conditionsToDiscard: [
+    { id: "EXPIRED", label: "Vencido" },
+    { id: "DAMAGED", label: "Dañado" },
+    { id: "OTHER", label: "Otro" },
   ],
 };
 

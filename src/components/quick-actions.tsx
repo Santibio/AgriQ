@@ -4,6 +4,7 @@ import {
   CircleUser,
   DollarSign,
   Package,
+  Trash2Icon,
   Truck,
 } from "lucide-react";
 import Link from "next/link";
@@ -49,6 +50,14 @@ const quickActions = [
     gradient: "from-teal-400 to-teal-600",
     link: paths.customers(),
   },
+  {
+    title: "Descartes",
+    description: "Gestión de descartes",
+    icon: Trash2Icon,
+    color: "bg-teal-500",
+    gradient: "from-teal-400 to-teal-600",
+    link: paths.discard(),
+  },
 ];
 
 const QuickActions = () => {
@@ -60,7 +69,7 @@ const QuickActions = () => {
           <Link href={action.link || "#"} key={index}>
             <Card
               key={index}
-              className="bg-white/70 backdrop-blur-sm border-white/20 "
+              className="bg-white/70 backdrop-blur-sm border-white/20 h-full"
             >
               <CardBody className="p-4">
                 <div className="space-y-3">

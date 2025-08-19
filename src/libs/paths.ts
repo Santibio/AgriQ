@@ -50,6 +50,12 @@ const paths = {
   customerEdit(customerId: string) {
     return `/customers/${customerId}`;
   },
+  discard() {
+    return `/discard`;
+  },
+  discardAdd() {
+    return `/discard/add`;
+  },
 };
 
 export default paths;
