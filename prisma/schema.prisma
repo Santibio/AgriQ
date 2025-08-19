@@ -80,6 +80,7 @@ model Movement {
   userId         Int
   createdAt      DateTime         @default(now())
   type           MovementType
+  shipment       Shipment?
 }
 
 model MovementDetail {
@@ -108,4 +109,19 @@ model Customer {
   active          Boolean         @default(true)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+}
+
+enum ShipmentStatus {
+  PENDING
+  RECEIVED_OK
+  RECEIVED_NO_OK
+}
+
+model Shipment {
+  id         Int            @id @default(autoincrement())
+  status     ShipmentStatus @default(PENDING)
+  movementId Int            @unique
+  movement   Movement       @relation(fields: [movementId], references: [id])
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
 }

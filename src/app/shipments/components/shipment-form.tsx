@@ -1,249 +1,169 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
-import { Product } from "@prisma/client";
-import {
-  Autocomplete,
-  AutocompleteItem,
-  Button,
-  Input,
-  ScrollShadow,
-} from "@heroui/react";
-import { capitalize } from "@/libs/helpers/text";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Search, Trash } from "lucide-react";
-import {
-  AddProductionInputs,
-  CreateProductionFormSchema,
-} from "@/libs/schemas/production";
-// import { createProduction } from "../actions";
+import { Batch, Product } from "@prisma/client";
 import { useState } from "react";
-import { createShipment } from "../actions";
+import { Checkbox, Input, Card } from "@heroui/react";
+import { createShipment, editShipment } from "../actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import paths from "@/libs/paths";
+import { capitalize } from "@/libs/utils";
 
-interface GroupedProductQuantity {
-  productId: number; // o string, dependiendo de cómo manejes el tipo de ID
-  remainingQuantity: number;
-}
+type ShipmentFormProps = {
+  batchs: (Batch & { product: Product; filtered?: boolean })[];
+  movementId?: number; // Agregado para manejar el modo de edición
+};
 
-interface ProductionFormProps {
-  products: Product[];
-  groupedProductQuantities: GroupedProductQuantity[];
-}
-
-interface AddedProduct {
-  id: number | undefined;
-  product: string;
-  quantity: number;
-}
-
-// Esquema de validación Zod
+const quantityToCheck = (
+  batch: Batch & {
+    product: Product;
+    depositQuantity?: number;
+    sentQuantity?: number;
+  },
+  isEditing: boolean
+) => {
+  if (isEditing) {
+    return batch.sentQuantity;
+  }
+  return batch.depositQuantity;
+};
 
 export default function ShipmentForm({
-  products,
-  groupedProductQuantities,
-}: ProductionFormProps) {
+  batchs,
+  movementId,
+}: ShipmentFormProps) {
+  const isEditing = Boolean(movementId);
+
   const router = useRouter();
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-    setError,
-  } = useForm<AddProductionInputs>({
-    resolver: zodResolver(CreateProductionFormSchema),
-    defaultValues: {
-      product: "",
-      quantity: undefined,
-    },
-  });
+  // Estado para lotes seleccionados y cantidades
+  const [selected, setSelected] = useState<{ [batchId: number]: boolean }>(() =>
+    Object.fromEntries(batchs.map((b) => [b.id, !b.filtered]))
+  );
 
-  const [availableProducts, setAvailableProducts] =
-    useState<Product[]>(products);
-  const [isLoading, setIsloading] = useState<boolean>(false);
-  const [addedProducts, setAddedProducts] = useState<AddedProduct[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<
-    string | number | null
-  >(""); // Estado local para manejar el valor del Autocomplete
+  const [quantities, setQuantities] = useState<{ [batchId: number]: number }>(
+    () =>
+      Object.fromEntries(
+        batchs.map((b) => [b.id, quantityToCheck(b, isEditing)])
+      )
+  );
 
-  const addProduct = (data: AddProductionInputs) => {
-    const productQuantity = groupedProductQuantities.find(
-      (group) => group.productId === Number(data.product)
-    );
+  const [initialQuantities] = useState<{ [batchId: number]: number }>(() =>
+    Object.fromEntries(batchs.map((b) => [b.id, quantityToCheck(b, isEditing)]))
+  );
 
-    if (productQuantity)
-      if (data.quantity > productQuantity?.remainingQuantity) {
-        // Verificar si la cantidad ingresada excede la cantidad disponible
-        setError("quantity", {
-          message: `La cantidad excede la cantidad disponible (${productQuantity?.remainingQuantity}).`,
-        });
-        return;
-      }
-
-    const product = products.find(
-      (product) => product.id === Number(data.product)
-    );
-
-    const newAvailableProducts = availableProducts.filter(
-      (product) => product.id !== Number(data.product)
-    );
-    setAvailableProducts(newAvailableProducts);
-    setAddedProducts((prevData) => [
-      ...prevData,
-      { ...data, product: product?.name || "", id: product?.id },
-    ]);
-    reset();
-    setSelectedProduct(null);
+  const handleSelect = (batchId: number) => {
+    setSelected((prev) => ({ ...prev, [batchId]: !prev[batchId] }));
   };
 
-  const deleteFromAddedProducts = (index: number) => {
-    const productToRemove = addedProducts[index]; // Obtén el producto que se va a eliminar
-
-    // Filtra el producto que se va a eliminar
-    const newSelectedProducts = addedProducts.filter((_, i) => i !== index);
-
-    setAddedProducts(newSelectedProducts); // Actualiza la lista de productos agregados
-    // Agregar el producto de nuevo a la lista de productos disponibles
-    const newAvailableProduct = products.find(
-      (product) => product.name === productToRemove.product
-    );
-
-    if (newAvailableProduct) {
-      setAvailableProducts((prevProducts) => [
-        ...prevProducts,
-        newAvailableProduct,
-      ]);
-    }
+  const handleQuantityChange = (batchId: number, value: string) => {
+    const num = Number(value);
+    setQuantities((prev) => ({ ...prev, [batchId]: num }));
   };
 
-  const handleCreateShipment = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const selectedBatches = batchs.filter((b) => selected[b.id]);
+    const formData = selectedBatches.map((b) => ({
+      batchId: b.id,
+      quantity: quantities[b.id] || 0,
+    }));
+
     try {
-      setIsloading(true);
-      const response = await createShipment(addedProducts);
+      const response = isEditing
+        ? await editShipment(Number(movementId), formData)
+        : await createShipment(formData);
+
       if (response?.errors) {
-        const errorMessage =
-          response.errors._form?.[0] || "An unexpected error occurred.";
-        toast.error(errorMessage);
-      } else {
-        toast.success("Envío creado correctamente");
-        router.push(paths.shipments());
+        return toast.error("Ocurrió un error al procesar la solicitud.");
       }
+
+      toast.success("Envio generado correctamente");
+      router.push(paths.shipments());
     } catch (error) {
-      console.log("Error: ", error);
-      // Optionally handle unexpected errors
-      toast.error("An unexpected error occurred.");
-    } finally {
-      setIsloading(false);
+      console.error("Error al enviar los lotes:", error);
+      toast.error("Ocurrió un error al procesar la solicitud.");
     }
   };
+
+  const hasError =
+    batchs.some(
+      (batch) =>
+        selected[batch.id] &&
+        (quantities[batch.id] === undefined ||
+          quantities[batch.id] < 1 ||
+          quantities[batch.id] >
+            (isEditing
+              ? batch.sentQuantity + batch.depositQuantity
+              : batch.depositQuantity))
+    ) || !batchs.some((batch) => selected[batch.id]);
+
+  const depositQuantity = (
+    batch: Batch & {
+      product: Product;
+      depositQuantity?: number;
+      sentQuantity?: number;
+    }
+  ) =>
+    isEditing
+      ? initialQuantities[batch.id] +
+          batch.depositQuantity -
+          quantities[batch.id] <
+        0
+        ? 0
+        : initialQuantities[batch.id] +
+          batch.depositQuantity -
+          quantities[batch.id]
+      : batch.depositQuantity - (quantities[batch.id] || 0);
 
   return (
-    <>
-      <form onSubmit={handleSubmit(addProduct)}>
-        <div className="flex flex-col gap-4">
-          <Controller
-            name="product"
-            control={control}
-            render={({ field }) => (
-              <Autocomplete
-                {...field}
-                label="Producto"
-                placeholder="Buscar producto"
-                onSelectionChange={(key) => {
-                  field.onChange(key);
-                  setSelectedProduct(key);
-                }}
-                defaultItems={availableProducts}
-                isInvalid={!!errors.product}
-                errorMessage={errors.product?.message}
-                startContent={
-                  <Search
-                    className="text-default-400"
-                    strokeWidth={2.5}
-                    size={20}
-                  />
-                }
-                value={selectedProduct || ""}
-                selectedKey={selectedProduct}
-              >
-                {(item) => (
-                  <AutocompleteItem key={item.id}>
-                    {capitalize(item.name)}
-                  </AutocompleteItem>
-                )}
-              </Autocomplete>
-            )}
-          />
-          <Controller
-            name="quantity"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                type="number"
-                label="Cantidad"
-                placeholder="Ingresar cantidad"
-                value={field.value?.toString() ?? ""}
-                onChange={(e) => field.onChange(Number(e.target.value))}
-                isInvalid={!!errors.quantity}
-                errorMessage={errors.quantity?.message}
-              />
-            )}
-          />
-          <Button
-            type="submit"
-            className="ml-auto"
-            variant="flat"
-            color="primary"
-            isIconOnly
+    <form onSubmit={handleSubmit} >
+      <div className="flex flex-col gap-6">
+        {batchs.map((batch) => (
+          <Card
+            key={batch.id}
+            className="p-6 flex flex-col gap-3 border border-gray-200 shadow-sm hover:shadow-md transition-all"
           >
-            <Plus className="h-[20px]" />
-          </Button>
-        </div>
-      </form>
-      <ScrollShadow className="h-[40dvh] flex flex-col gap-2 overflow-y-auto">
-        {addedProducts.length ? (
-          <>
-            <span className="font-semibold">Productos añadidos:</span>
-            {addedProducts.map((product, index) => (
-              <div
-                key={product.product}
-                className="flex gap-2 items-center bg-slate-200 rounded-lg p-2 justify-between"
+            <div className="flex items-center gap-4">
+              <Checkbox
+                isSelected={!!selected[batch.id]}
+                onChange={() => handleSelect(batch.id)}
+                aria-label={`Seleccionar lote ${batch.id}`}
+                className="scale-110"
               >
-                <div className="flex gap-2 items-center">
-                  <span className="font-semibold capitalize">
-                    {product.product}
-                  </span>
-                  <span>x{product.quantity}</span>
-                </div>
-                <Trash
-                  className="h-[20px]"
-                  onClick={() => deleteFromAddedProducts(index)}
-                />
-              </div>
-            ))}
-          </>
-        ) : (
-          <h4 className="text-center font-semibold mt-4">
-            No hay productos añadidos
-          </h4>
-        )}
-      </ScrollShadow>
-      <Button
-        // type="submit"
-        color="primary"
-        variant="ghost"
-        className="w-full mt-6"
-        isLoading={isLoading}
-        isDisabled={isLoading || !addedProducts.length}
-        onClick={handleCreateShipment}
-      >
-        Confirmar
-      </Button>
-    </>
+                <span className="font-semibold text-lg text-gray-800">
+                  {batch.product.name}
+                </span>
+              </Checkbox>
+              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                Lote #{batch.id}
+              </span>
+            </div>
+            <div className="flex items-center gap-4 mt-2">
+              <span className="text-sm text-gray-600">En depósito quedara:</span>
+              <span className="font-bold text-primary text-lg bg-primary-50 px-2 py-1 rounded">
+                {batch.depositQuantity}
+              </span>
+              <Input
+                type="number"
+                min={0}
+                max={batch.depositQuantity}
+                value={
+                  quantities[batch.id] !== undefined
+                    ? String(quantities[batch.id])
+                    : ""
+                }
+                onChange={(e) => handleQuantityChange(batch.id, e.target.value)}
+                label="Cantidad a enviar"
+                placeholder="0"
+                size="sm"
+                isDisabled={!selected[batch.id]}
+                className=" ml-2"
+              />
+            </div>
+          </Card>
+        ))}
+      </div>
+    </form>
   );
 }

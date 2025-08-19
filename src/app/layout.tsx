@@ -44,7 +44,7 @@ export default function RootLayout({
       >
         <Providers>
           <Header />
-          <main className="max-w-[600px] m-auto  pt-4">
+          <main className="max-w-[600px] m-auto pt-4">
             {children}
           </main>
           <NavBar />

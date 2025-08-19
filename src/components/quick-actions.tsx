@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import paths from "@/libs/paths";
 
 const quickActions = [
   {
@@ -16,6 +17,7 @@ const quickActions = [
     icon: Package,
     color: "bg-green-500",
     gradient: "from-green-400 to-green-600",
+    link: paths.production(),
   },
   {
     title: "Ventas",
@@ -30,6 +32,7 @@ const quickActions = [
     icon: Truck,
     color: "bg-purple-500",
     gradient: "from-purple-400 to-purple-600",
+    link: paths.shipments(),
   },
   {
     title: "Reportes",
@@ -44,7 +47,7 @@ const quickActions = [
     icon: CircleUser,
     color: "bg-teal-500",
     gradient: "from-teal-400 to-teal-600",
-    link: "/customers",
+    link: paths.customers(),
   },
 ];
 

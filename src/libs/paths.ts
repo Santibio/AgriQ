@@ -29,6 +29,9 @@ const paths = {
   shipmentAdd() {
     return `/shipments/add`;
   },
+  shipmentEdit(shipmentId: string) {
+    return `/shipments/${shipmentId}`;
+  },
   production() {
     return `/production`;
   },
