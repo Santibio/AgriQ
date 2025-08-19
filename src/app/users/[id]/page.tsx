@@ -4,9 +4,7 @@ import db from "@/libs/db";
 import { notFound } from "next/navigation";
 
 interface UserEditPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
 }
 
 export default async function UserEditPage(props: UserEditPageProps) {

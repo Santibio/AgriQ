@@ -5,9 +5,7 @@ import React from "react";
 import ProductForm from "../components/product-form";
 
 interface ProductEditPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
 }
 
 export default async function ProductEditPage(props: ProductEditPageProps) {

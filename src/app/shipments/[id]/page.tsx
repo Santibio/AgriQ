@@ -3,9 +3,7 @@ import db from "@/libs/db";
 import CustomerForm from "../components/shipment-form";
 
 interface ShipmentEditPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export default async function ShipmentEditPage({

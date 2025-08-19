@@ -4,9 +4,7 @@ import { notFound } from "next/navigation";
 import CustomerForm from "../components/customer-form";
 
 interface CustomerEditPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export default async function CustomerEditPage({

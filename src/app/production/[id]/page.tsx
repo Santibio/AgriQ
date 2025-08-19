@@ -5,9 +5,7 @@ import React from "react";
 import ProductionForm from "../components/production-form";
 
 interface ProductionEditPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
 }
 
 export default async function ProductionEditPage(
