@@ -1,6 +1,5 @@
 import PageTitle from "@/components/page-title";
 import db from "@/libs/db";
-import { notFound } from "next/navigation";
 import CustomerForm from "../components/shipment-form";
 
 interface ShipmentEditPageProps {

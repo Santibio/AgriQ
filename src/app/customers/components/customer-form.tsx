@@ -27,12 +27,14 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
   });
   const [isLoading, setIsloading] = useState<boolean>(false);
 
-  const handleOnchange = (e: any) => {
+  const handleOnchange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setCustmerForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsloading(true);
 
@@ -60,8 +62,7 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
       toast.error(
         "Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe."
       );
-    }
-    finally {
+    } finally {
       setIsloading(false);
     }
   };

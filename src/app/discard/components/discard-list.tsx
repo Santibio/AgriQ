@@ -1,4 +1,4 @@
-import { Link, ScrollShadow } from "@heroui/react";
+import { ScrollShadow } from "@heroui/react";
 
 import { CalendarArrowUp, CheckCheck, CircleX } from "lucide-react";
 import moment from "moment";
@@ -7,10 +7,8 @@ import {
   MovementDetail,
   Batch,
   Product,
-  Shipment,
   Discard,
 } from "@prisma/client";
-import paths from "@/libs/paths";
 import { JSX } from "react";
 
 interface DiscardListProps {
@@ -50,13 +48,15 @@ export default function DiscardList({ filteredMovements }: DiscardListProps) {
       <ul className="flex gap-2 flex-col">
         {filteredMovements.map((movement) => (
           <li key={movement.id} className="flex border rounded-md p-2 gap-2">
-            <div
-              className={`w-12 h-12 rounded-xl bg-gradient-to-r ${
-                REASON_MAP?.[movement!?.discard!.reason].gradient
-              } flex items-center justify-center `}
-            >
-              {REASON_MAP[movement!.discard!.reason].icon}
-            </div>
+            {movement.discard && (
+              <div
+                className={`w-12 h-12 rounded-xl bg-gradient-to-r ${
+                  REASON_MAP?.[movement.discard.reason].gradient
+                } flex items-center justify-center `}
+              >
+                {REASON_MAP[movement.discard.reason].icon}
+              </div>
+            )}
             <div className="flex-1">
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-center">

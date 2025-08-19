@@ -1,7 +1,6 @@
 "use client";
 import { Product, Batch } from "@prisma/client";
 import {
-  ScrollShadow,
   Image,
   Card,
   Input,
@@ -37,7 +36,9 @@ export default function DiscardList({ batchs }: DiscardListProps) {
   const router = useRouter();
 
   console.log("discardForm: ", discardForm);
-  const handleOnchange = (e: any) => {
+  const handleOnchange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setDiscardForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -47,7 +48,7 @@ export default function DiscardList({ batchs }: DiscardListProps) {
     setOpen(true);
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData();
