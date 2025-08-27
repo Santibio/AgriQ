@@ -55,7 +55,7 @@ const quickActions = [
     description: "Gestión de descartes",
     icon: Trash2Icon,
     color: "bg-teal-500",
-    gradient: "from-teal-400 to-teal-600",
+    gradient: "from-red-400 to-red-600",
     link: paths.discard(),
   },
 ];
