@@ -47,7 +47,6 @@ export default function ShipmentsList({
   filteredMovements,
 }: ShipmentsListProps) {
   return (
-    <ScrollShadow className="h-[70dvh]">
       <ul className="flex gap-2 flex-col">
         {filteredMovements.map((movement) => (
           <li key={movement.id}>
@@ -56,7 +55,7 @@ export default function ShipmentsList({
               className="flex border rounded-md p-2 gap-2"
             >
               <div
-                className={`w-12 h-12 rounded-xl bg-gradient-to-r ${
+                className={`w-12 h-12 rounded-md bg-gradient-to-r ${
                   STATUS_MAP?.[movement?.shipment?.status || "PENDING"].gradient
                 } flex items-center justify-center `}
               >
@@ -86,6 +85,5 @@ export default function ShipmentsList({
           </li>
         ))}
       </ul>
-    </ScrollShadow>
   );
 }

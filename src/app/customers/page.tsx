@@ -1,7 +1,6 @@
 import db from "@/libs/db";
-import { Plus } from "lucide-react";
-import { Button, Link } from "@nextui-org/react";
-import PageTitle from "@/components/page-title";
+import AddButton from "@/components/buttons/add-button";
+import PageSection from "@/components/list-page";
 import paths from "@/libs/paths";
 import CustomerList from "./components/customers-list";
 
@@ -11,19 +10,11 @@ export default async function CustomersPage() {
   });
 
   return (
-    <section className="flex flex-col justify-between gap-6 p-2 relative">
-      <PageTitle>Clientes</PageTitle>
+    <PageSection
+      title="Clientes"
+      actions={<AddButton href={paths.customerAdd()}>Crear cliente</AddButton>}
+    >
       <CustomerList customers={customers} />
-      <Button
-        color="primary"
-        className="absolute bottom-2 right-2"
-        href={paths.customerAdd()}
-        as={Link}
-        startContent={<Plus className="h-[20px]" />}
-        variant="shadow"
-      >
-        Agregar cliente
-      </Button>
-    </section>
+    </PageSection>
   );
 }

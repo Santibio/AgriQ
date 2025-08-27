@@ -17,7 +17,6 @@ type ProductionWithRelations = Batch & {
 
 export default function ProductionsList({ productions }: ProductionsListProps) {
   return (
-    <ScrollShadow className="h-[70dvh] pb-1 custom-scroll-shadow" hideScrollBar>
       <ul className="flex gap-2 flex-col">
         {productions.length ? (
           productions.map((production) => (
@@ -65,6 +64,5 @@ export default function ProductionsList({ productions }: ProductionsListProps) {
           <EmptyListMsg text="No hay lotes disponibles." />
         )}
       </ul>
-    </ScrollShadow>
   );
 }

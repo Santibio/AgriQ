@@ -1,4 +1,4 @@
-import { ScrollShadow } from "@heroui/react";
+import { Chip, ScrollShadow } from "@heroui/react";
 
 import { CalendarArrowUp, CheckCheck, CircleX } from "lucide-react";
 import moment from "moment";
@@ -10,6 +10,7 @@ import {
   Discard,
 } from "@prisma/client";
 import { JSX } from "react";
+import { capitalize } from "@/libs/utils";
 
 interface DiscardListProps {
   filteredMovements: MovementWithRelations[];
@@ -50,7 +51,7 @@ export default function DiscardList({ filteredMovements }: DiscardListProps) {
           <li key={movement.id} className="flex border rounded-md p-2 gap-2">
             {movement.discard && (
               <div
-                className={`w-12 h-12 rounded-xl bg-gradient-to-r ${
+                className={`w-12 h-12 rounded-md bg-gradient-to-r ${
                   REASON_MAP?.[movement.discard.reason].gradient
                 } flex items-center justify-center `}
               >
@@ -60,19 +61,16 @@ export default function DiscardList({ filteredMovements }: DiscardListProps) {
             <div className="flex-1">
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold text-xl">{`Envio #${movement.id}`}</span>
+                  <span className="font-semibold text-xl">{`Descarte #${movement.id}`}</span>
                   <span className="text-slate-500 text-sm">
                     {moment(movement?.createdAt).fromNow()}
                   </span>
                 </div>
-                <div className="flex gap-2 items-center text-sm flex-wrap">
+                <div className="flex gap-2 items-center flex-wrap">
                   {movement.movementDetail?.map((product) => (
-                    <span
-                      className="bg-slate-200 rounded-lg px-2 text-slate-400"
-                      key={product.id}
-                    >
-                      {product.batch.product.name}
-                    </span>
+                    <Chip key={product.id} size="sm" color="default" variant="flat">
+                      {capitalize(product.batch.product.name)}
+                    </Chip>
                   ))}
                 </div>
               </div>

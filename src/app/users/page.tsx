@@ -1,9 +1,8 @@
 import db from "@/libs/db";
-import { Plus } from "lucide-react";
-import { Button, Link } from "@heroui/react";
-import PageTitle from "@/components/page-title";
 import paths from "@/libs/paths";
 import UserList from "./components/users-list";
+import AddButton from "@/components/buttons/add-button";
+import PageSection from "@/components/list-page";
 
 export default async function UsersPage() {
   const users = await db.user.findMany({
@@ -17,18 +16,11 @@ export default async function UsersPage() {
     ],
   });
   return (
-    <section className="flex flex-col justify-between gap-6">
-      <PageTitle>Lista de usuarios</PageTitle>
+    <PageSection
+      title="Usuarios"
+      actions={<AddButton href={paths.userAdd()}>Crear usuario</AddButton>}
+    >
       <UserList users={users} />
-      <Button
-        color="primary"
-        className="w-full"
-        href={paths.userAdd()}
-        as={Link}
-        startContent={<Plus className="h-[20px]" />}
-      >
-        Agregar usuario
-      </Button>
-    </section>
+    </PageSection>
   );
 }

@@ -1,8 +1,7 @@
-import PageTitle from "@/components/page-title";
+import AddButton from "@/components/buttons/add-button";
+import PageSection from "@/components/list-page";
 import db from "@/libs/db";
 import ShipmentsList from "./components/shipments-list";
-
-import AddButton from "@/components/buttons/add-button";
 import paths from "@/libs/paths";
 
 export default async function Shipments() {
@@ -28,10 +27,11 @@ export default async function Shipments() {
   });
 
   return (
-    <section className="flex flex-col justify-between gap-6 px-6">
-      <PageTitle>Envíos</PageTitle>
+    <PageSection
+      title="Envíos"
+      actions={<AddButton href={paths.shipmentAdd()}>Crear envío</AddButton>}
+    >
       <ShipmentsList filteredMovements={filteredMovements} />
-      <AddButton href={paths.shipmentAdd()}>Crear envío</AddButton>
-    </section>
+    </PageSection>
   );
 }

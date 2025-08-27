@@ -75,7 +75,7 @@ export default function ProductionForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="h-[70dvh] flex flex-col gap-4">
+      <div className="h-[65dvh] flex flex-col gap-4">
         <Controller
           name="product"
           control={control}

@@ -12,7 +12,6 @@ interface UserListProps {
 
 export default function UserList({ users }: UserListProps) {
   return (
-    <ScrollShadow className="h-[70dvh]">
       <ul className="flex gap-2 flex-col">
         {users.map((user) => {
           const roleLabel = config.roles.find((r) => r.id === user.role)?.label;
@@ -43,7 +42,6 @@ export default function UserList({ users }: UserListProps) {
           );
         })}
       </ul>
-    </ScrollShadow>
   );
 }
 

@@ -1,8 +1,8 @@
-import PageTitle from "@/components/page-title";
 import db from "@/libs/db";
 import DiscardList from "./components/discard-list";
 import paths from "@/libs/paths";
 import AddButton from "@/components/buttons/add-button";
+import PageSection from "@/components/list-page";
 
 export default async function Shipments() {
   const filteredMovements = await db.movement.findMany({
@@ -27,10 +27,15 @@ export default async function Shipments() {
   });
 
   return (
-    <section className="flex flex-col justify-between gap-6 px-6">
-      <PageTitle>Descarte</PageTitle>
+    <PageSection
+      title="Descartes"
+      actions={
+        <AddButton href={paths.discardAdd()}>
+          Crear descarte
+        </AddButton>
+      }
+      >
       <DiscardList filteredMovements={filteredMovements} />
-      <AddButton href={paths.discardAdd()}>Crear descarte</AddButton>
-    </section>
+    </PageSection>
   );
 }

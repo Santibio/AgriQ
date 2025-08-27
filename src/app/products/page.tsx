@@ -1,25 +1,21 @@
 import db from "@/libs/db";
-import { Plus } from "lucide-react";
-import { Button, Link } from "@heroui/react";
-import PageTitle from "@/components/page-title";
 import paths from "@/libs/paths";
 import ProductsList from "@/app/products/components/products-list";
+import AddButton from "@/components/buttons/add-button";
+import PageSection from "@/components/list-page";
 
 export default async function ProductsPage() {
-  const products = await db.product.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }, ] });
+
+  const products = await db.product.findMany({
+    orderBy: [{ active: "desc" }, { name: "asc" }],
+  });
+  
   return (
-    <section className="flex flex-col justify-between gap-6">
-      <PageTitle>Productos</PageTitle>
+    <PageSection
+      title="Productos"
+      actions={<AddButton href={paths.productAdd()}>Crear producto</AddButton>}
+    >
       <ProductsList products={products} />
-      <Button
-        color="primary"
-        className="w-full"
-        href={paths.productAdd()}
-        as={Link}
-        startContent={<Plus className="h-[20px]" />}
-      >
-        Agregar producto
-      </Button>
-    </section>
+    </PageSection>
   );
 }

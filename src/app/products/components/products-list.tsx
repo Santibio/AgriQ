@@ -17,8 +17,7 @@ interface ProductsListProps {
 
 export default function ProductsList({ products }: ProductsListProps) {
   return (
-    <ScrollShadow className="h-[70dvh] pb-1">
-      <div className="gap-6 grid grid-cols-2 sm:grid-cols-4">
+      <ul className="gap-6 grid grid-cols-2 sm:grid-cols-4">
         {products.length ? (
           products.map((product) => (
             <Link
@@ -47,7 +46,6 @@ export default function ProductsList({ products }: ProductsListProps) {
         ) : (
           <EmptyListMsg text="No hay productos disponibles." />
         )}
-      </div>
-    </ScrollShadow>
+      </ul>
   );
 }

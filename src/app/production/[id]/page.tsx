@@ -32,8 +32,8 @@ export default async function ProductionEditPage(
   );
 
   return (
-    <section className="flex flex-col justify-between gap-6">
-      <PageTitle>Editar Lote</PageTitle>
+    <section className="flex flex-col justify-between gap-6 px-4">
+      <PageTitle> {hasMovement ? "Detalle Lote" : "Editar Lote"}</PageTitle>
       <ProductionForm
         products={products}
         batch={batch}

@@ -65,7 +65,6 @@ const CustomerInfo = ({ customer }: CustomerInfoProps) => {
 
 export default function CustomerList({ customers }: CustomerListProps) {
   return (
-    <ScrollShadow className="h-[70dvh]">
       <ul className="flex gap-2 flex-col">
         {customers?.map((c) => (
           <li key={c.id}>
@@ -91,6 +90,5 @@ export default function CustomerList({ customers }: CustomerListProps) {
           </li>
         ))}
       </ul>
-    </ScrollShadow>
   );
 }
