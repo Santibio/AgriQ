@@ -1,6 +1,20 @@
 "use client";
 import { Product, Batch } from "@prisma/client";
-import { Image, Card, Input, Select, SelectItem } from "@heroui/react";
+import {
+  Button,
+  Image,
+  Card,
+  Input,
+  Select,
+  SelectItem,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  useDisclosure,
+  Form,
+} from "@heroui/react";
 import moment from "moment";
 import { capitalize } from "@/libs/helpers/text";
 import EmptyListMsg from "@/components/empty-list";
@@ -21,12 +35,13 @@ type ProductionWithRelations = Batch & {
 };
 
 export default function DiscardList({ batchs }: DiscardListProps) {
-  const [isOpen, setOpen] = useState(false);
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [selectedBatch, setSelectedBatch] = useState<Batch>();
   const [discardForm, setDiscardForm] = useState({
     reason: "",
     productToDescard: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const resetForm = () => {
@@ -43,28 +58,35 @@ export default function DiscardList({ batchs }: DiscardListProps) {
   const handleBatchSelect = (batch: Batch) => {
     setSelectedBatch(batch);
     resetForm();
-    setOpen(true);
+    onOpen();
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     const formData = new FormData();
     formData.append("reason", discardForm.reason);
     formData.append("productToDescard", discardForm.productToDescard);
 
-    const response = await createDiscard(selectedBatch!.id, formData);
+    try {
+      const response = await createDiscard(selectedBatch!.id, formData);
 
-    if (response?.errors) {
+      if (response?.errors) {
+        return toast.error("Ocurrió un error al procesar la solicitud.");
+      }
+
+      toast.success("Producto descartado correctamente");
+
+      router.push(paths.discard());
+      setSelectedBatch(undefined);
+      setDiscardForm({ reason: "", productToDescard: "" });
+    } catch (error) {
       return toast.error("Ocurrió un error al procesar la solicitud.");
+    } finally {
+      onClose();
+      setIsSubmitting(false);
     }
-
-    toast.success("Producto descartado correctamente");
-
-    router.push(paths.discard());
-    setOpen(false);
-    setSelectedBatch(undefined);
-    setDiscardForm({ reason: "", productToDescard: "" });
   };
 
   return (
@@ -115,63 +137,66 @@ export default function DiscardList({ batchs }: DiscardListProps) {
           <EmptyListMsg text="No hay lotes disponibles." />
         )}
       </ul>
-      <Sheet
+      <Drawer
         isOpen={isOpen}
-        onClose={() => setOpen(false)}
-        detent="content-height"
+        onOpenChange={onOpenChange}
+        backdrop="blur"
+        placement="bottom"
       >
-        <Sheet.Container>
-          <Sheet.Header />
-          <Sheet.Content>
-            <form
-              className="flex flex-col gap-20 px-4 pb-10"
-              onSubmit={handleSubmit}
-            >
-              <div className="flex flex-col gap-4">
+        <DrawerContent>
+          {() => (
+            <>
+              <DrawerHeader className="flex flex-col gap-1">
                 <h2 className="text-xl font-semibold">
                   Descartar productos del Lote #{selectedBatch?.id}
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                   Selecciona la cantidad de productos que deseas descartar.
                 </p>
-                <Input
-                  type="number"
-                  min={0}
-                  max={selectedBatch?.depositQuantity}
-                  label="Cantidad a descartar"
-                  value={
-                    Number(discardForm.productToDescard) !== 0
-                      ? String(discardForm.productToDescard)
-                      : ""
-                  }
-                  name="productToDescard"
-                  required
-                  onChange={handleOnchange}
-                  placeholder="Cantidad"
-                />
-                <Select
-                  label="Razón del descarte"
-                  onChange={handleOnchange}
-                  name="reason"
-                >
-                  {config.conditionsToDiscard.map((condition) => (
-                    <SelectItem key={condition.id}>
-                      {condition.label}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </div>
-              <button
-                type="submit"
-                className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors"
-              >
-                Confirmar Descarte
-              </button>
-            </form>
-          </Sheet.Content>
-        </Sheet.Container>
-        <Sheet.Backdrop />
-      </Sheet>
+              </DrawerHeader>
+              <DrawerBody className="pb-10 pt-2">
+                <Form className="flex flex-col gap-10" onSubmit={handleSubmit}>
+                  <div className="flex flex-col gap-4 w-full">
+                    <Input
+                      type="number"
+                      min={0}
+                      max={selectedBatch?.depositQuantity}
+                      label="Cantidad a descartar"
+                      value={
+                        Number(discardForm.productToDescard) !== 0
+                          ? String(discardForm.productToDescard)
+                          : ""
+                      }
+                      name="productToDescard"
+                      required
+                      onChange={handleOnchange}
+                      placeholder="Cantidad"
+                    />
+                    <Select
+                      label="Razón del descarte"
+                      onChange={handleOnchange}
+                      name="reason"
+                    >
+                      {config.conditionsToDiscard.map((condition) => (
+                        <SelectItem key={condition.id}>
+                          {condition.label}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                  </div>
+                  <Button
+                    className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors w-full"
+                    type="submit"
+                    isLoading={isSubmitting}
+                  >
+                    Confirmar
+                  </Button>
+                </Form>
+              </DrawerBody>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }

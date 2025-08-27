@@ -1,6 +1,6 @@
 import { Chip, ScrollShadow } from "@heroui/react";
 
-import { CalendarArrowUp, CheckCheck, CircleX } from "lucide-react";
+import { CircleX, FishOff, ShieldAlert } from "lucide-react";
 import moment from "moment";
 import {
   Movement,
@@ -24,60 +24,76 @@ type MovementWithRelations = Movement & {
   })[];
   discard: Discard | null;
 };
-
 const REASON_MAP: Record<
   Discard["reason"],
-  { icon: JSX.Element; gradient: string }
+  { icon: JSX.Element; background: string; label: string }
 > = {
   EXPIRED: {
-    icon: <CalendarArrowUp className="h-6 w-6 text-white" />,
-    gradient: "from-success to-success/50",
+    icon: <FishOff className="h-6 w-6 text-green-600" />,
+    background: "bg-green-100",
+    label: "Vencido",
   },
   DAMAGED: {
-    icon: <CheckCheck className="h-6 w-6 text-white" />,
-    gradient: "from-primary to-primary/50",
+    icon: <ShieldAlert className="h-6 w-6 text-red-600" />,
+    background: "bg-red-100",
+    label: "Dañado",
   },
   OTHER: {
-    icon: <CircleX className="h-6 w-6 text-white" />,
-    gradient: "from-error to-error/50",
+    icon: <CircleX className="h-6 w-6 text-gray600" />,
+    background: "bg-gray-100",
+    label: "Otro",
   },
 };
 
 export default function DiscardList({ filteredMovements }: DiscardListProps) {
   return (
-    <ScrollShadow className="h-[70dvh]">
       <ul className="flex gap-2 flex-col">
         {filteredMovements.map((movement) => (
-          <li key={movement.id} className="flex border rounded-md p-2 gap-2">
+          <li
+            key={movement.id}
+            className="flex border rounded-xl p-4 gap-4 bg-white shadow hover:shadow-lg transition-all"
+          >
             {movement.discard && (
               <div
-                className={`w-12 h-12 rounded-md bg-gradient-to-r ${
-                  REASON_MAP?.[movement.discard.reason].gradient
-                } flex items-center justify-center `}
+                className={`w-10 h-10 rounded-md ${
+                  REASON_MAP?.[movement.discard.reason].background
+                } flex items-center justify-center`}
               >
                 {REASON_MAP[movement.discard.reason].icon}
               </div>
             )}
-            <div className="flex-1">
-              <div className="flex flex-col gap-2">
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-xl">{`Descarte #${movement.id}`}</span>
-                  <span className="text-slate-500 text-sm">
-                    {moment(movement?.createdAt).fromNow()}
-                  </span>
-                </div>
-                <div className="flex gap-2 items-center flex-wrap">
-                  {movement.movementDetail?.map((product) => (
-                    <Chip key={product.id} size="sm" color="default" variant="flat">
-                      {capitalize(product.batch.product.name)}
-                    </Chip>
-                  ))}
-                </div>
+            <div className="flex-1 flex flex-col gap-2 justify-center">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-semibold text-xl text-gray-800">
+                  {capitalize(movement.movementDetail[0].batch.product.name)}
+                </span>
+                <span className="text-slate-500 text-sm">
+                  {moment(movement?.createdAt).fromNow()}
+                </span>
               </div>
+              {movement.discard && (
+                <div className="flex gap-4 items-center mt-1 justify-between">
+                  <div className="flex gap-2 items-center">
+                    <span className="text-sm font-medium text-gray-600">
+                      Motivo:
+                    </span>
+                    <Chip size="sm">
+                      {REASON_MAP?.[movement.discard.reason].label}
+                    </Chip>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <span className="text-sm font-medium text-gray-600">
+                      Cantidad:
+                    </span>
+                    <Chip size="sm" color="primary" radius="sm" variant="flat">
+                      {movement.movementDetail[0].quantity}
+                    </Chip>
+                  </div>
+                </div>
+              )}
             </div>
           </li>
         ))}
       </ul>
-    </ScrollShadow>
   );
 }

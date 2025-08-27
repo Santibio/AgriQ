@@ -1,6 +1,17 @@
+"use client";
 import { ReactNode } from "react";
 import PageTitle from "./page-title";
-import { ScrollShadow } from "@heroui/react";
+import {
+  Button,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  ScrollShadow,
+  useDisclosure,
+} from "@heroui/react";
+import { ArrowDownWideNarrow } from "lucide-react";
 
 interface PageTitleProps {
   children: ReactNode;
@@ -9,13 +20,56 @@ interface PageTitleProps {
 }
 
 export default function ListPage({ title, actions, children }: PageTitleProps) {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
   return (
-    <section className="flex flex-col gap-6 px-4 relative h-[82dvh]">
-      <PageTitle>{title}</PageTitle>
-      <ScrollShadow className="pb-1 custom-scroll-shadow flex-1" hideScrollBar>
-        {children}
-      </ScrollShadow>
-      <div className="pb-2">{actions}</div>
-    </section>
+    <>
+      <section className="flex flex-col gap-6 px-4 relative h-[82dvh]">
+        <div className="flex items-center justify-between">
+          <PageTitle>{title}</PageTitle>
+          <Button
+            isIconOnly
+            color="primary"
+            size="sm"
+            variant="flat"
+            onPress={onOpen}
+            disabled
+          >
+            <ArrowDownWideNarrow className="h-4 w-4 " color="blue" />
+          </Button>
+        </div>
+        <ScrollShadow
+          className="pb-1 custom-scroll-shadow flex-1"
+          hideScrollBar
+        >
+          {children}
+        </ScrollShadow>
+        <div className="pb-2">{actions}</div>
+      </section>
+      <Drawer isOpen={isOpen} onOpenChange={onOpenChange}  backdrop='blur' placement="bottom">
+        <DrawerContent>
+          {(onClose) => (
+            <>
+              <DrawerHeader className="flex flex-col gap-1">
+                Filtros y ordernamiento
+              </DrawerHeader>
+              <DrawerBody>
+                <p>
+                En trabajo...
+                </p>
+              </DrawerBody>
+              <DrawerFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={onClose}>
+                  Action
+                </Button>
+              </DrawerFooter>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 }
