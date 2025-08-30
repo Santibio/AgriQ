@@ -58,6 +58,14 @@ const quickActions = [
     gradient: "from-red-400 to-red-600",
     link: paths.discard(),
   },
+  {
+    title: "Recepción de envíos",
+    description: "Gestión de recepción de envíos",
+    icon: Truck,
+    color: "bg-teal-500",
+    gradient: "from-red-400 to-red-600",
+    link: paths.shipmentReception(),
+  },
 ];
 
 const QuickActions = () => {

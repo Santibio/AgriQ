@@ -1,6 +1,7 @@
 import PageTitle from "@/components/page-title";
 import db from "@/libs/db";
 import CustomerForm from "../components/shipment-form";
+import { notFound } from "next/navigation";
 
 interface ShipmentEditPageProps {
   params: Promise<{ id: string }>;
@@ -11,25 +12,27 @@ export default async function ShipmentEditPage({
 }: ShipmentEditPageProps) {
   // Espera params antes de usar sus propiedades
   const awaitedParams = await params;
-  const movementId = parseInt(awaitedParams.id);
+  const shipmentId = parseInt(awaitedParams.id);
 
-  const filteredMovement = await db.movement.findUnique({
-    where: { id: movementId },
+  const shipment = await db.shipment.findUnique({
+    where: { id: shipmentId },
     include: {
-      shipment: {
-        where: { status: "PENDING" },
-      },
-      movementDetail: {
+      movement: {
         include: {
-          batch: {
+          movementDetail: {
             include: {
-              product: true,
+              batch: {
+                include: {
+                  product: true,
+                },
+              },
             },
           },
         },
       },
     },
   });
+  if (!shipment) return notFound();
 
   const batchs = await db.batch.findMany({
     include: {
@@ -43,7 +46,7 @@ export default async function ShipmentEditPage({
   });
 
   // Unifica los batchs a editar con los nuevos, sin repetir
-  const batchsToEdit = filteredMovement!.movementDetail.map((detail) => ({
+  const batchsToEdit = shipment!.movement.movementDetail.map((detail) => ({
     ...detail.batch,
     sentQuantity: detail.quantity,
   }));
@@ -58,16 +61,16 @@ export default async function ShipmentEditPage({
       .map((batch) => ({ ...batch, filtered: true })),
   ];
 
-  const canEdit = filteredMovement!.shipment?.status === "PENDING";
+  const canEdit = shipment?.status === "PENDING";
 
   return (
     <section className="pt-6 flex flex-col justify-between gap-6 px-6">
       <PageTitle>
-        {canEdit ? `Editar envío #${movementId}` : `Envío #${movementId}`}
+        {canEdit ? `Editar envío #${shipmentId}` : `Envío #${shipmentId}`}
       </PageTitle>
       <CustomerForm
         batchs={allBatchs}
-        movementId={movementId}
+        movementId={shipment?.movementId}
         canEdit={canEdit}
       />
     </section>

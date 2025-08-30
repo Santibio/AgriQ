@@ -41,21 +41,22 @@ model Product {
 }
 
 model Batch {
-  id                Int              @id @default(autoincrement())
-  code              String           @unique
-  initialQuantity   Int
-  depositQuantity   Int
-  marketQuantity    Int              @default(0)
-  sentQuantity      Int              @default(0)
-  receivedQuantity  Int              @default(0)
-  discardedQuantity Int              @default(0)
-  reservedQuantity  Int              @default(0)
-  soltQuantity      Int              @default(0)
-  productId         Int
-  product           Product          @relation(fields: [productId], references: [id])
-  movementDetail    MovementDetail[]
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id                  Int              @id @default(autoincrement())
+  code                String           @unique
+  initialQuantity     Int
+  depositQuantity     Int
+  marketQuantity      Int              @default(0)
+  sentQuantity        Int              @default(0)
+  receivedQuantity    Int              @default(0)
+  discardedQuantity   Int              @default(0)
+  reservedQuantity    Int              @default(0)
+  soltQuantity        Int              @default(0)
+  discrepancyQuantity Int              @default(0)
+  productId           Int
+  product             Product          @relation(fields: [productId], references: [id])
+  movementDetail      MovementDetail[]
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
 }
 
 enum MovementType {
@@ -134,10 +135,10 @@ enum DiscardReason {
 }
 
 model Discard {
-  id         Int            @id @default(autoincrement())
+  id         Int           @id @default(autoincrement())
   reason     DiscardReason
-  movementId Int            @unique
-  movement   Movement       @relation(fields: [movementId], references: [id])
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
+  movementId Int           @unique
+  movement   Movement      @relation(fields: [movementId], references: [id])
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 }

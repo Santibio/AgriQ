@@ -56,6 +56,12 @@ const paths = {
   discardAdd() {
     return `/discard/add`;
   },
+  shipmentReception() {
+    return `/shipments-reception`;
+  },
+  shipmentReceptionEdit(shipmentId: string) {
+    return `/shipments-reception/${shipmentId}`;
+  },
 };
 
 export default paths;

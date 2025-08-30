@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import paths from "@/libs/paths";
 import { capitalize } from "@/libs/utils";
+import EmptyListMsg from "@/components/empty-list";
 
 type ShipmentFormProps = {
   batchs: (Batch & { product: Product; filtered?: boolean })[];
@@ -41,6 +42,7 @@ export default function ShipmentForm({
   movementId,
   canEdit = false,
 }: ShipmentFormProps) {
+  /* Todo revisar los casos de ver con status no ok o ok */
   const hasMovementId = Boolean(movementId);
   const isEditing = canEdit;
 
@@ -130,6 +132,10 @@ export default function ShipmentForm({
       (batch.depositQuantity ?? 0) - (quantities[batch.id] ?? 0);
     return Math.max(0, remaining);
   };
+
+  if (batchs.length === 0) {
+    return <EmptyListMsg text="No hay lotes disponibles para enviar." />;
+  }
 
   return (
     <form onSubmit={handleSubmit}>

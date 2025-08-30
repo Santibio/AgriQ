@@ -1,12 +1,12 @@
-import AddButton from "@/components/buttons/add-button";
 import PageSection from "@/components/list-page";
 import db from "@/libs/db";
-import ShipmentsList from "./components/shipments-list";
-import paths from "@/libs/paths";
+import ShipmentsReceptionList from "./components/shipments-reception-list";
 
 export default async function Shipments() {
-  const pendingShipments = await db.shipment.findMany({
-    where: { status: "PENDING" }, // TODO: deberian venir todos
+  const filteredMovements = await db.shipment.findMany({
+    where: {
+      status: "PENDING",
+    },
     include: {
       movement: {
         include: {
@@ -28,11 +28,8 @@ export default async function Shipments() {
   });
 
   return (
-    <PageSection
-      title="Envíos"
-      actions={<AddButton href={paths.shipmentAdd()}>Crear envío</AddButton>}
-    >
-      <ShipmentsList list={pendingShipments} />
+    <PageSection title="Recepción de envíos">
+      <ShipmentsReceptionList list={filteredMovements} />
     </PageSection>
   );
 }
