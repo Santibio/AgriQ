@@ -2,7 +2,6 @@
 import { Product } from "@prisma/client";
 import {
   CardBody,
-  ScrollShadow,
   Card,
   CardFooter,
   Image,

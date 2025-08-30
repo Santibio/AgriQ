@@ -1,7 +1,6 @@
 import db from "@/libs/db";
 import ShipmentsReceptionForm from "../components/shipments-reception-form";
 import { notFound } from "next/navigation";
-import PageSection from "@/components/layout/list-page";
 import FormPage from "@/components/layout/form-page";
 
 interface ShipmentEditPageProps {

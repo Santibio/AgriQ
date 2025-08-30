@@ -10,7 +10,6 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
-  DrawerFooter,
   DrawerHeader,
   useDisclosure,
   Form,
@@ -18,7 +17,6 @@ import {
 import moment from "moment";
 import { capitalize } from "@/libs/helpers/text";
 import EmptyListMsg from "@/components/empty-list";
-import { Sheet } from "react-modal-sheet";
 import { useState } from "react";
 import config from "@/config";
 import { createDiscard } from "../actions";
@@ -82,6 +80,7 @@ export default function DiscardList({ batchs }: DiscardListProps) {
       setSelectedBatch(undefined);
       setDiscardForm({ reason: "", productToDescard: "" });
     } catch (error) {
+      console.log("error: ", error);
       return toast.error("Ocurrió un error al procesar la solicitud.");
     } finally {
       onClose();

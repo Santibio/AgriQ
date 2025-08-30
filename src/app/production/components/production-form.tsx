@@ -2,7 +2,7 @@
 
 import { useForm, Controller } from "react-hook-form";
 import { Batch, Product } from "@prisma/client";
-import { Autocomplete, AutocompleteItem, Button, Input } from "@heroui/react";
+import { Autocomplete, AutocompleteItem, Input } from "@heroui/react";
 import { capitalize } from "@/libs/helpers/text";
 
 import { zodResolver } from "@hookform/resolvers/zod";

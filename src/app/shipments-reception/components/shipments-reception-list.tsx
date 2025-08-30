@@ -1,4 +1,4 @@
-import { Chip, Link, ScrollShadow } from "@heroui/react";
+import { Chip, Link } from "@heroui/react";
 
 import { CalendarArrowUp, CheckCheck, CircleX } from "lucide-react";
 import moment from "moment";

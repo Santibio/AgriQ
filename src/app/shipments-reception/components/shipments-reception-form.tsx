@@ -8,7 +8,6 @@ import {
   Card,
   Button,
   Image,
-  ScrollShadow,
   Modal,
   useDisclosure,
   ModalContent,

@@ -1,4 +1,3 @@
-import PageTitle from "@/components/page-title";
 import db from "@/libs/db";
 import { notFound } from "next/navigation";
 import React from "react";

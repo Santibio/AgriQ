@@ -1,4 +1,4 @@
-import { Chip, ScrollShadow } from "@heroui/react";
+import { Chip } from "@heroui/react";
 
 import { CircleX, FishOff, ShieldAlert } from "lucide-react";
 import moment from "moment";

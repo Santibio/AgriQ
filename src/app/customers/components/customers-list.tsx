@@ -1,5 +1,5 @@
 import type { Customer } from "@prisma/client";
-import { Avatar, ScrollShadow } from "@nextui-org/react";
+import { Avatar } from "@nextui-org/react";
 import Link from "next/link";
 import paths from "@/libs/paths";
 import clsx from "clsx";

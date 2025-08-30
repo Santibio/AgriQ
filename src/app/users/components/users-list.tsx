@@ -1,5 +1,5 @@
 import type { User } from "@prisma/client";
-import { Avatar, ScrollShadow } from "@heroui/react";
+import { Avatar } from "@heroui/react";
 import UserMenu from "./user-menu";
 import Link from "next/link";
 import paths from "@/libs/paths";
