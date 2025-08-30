@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import paths from "@/libs/paths";
 import { capitalize } from "@/libs/utils";
-
+import FormWrapper from "@/components/layout/form-wrapper";
 
 type ShipmentFormProps = {
   batchs: (Batch & { product: Product; sentQuantity?: number })[];
@@ -38,7 +38,7 @@ const checkDiscrepancy = (
   receivedQuantity: number
 ) => {
   return (batch.sentQuantity || 0) !== receivedQuantity;
-}
+};
 
 const getDiscrepancyQuantity = (
   batch: Batch & {
@@ -48,13 +48,14 @@ const getDiscrepancyQuantity = (
   receivedQuantity: number
 ) => {
   return (batch.sentQuantity || 0) - receivedQuantity;
-}
+};
 
 export default function ShipmentForm({
   batchs,
   shipmentId,
 }: ShipmentFormProps) {
   const router = useRouter();
+  const [isLoading, setIsloading] = useState<boolean>(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const [selected, setSelected] = useState<{ [batchId: number]: boolean }>(() =>
@@ -83,6 +84,7 @@ export default function ShipmentForm({
   };
 
   const handleSubmit = async () => {
+    setIsloading(true);
     const hasDiscrepancy = batchs.some((batch) =>
       checkDiscrepancy(batch, quantities[batch.id] || 0)
     );
@@ -107,86 +109,81 @@ export default function ShipmentForm({
     } catch (error) {
       console.error("Error al registrar la recepción:", error);
       toast.error("Ocurrió un error al procesar la solicitud.");
+    } finally {
+      setIsloading(false);
     }
   };
 
   return (
     <>
-      <form onSubmit={handleConfirm}>
-        <ScrollShadow className="h-[65dvh]">
-          <div className="flex flex-col gap-6">
-            {batchs.map((batch) => (
-              <Card
-                key={batch.id}
-                className="p-4 flex flex-col gap-3 border border-gray-200 shadow-sm hover:shadow-md transition-all"
-              >
-                <div className="flex gap-4">
-                  <Image
-                    src={batch.product.image}
-                    alt={batch.product.name}
-                    width={50}
-                    height={50}
-                    className="object-cover rounded-md"
-                  />
-                  <div className="flex flex-col gap-2 flex-1">
-                    <span className="font-semibold text-lg text-gray-800 leading-none">
-                      {capitalize(batch.product.name)}
+      <FormWrapper
+        onSubmit={handleConfirm}
+        buttonLabel="Registrar recepción de envío"
+      >
+        <div className="flex flex-col gap-6">
+          {batchs.map((batch) => (
+            <Card
+              key={batch.id}
+              className="p-4 flex flex-col gap-3 border border-gray-200 shadow-sm hover:shadow-md transition-all"
+            >
+              <div className="flex gap-4">
+                <Image
+                  src={batch.product.image}
+                  alt={batch.product.name}
+                  width={50}
+                  height={50}
+                  className="object-cover rounded-md"
+                />
+                <div className="flex flex-col gap-2 flex-1">
+                  <span className="font-semibold text-lg text-gray-800 leading-none">
+                    {capitalize(batch.product.name)}
+                  </span>
+                  <div className="flex">
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                      Lote #{batch.id}
                     </span>
-                    <div className="flex">
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        Lote #{batch.id}
-                      </span>
-                    </div>
                   </div>
-                  <Checkbox
-                    isSelected={!!selected[batch.id]}
-                    onChange={() => handleSelect(batch.id)}
-                    aria-label={`Confirmar lote ${batch.id}`}
-                    color="success"
-                  ></Checkbox>
                 </div>
-                <div className="flex items-center gap-10 mt-2">
-                  <div className="flex flex-col">
-                    <span className="text-sm text-gray-600 text-nowrap font-semibold mt-[-10px]">
-                      Cantidad enviada:
+                <Checkbox
+                  isSelected={!!selected[batch.id]}
+                  onChange={() => handleSelect(batch.id)}
+                  aria-label={`Confirmar lote ${batch.id}`}
+                  color="success"
+                ></Checkbox>
+              </div>
+              <div className="flex items-center gap-10 mt-2">
+                <div className="flex flex-col">
+                  <span className="text-sm text-gray-600 text-nowrap font-semibold mt-[-10px]">
+                    Cantidad enviada:
+                  </span>
+                  <div className="flex items-end gap-1">
+                    <span className="font-bold text-primary text-xl leading-none">
+                      {batch.sentQuantity}
                     </span>
-                    <div className="flex items-end gap-1">
-                      <span className="font-bold text-primary text-xl leading-none">
-                        {batch.sentQuantity}
-                      </span>
-                      <span className="text-sm leading-none">Unidades</span>
-                    </div>
+                    <span className="text-sm leading-none">Unidades</span>
                   </div>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={
-                      quantities[batch.id] !== undefined
-                        ? String(quantities[batch.id])
-                        : ""
-                    }
-                    onChange={(e) =>
-                      handleQuantityChange(batch.id, e.target.value)
-                    }
-                    label="Recibido"
-                    placeholder="0"
-                    size="sm"
-                    isDisabled={selected[batch.id]}
-                  />
                 </div>
-              </Card>
-            ))}
-          </div>
-        </ScrollShadow>
-        <Button
-          variant="ghost"
-          type="submit"
-          className="mt-auto w-full"
-          color="primary"
-        >
-          Registrar recepción de envío
-        </Button>
-      </form>
+                <Input
+                  type="number"
+                  min={0}
+                  value={
+                    quantities[batch.id] !== undefined
+                      ? String(quantities[batch.id])
+                      : ""
+                  }
+                  onChange={(e) =>
+                    handleQuantityChange(batch.id, e.target.value)
+                  }
+                  label="Recibido"
+                  placeholder="0"
+                  size="sm"
+                  isDisabled={selected[batch.id]}
+                />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </FormWrapper>
       <Modal
         isDismissable={false}
         isKeyboardDismissDisabled={true}
@@ -251,7 +248,12 @@ export default function ShipmentForm({
                 <Button color="danger" variant="light" onPress={onClose}>
                   Cancelar
                 </Button>
-                <Button color="primary" onPress={handleSubmit}>
+                <Button
+                  color="primary"
+                  onPress={handleSubmit}
+                  isLoading={isLoading}
+                  isDisabled={isLoading}
+                >
                   Confirmar
                 </Button>
               </ModalFooter>

@@ -1,7 +1,8 @@
-import PageTitle from "@/components/page-title";
 import db from "@/libs/db";
 import ShipmentsReceptionForm from "../components/shipments-reception-form";
 import { notFound } from "next/navigation";
+import PageSection from "@/components/layout/list-page";
+import FormPage from "@/components/layout/form-page";
 
 interface ShipmentEditPageProps {
   params: Promise<{ id: string }>;
@@ -32,18 +33,17 @@ export default async function ShipmentEditPage({
       },
     },
   });
-  
+
   if (!filteredShipments) return notFound();
 
   return (
-    <section className="pt-6 flex flex-col justify-between gap-6 px-6">
-      <PageTitle>Registrar recepción de Envío #{shipmentId}</PageTitle>
+    <FormPage title="Registrar recepción de Envío">
       <ShipmentsReceptionForm
         batchs={
           filteredShipments?.movement.movementDetail.map((md) => md.batch) || []
         }
         shipmentId={shipmentId}
       />
-    </section>
+    </FormPage>
   );
 }

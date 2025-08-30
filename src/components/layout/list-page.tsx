@@ -1,6 +1,6 @@
 "use client";
 import { ReactNode } from "react";
-import PageTitle from "./page-title";
+import PageTitle from "../page-title";
 import {
   Button,
   Drawer,
@@ -13,13 +13,13 @@ import {
 } from "@heroui/react";
 import { ArrowDownWideNarrow } from "lucide-react";
 
-interface PageTitleProps {
+interface ListPageProps {
   children: ReactNode;
   title: string;
   actions?: ReactNode;
 }
 
-export default function ListPage({ title, actions, children }: PageTitleProps) {
+export default function ListPage({ title, actions, children }: ListPageProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
@@ -46,7 +46,12 @@ export default function ListPage({ title, actions, children }: PageTitleProps) {
         </ScrollShadow>
         <div className="pb-2">{actions}</div>
       </section>
-      <Drawer isOpen={isOpen} onOpenChange={onOpenChange}  backdrop='blur' placement="bottom">
+      <Drawer
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        backdrop="blur"
+        placement="bottom"
+      >
         <DrawerContent>
           {(onClose) => (
             <>
@@ -54,9 +59,7 @@ export default function ListPage({ title, actions, children }: PageTitleProps) {
                 Filtros y ordernamiento
               </DrawerHeader>
               <DrawerBody>
-                <p>
-                En trabajo...
-                </p>
+                <p>En trabajo...</p>
               </DrawerBody>
               <DrawerFooter>
                 <Button color="danger" variant="light" onPress={onClose}>

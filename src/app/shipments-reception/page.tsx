@@ -1,4 +1,4 @@
-import PageSection from "@/components/list-page";
+import PageSection from "@/components/layout/list-page";
 import db from "@/libs/db";
 import ShipmentsReceptionList from "./components/shipments-reception-list";
 

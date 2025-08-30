@@ -1,6 +1,6 @@
 import db from "@/libs/db";
 import AddButton from "@/components/buttons/add-button";
-import PageSection from "@/components/list-page";
+import PageSection from "@/components/layout/list-page";
 import paths from "@/libs/paths";
 import CustomerList from "./components/customers-list";
 

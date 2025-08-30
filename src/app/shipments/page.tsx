@@ -1,5 +1,5 @@
 import AddButton from "@/components/buttons/add-button";
-import PageSection from "@/components/list-page";
+import PageSection from "@/components/layout/list-page";
 import db from "@/libs/db";
 import ShipmentsList from "./components/shipments-list";
 import paths from "@/libs/paths";
