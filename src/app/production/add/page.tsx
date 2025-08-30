@@ -1,14 +1,13 @@
-import PageTitle from "@/components/page-title";
 import db from "@/libs/db";
 import ProductionForm from "../components/production-form";
+import FormPage from "@/components/layout/form-page";
 
 export default async function ProductionPage() {
   const products = await db.product.findMany();
   
   return (
-    <section className="flex flex-col justify-between gap-6 px-6">
-      <PageTitle>Crear Producción</PageTitle>
+    <FormPage title="Crear Lote">
       <ProductionForm products={products} />
-    </section>
+    </FormPage>
   );
 }

@@ -3,6 +3,7 @@ import db from "@/libs/db";
 import { notFound } from "next/navigation";
 import React from "react";
 import ProductionForm from "../components/production-form";
+import FormPage from "@/components/layout/form-page";
 
 interface ProductionEditPageProps {
   params: Promise<{ id: string }>;
@@ -32,13 +33,12 @@ export default async function ProductionEditPage(
   );
 
   return (
-    <section className="flex flex-col justify-between gap-6 px-4">
-      <PageTitle> {hasMovement ? "Detalle Lote" : "Editar Lote"}</PageTitle>
+    <FormPage title={hasMovement ? "Detalle Lote" : "Editar Lote"}>
       <ProductionForm
         products={products}
         batch={batch}
         canEdit={!hasMovement}
       />
-    </section>
+    </FormPage>
   );
 }

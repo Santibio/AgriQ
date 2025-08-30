@@ -16,6 +16,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import paths from "@/libs/paths";
+import FormWrapper from "@/components/layout/form-wrapper";
 
 interface ProductionFormProps {
   products: Product[];
@@ -28,7 +29,6 @@ export default function ProductionForm({
   batch,
   canEdit = true,
 }: ProductionFormProps) {
-  console.log("canEdit: ", canEdit);
   const router = useRouter();
 
   const isEditing = Boolean(batch);
@@ -74,8 +74,14 @@ export default function ProductionForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="h-[65dvh] flex flex-col gap-4">
+    <FormWrapper
+      onSubmit={handleSubmit(onSubmit)}
+      buttonLabel="Confirmar"
+      buttonProps={{ isLoading, isDisabled: isLoading }}
+      showButton={canEdit}
+      showScrollShadow={false}
+    >
+      <div className="flex flex-col gap-4 w-full">
         <Controller
           name="product"
           control={control}
@@ -91,6 +97,7 @@ export default function ProductionForm({
               isInvalid={!!errors.product}
               errorMessage={errors.product?.message}
               defaultSelectedKey={batch?.productId?.toString() || ""}
+              isDisabled={!canEdit}
               startContent={
                 <Search
                   className="text-default-400"
@@ -120,22 +127,11 @@ export default function ProductionForm({
               onChange={(e) => field.onChange(Number(e.target.value))}
               isInvalid={!!errors.quantity}
               errorMessage={errors.quantity?.message}
+              isDisabled={!canEdit}
             />
           )}
         />
       </div>
-      {canEdit && (
-        <Button
-          type="submit"
-          color="primary"
-          variant="ghost"
-          className="w-full mt-6"
-          isLoading={isLoading}
-          isDisabled={isLoading}
-        >
-          Confirmar
-        </Button>
-      )}
-    </form>
+    </FormWrapper>
   );
 }
