@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Select, SelectItem } from "@heroui/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { addCustomer, editCustomer } from "../actions";
 import { toast } from "sonner";
 import paths from "@/libs/paths";
@@ -33,6 +33,14 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
     const { name, value } = e.target;
     setCustmerForm((prev) => ({ ...prev, [name]: value }));
   };
+
+  const validatePhoneNumber = (value: string) => value.match(/^\+?\d{7,15}$/);
+
+  const isInvalid = useMemo(() => {
+    if (customerForm.phone === "") return false;
+
+    return validatePhoneNumber(customerForm.phone) ? false : true;
+  }, [customerForm.phone]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,6 +85,7 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
             name="name"
             onChange={handleOnchange}
             value={customerForm.name}
+            isRequired
           />
           <Input
             label="Apellido"
@@ -92,6 +101,8 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
           name="email"
           onChange={handleOnchange}
           value={customerForm.email}
+          isRequired
+          type="email"
         />
         <Input
           label="Teléfono"
@@ -99,6 +110,9 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
           name="phone"
           onChange={handleOnchange}
           value={customerForm.phone}
+          isInvalid={isInvalid}
+          color={isInvalid ? "danger" : undefined}
+          errorMessage="Ingresa un teléfono válido"
         />
         <Select
           label="Información fiscal"
@@ -109,6 +123,7 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
           onChange={handleOnchange}
           defaultSelectedKeys={[customerForm.fiscalCondition]}
           className="mt-5"
+          isRequired
         >
           {config.ficalInformation.map((info) => (
             <SelectItem key={info.id}>{info.label}</SelectItem>
