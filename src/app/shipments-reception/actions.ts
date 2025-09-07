@@ -7,12 +7,12 @@ import { revalidatePath } from "next/cache";
 
 interface ProductionFormState {
   errors?:
-    | {
-        product?: string[];
-        quantity?: string[];
-        _form?: string[];
-      }
-    | false;
+  | {
+    product?: string[];
+    quantity?: string[];
+    _form?: string[];
+  }
+  | false;
 }
 
 interface FormData {
@@ -73,22 +73,20 @@ export async function createShipmentReception(
           },
         });
 
-        if (discrepancyQuantity > 0) {
-          await tx.batch.update({
-            where: { id: batchId },
-            data: {
-              marketQuantity: {
-                increment: quantity,
-              },
-              sentQuantity: {
-                decrement: quantity,
-              },
-              discrepancyQuantity: {
-                increment: discrepancyQuantity,
-              },
+        await tx.batch.update({
+          where: { id: batchId },
+          data: {
+            marketQuantity: {
+              increment: quantity,
             },
-          });
-        }
+            sentQuantity: {
+              decrement: quantity,
+            },
+            discrepancyQuantity: {
+              increment: discrepancyQuantity,
+            },
+          },
+        });
       }
     });
 
