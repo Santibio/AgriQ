@@ -1,12 +1,15 @@
 import { addCustomer } from "@/app/customers/actions";
 import config from "@/config";
-import { Button, Input, Select, SelectItem } from "@heroui/react";
+import { Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, Input, Select, SelectItem } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+interface FormWrapperProps {
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+}
 
-
-export default function CustomerForm() {
+const CustomerForm = () => {
 
     const [customerForm, setCustmerForm] = useState({
         name: "",
@@ -66,66 +69,93 @@ export default function CustomerForm() {
 
 
 
-    return <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    return (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex gap-2">
+                <Input
+                    label="Nombre"
+                    placeholder="Ingresar nombre"
+                    name="name"
+                    onChange={handleOnchange}
+                    value={customerForm.name}
+                    isRequired
+                />
+                <Input
+                    label="Apellido"
+                    placeholder="Ingresar apellido"
+                    name="lastName"
+                    onChange={handleOnchange}
+                    value={customerForm.lastName}
+                />
+            </div>
             <Input
-                label="Nombre"
-                placeholder="Ingresar nombre"
-                name="name"
+                label="Email"
+                placeholder="Ingresar email"
+                name="email"
                 onChange={handleOnchange}
-                value={customerForm.name}
+                value={customerForm.email}
                 isRequired
+                type="email"
             />
             <Input
-                label="Apellido"
-                placeholder="Ingresar apellido"
-                name="lastName"
+                label="Teléfono"
+                placeholder="Ingresar teléfono"
+                name="phone"
                 onChange={handleOnchange}
-                value={customerForm.lastName}
+                value={customerForm.phone}
+                isInvalid={isInvalid}
+                color={isInvalid ? "danger" : undefined}
+                errorMessage="Ingresa un teléfono válido"
             />
-        </div>
-        <Input
-            label="Email"
-            placeholder="Ingresar email"
-            name="email"
-            onChange={handleOnchange}
-            value={customerForm.email}
-            isRequired
-            type="email"
-        />
-        <Input
-            label="Teléfono"
-            placeholder="Ingresar teléfono"
-            name="phone"
-            onChange={handleOnchange}
-            value={customerForm.phone}
-            isInvalid={isInvalid}
-            color={isInvalid ? "danger" : undefined}
-            errorMessage="Ingresa un teléfono válido"
-        />
-        <Select
-            label="Información fiscal"
-            labelPlacement="outside"
-            name="fiscalCondition"
-            placeholder="Selecciona la condición fiscal"
-            value={customerForm.fiscalCondition}
-            onChange={handleOnchange}
-            defaultSelectedKeys={[customerForm.fiscalCondition]}
-            className="mt-5"
-            isRequired
-        >
-            {config.ficalInformation.map((info) => (
-                <SelectItem key={info.id}>{info.label}</SelectItem>
-            ))}
-        </Select>
-        <Button
-            type="submit"
-            color="primary"
-            variant="ghost"
-            className="w-full mt-auto"
-            isLoading={isLoading}
-        >
-            Agregar Cliente
-        </Button>
-    </form>
+            <Select
+                label="Información fiscal"
+                labelPlacement="outside"
+                name="fiscalCondition"
+                placeholder="Selecciona la condición fiscal"
+                value={customerForm.fiscalCondition}
+                onChange={handleOnchange}
+                defaultSelectedKeys={[customerForm.fiscalCondition]}
+                className="mt-5"
+                isRequired
+            >
+                {config.ficalInformation.map((info) => (
+                    <SelectItem key={info.id}>{info.label}</SelectItem>
+                ))}
+            </Select>
+            <Button
+                type="submit"
+                color="primary"
+                variant="ghost"
+                className="w-full mt-10"
+                isLoading={isLoading}
+            >
+                Agregar Cliente
+            </Button>
+        </form>
+    );
+}
+
+export default function FormWrapper({ isOpen, onOpenChange }: FormWrapperProps) {
+    return <Drawer
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        backdrop="blur"
+        placement="bottom"
+        size="xl"
+    >
+        <DrawerContent>
+            {() => (
+                <>
+                    <DrawerHeader className="flex flex-col gap-1">
+                        <h2 className="text-xl font-semibold">
+                            Agregar cliente
+                        </h2>
+                    </DrawerHeader>
+                    <DrawerBody className="pb-10 pt-2">
+                        <CustomerForm />
+                    </DrawerBody>
+                </>
+            )}
+        </DrawerContent>
+    </Drawer>
 }

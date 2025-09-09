@@ -23,7 +23,7 @@ export default async function ShipmentAddPage() {
   const productIds = batchs.map(b => b.productId);
   const products = await db.product.findMany({
     where: { id: { in: productIds } },
-    select: { id: true, name: true, price: true },
+    select: { id: true, name: true, price: true, image: true },
   });
 
   const groupBatchByProduct = batchs.map(b => ({
@@ -31,6 +31,7 @@ export default async function ShipmentAddPage() {
     productName: products.find(p => p.id === b.productId)?.name || "",
     quantity: b._sum.marketQuantity || 0,
     price: products.find(p => p.id === b.productId)?.price || "",
+    image: products.find(p => p.id === b.productId)?.image || "",
   }));
 
 
