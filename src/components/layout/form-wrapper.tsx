@@ -20,7 +20,7 @@ export default function FormWrapper({
   showScrollShadow = true,
 }: FormWrapperProps) {
   return (
-    <Form onSubmit={onSubmit} className="flex flex-col justify-between h-[76dvh]">
+    <Form onSubmit={onSubmit} className="flex flex-col justify-between h-[calc(100vh-205px)]">
       {showScrollShadow ? (
         <ScrollShadow className="pb-1 flex-1 w-full">{children}</ScrollShadow>
       ) : (

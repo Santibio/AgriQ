@@ -43,13 +43,11 @@ export default function ProductionsList({ productions }: ProductionsListProps) {
                   <div className="flex gap-2 justify-between items-center">
                     <span
                       className="rounded-lg  text-slate-400 font-semibold"
-                      key={production.productId}
                     >
                       {capitalize(production.product.name)}
                     </span>
                     <span
                       className="rounded-lg  text-slate-400 font-bold text-sm"
-                      key={production.productId}
                     >
                       x{production.initialQuantity}
                     </span>

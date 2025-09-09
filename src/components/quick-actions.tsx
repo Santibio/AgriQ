@@ -66,6 +66,14 @@ const quickActions = [
     gradient: "from-red-400 to-red-600",
     link: paths.shipmentReception(),
   },
+  {
+    title: "Pedidos",
+    description: "Gestión de pedidos",
+    icon: Truck,
+    color: "bg-teal-500",
+    gradient: "from-red-400 to-red-600",
+    link: paths.orders(),
+  },
 ];
 
 const QuickActions = () => {
