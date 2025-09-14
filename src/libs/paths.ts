@@ -62,6 +62,15 @@ const paths = {
   shipmentReceptionEdit(shipmentId: string) {
     return `/shipments-reception/${shipmentId}`;
   },
+  orders() {
+    return `/orders`;
+  },
+  orderAdd() {
+    return `/orders/add`;
+  },
+  orderToEdit(orderId: string) {
+    return `/orders/${orderId}`;
+  },
 };
 
 export default paths;

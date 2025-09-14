@@ -83,6 +83,7 @@ model Movement {
   type           MovementType
   shipment       Shipment?
   discard        Discard?
+  Order          Order?
 }
 
 model MovementDetail {
@@ -111,6 +112,7 @@ model Customer {
   active          Boolean         @default(true)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  Order           Order[]
 }
 
 enum ShipmentStatus {
@@ -141,4 +143,52 @@ model Discard {
   movement   Movement      @relation(fields: [movementId], references: [id])
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
+}
+
+enum StatusDoing {
+  PENDING
+  READY_TO_DELIVER
+  DELIVERED
+}
+
+enum StatusPayment {
+  PAID
+  UNPAID
+  PARCIAL_PAID
+  CANCELED
+}
+
+model Order {
+  id                 Int           @id @default(autoincrement())
+  movement           Movement      @relation(fields: [movementId], references: [id])
+  movementId         Int           @unique
+  customer           Customer      @relation(fields: [customerId], references: [id])
+  customerId         Int
+  statusDoing        StatusDoing   @default(PENDING)
+  statusPayment      StatusPayment @default(UNPAID)
+  details            OrderDetail[]
+  total              Float
+  agreedDeliveryTime DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+}
+
+model OrderDetail {
+  id          Int      @id @default(autoincrement())
+  orderId     Int
+  order       Order    @relation(fields: [orderId], references: [id])
+  productName String
+  quantity    Int
+  price       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+model Sell {
+  id         Int      @id @default(autoincrement())
+  orderId    Int      @unique
+  movementId Int      @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

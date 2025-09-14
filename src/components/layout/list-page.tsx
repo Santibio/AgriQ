@@ -24,7 +24,7 @@ export default function ListPage({ title, actions, children }: ListPageProps) {
 
   return (
     <>
-      <section className="flex flex-col gap-6 px-4 relative h-[82dvh]">
+      <section className="flex flex-col h-[calc(100vh-150px)] px-4 relative gap-2">
         <div className="flex items-center justify-between">
           <PageTitle>{title}</PageTitle>
           <Button
@@ -39,12 +39,12 @@ export default function ListPage({ title, actions, children }: ListPageProps) {
           </Button>
         </div>
         <ScrollShadow
-          className="pb-1 custom-scroll-shadow flex-1"
+          className="pb-2 custom-scroll-shadow flex-1"
           hideScrollBar
         >
           {children}
         </ScrollShadow>
-        <div className="pb-2">{actions}</div>
+        <div>{actions}</div>
       </section>
       <Drawer
         isOpen={isOpen}
