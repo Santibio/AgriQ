@@ -7,7 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 
 export default function BackButton() {
   const pathname = usePathname();
-  
+
   const isHome = pathname === paths.home();
   const router = useRouter();
 
@@ -24,8 +24,9 @@ export default function BackButton() {
   };
 
   if (isHome) return <div className="w-10" />;
+
   return (
-    <Button isIconOnly variant="light" onClick={handleGoBack}>
+    <Button isIconOnly variant="light" onPress={handleGoBack}>
       <ChevronLeft />
     </Button>
   );

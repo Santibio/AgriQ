@@ -93,12 +93,12 @@ async function main() {
   console.log("Start seeding...");
 
   // Eliminar registros existentes
+  await prisma.movementDetail.deleteMany();
   await prisma.orderDetail.deleteMany();
   await prisma.order.deleteMany();
   await prisma.customer.deleteMany();
   await prisma.shipment.deleteMany();
   await prisma.batch.deleteMany();
-  await prisma.movementDetail.deleteMany();
   await prisma.movement.deleteMany();
   await prisma.user.deleteMany();
   await prisma.product.deleteMany();

@@ -77,10 +77,10 @@ const config: Config = {
       link: "/production",
     },
     {
-      id: "sales",
+      id: "orders",
       icon: <TrendingUp className="w-5 h-5" />,
-      label: "Ventas",
-      link: "/sales",
+      label: "Pedidos",
+      link: "/orders",
     },
 
     {

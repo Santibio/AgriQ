@@ -18,7 +18,8 @@ interface OrderDetailProps {
         image?: string;
     }>
 }
-export default function OrderDetail({ productsList, isOpen, onOpenChange }: OrderDetailProps) {
+export default function OrderDetail({ productsList, isOpen, onOpenChange, handleDeleteProduct, handleEditProduct }: OrderDetailProps) {
+    console.log("🚀 ~ OrderDetail ~ productsList 2:", productsList)
 
     if (!productsList || productsList.length === 0) {
         return <div className="text-center text-gray-500 mt-10">No hay productos agregados al pedido.</div>;
@@ -48,16 +49,17 @@ export default function OrderDetail({ productsList, isOpen, onOpenChange }: Orde
                                 <div>
                                     <div className="mt-4">
                                         <ul aria-label="Productos agregados" className="w-full space-y-2">
-                                            {productsList.map((product) => (
+                                            {productsList.map((product, index) => (
                                                 <li
-                                                    key={product.productId}
+                                                    key={`${product.productId}-${product.quantity}`}
                                                 >
                                                     <Card
                                                         shadow="sm">
                                                         <CardBody className="p-4">
                                                             <div className="flex items-center justify-between">
                                                                 <div className="flex items-center gap-4">
-                                                                    <Image src={product.image} alt={product.productName}
+                                                                    <Image src={product.image}
+                                                                        alt={product.productName}
                                                                         width={60}
                                                                         height={60}
                                                                         className="object-cover rounded-md" />
@@ -65,7 +67,7 @@ export default function OrderDetail({ productsList, isOpen, onOpenChange }: Orde
                                                                         <h4 className="font-semibold text-gray-900">{capitalize(product.productName)}</h4>
                                                                         <div className="flex items-center space-x-2 text-sm text-gray-600">
                                                                             <span>
-                                                                                {product.quantity}
+                                                                                {product.selectedQuantity}
                                                                             </span>
                                                                             <span>×</span>
                                                                             <span>${product.price}</span>
@@ -78,6 +80,7 @@ export default function OrderDetail({ productsList, isOpen, onOpenChange }: Orde
                                                                     <Button
                                                                         variant="light"
                                                                         isIconOnly
+                                                                        onPress={() => handleEditProduct(index)}
                                                                         className="h-8 w-8 hover:bg-blue-50 text-blue-600"
                                                                     >
                                                                         <Edit className="h-4 w-4" />
@@ -85,6 +88,7 @@ export default function OrderDetail({ productsList, isOpen, onOpenChange }: Orde
                                                                     <Button
                                                                         variant="light"
                                                                         isIconOnly
+                                                                        onPress={() => handleDeleteProduct(index)}
                                                                         className="h-8 w-8 hover:bg-red-50 text-red-600"
                                                                     >
                                                                         <Trash className="h-4 w-4" />

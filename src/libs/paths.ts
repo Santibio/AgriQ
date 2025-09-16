@@ -71,6 +71,12 @@ const paths = {
   orderToEdit(orderId: string) {
     return `/orders/${orderId}`;
   },
+  orderToCharge(orderId: string) {
+    return `/orders/${orderId}/payment`;
+  },
+  orderToMovements(orderId: string) {
+    return `/orders/${orderId}/movements`;
+  },
 };
 
 export default paths;

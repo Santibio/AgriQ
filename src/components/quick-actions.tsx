@@ -1,9 +1,9 @@
 import { Card, CardBody } from "@heroui/react";
 import {
-  BarChart3,
+  Apple,
   CircleUser,
   DollarSign,
-  Package,
+  PackageCheck,
   Trash2Icon,
   Truck,
 } from "lucide-react";
@@ -12,21 +12,7 @@ import React from "react";
 import paths from "@/libs/paths";
 
 const quickActions = [
-  {
-    title: "Producción",
-    description: "Gestión de la producción",
-    icon: Package,
-    color: "bg-green-500",
-    gradient: "from-green-400 to-green-600",
-    link: paths.production(),
-  },
-  {
-    title: "Ventas",
-    description: "Administración de ventas",
-    icon: DollarSign,
-    color: "bg-blue-500",
-    gradient: "from-blue-400 to-blue-600",
-  },
+
   {
     title: "Envíos",
     description: "Seguimiento de envíos",
@@ -36,19 +22,12 @@ const quickActions = [
     link: paths.shipments(),
   },
   {
-    title: "Reportes",
-    description: "Informes y análisis",
-    icon: BarChart3,
-    color: "bg-orange-500",
-    gradient: "from-orange-400 to-orange-600",
-  },
-  {
-    title: "Clientes",
-    description: "Gestión de clientes",
-    icon: CircleUser,
+    title: "Recepción de envíos",
+    description: "Gestión de recepción de envíos",
+    icon: PackageCheck,
     color: "bg-teal-500",
-    gradient: "from-teal-400 to-teal-600",
-    link: paths.customers(),
+    gradient: "from-green-400 to-green-600",
+    link: paths.shipmentReception(),
   },
   {
     title: "Descartes",
@@ -59,21 +38,30 @@ const quickActions = [
     link: paths.discard(),
   },
   {
-    title: "Recepción de envíos",
-    description: "Gestión de recepción de envíos",
-    icon: Truck,
-    color: "bg-teal-500",
-    gradient: "from-red-400 to-red-600",
-    link: paths.shipmentReception(),
+    title: "Productos",
+    description: "Gestión de productos",
+    icon: Apple,
+    color: "bg-orange-500",
+    gradient: "from-orange-400 to-orange-600",
+    link: paths.products(),
   },
   {
-    title: "Pedidos",
-    description: "Gestión de pedidos",
-    icon: Truck,
+    title: "Clientes",
+    description: "Gestión de clientes",
+    icon: CircleUser,
     color: "bg-teal-500",
-    gradient: "from-red-400 to-red-600",
-    link: paths.orders(),
+    gradient: "from-teal-400 to-teal-600",
+    link: paths.customers(),
   },
+
+  {
+    title: "Ventas",
+    description: "Administración de ventas",
+    icon: DollarSign,
+    color: "bg-blue-500",
+    gradient: "from-blue-400 to-blue-600",
+  },
+
 ];
 
 const QuickActions = () => {

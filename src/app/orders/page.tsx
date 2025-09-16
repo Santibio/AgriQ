@@ -17,7 +17,7 @@ export default async function Orders() {
       },
     },
     include: {
-      movement: {
+      movements: {
         include: {
           movementDetail: {
             include: {

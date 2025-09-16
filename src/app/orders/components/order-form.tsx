@@ -6,7 +6,7 @@ import { capitalize } from "@/libs/helpers/text";
 
 import { EyeIcon, Search } from "lucide-react";
 
-import { confirmOrder, createOrder } from "../actions";
+import { createOrder, editOrder } from "../actions";
 import { Key, useState } from "react";
 import { Button, useDisclosure } from "@heroui/react";
 import { toast } from "sonner";
@@ -20,20 +20,15 @@ interface Batch {
   productId: number;
   productName: string;
   quantity: number;
-  price: number;
+  price?: number;
   image?: string;
 }
 
 interface ProductionFormProps {
-  batchs: {
-    productId: number;
-    productName: string;
-    quantity: number;
-    price: number;
-  }[];
-  canEdit?: boolean;
+  batchs: Batch[];
   customers: Customer[];
   movementId?: number;
+  orderId?: number;
   initialData?: {
     customerId?: number;
     products?: {
@@ -41,7 +36,7 @@ interface ProductionFormProps {
       productName: string;
       quantity: number;
       price: number;
-      image: string;
+      image?: string;
     }[];
   }
 }
@@ -50,6 +45,8 @@ export default function OrderForm({
   batchs,
   customers,
   initialData,
+  orderId,
+  movementId,
 }: ProductionFormProps) {
   const router = useRouter();
   const isEditing = Boolean(initialData);
@@ -84,6 +81,8 @@ export default function OrderForm({
     quantity: 0,
   });
 
+  const [editingProductIndex, setEditingProductIndex] = useState<number | null>(null);
+
   const [productsList, setProductsList] = useState<Array<{
     productId: number;
     productName: string;
@@ -98,23 +97,78 @@ export default function OrderForm({
     price: p.price,
     selectedQuantity: p.quantity,
   })) : []);
+  console.log("🚀 ~ OrderForm ~ productsList:", productsList)
 
 
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState<{ quantity: number }>({ quantity: 0 });
+  // const [editIndex, setEditIndex] = useState<number | null>(null);
+  // const [editForm, setEditForm] = useState<{ quantity: number }>({ quantity: 0 });
 
-  // Filtrar productos ya agregados
-  const availableBatchs = batchs.filter(
-    b => !productsList.some(p => p.productId === b.productId)
-  );
+  // Filtrar productos ya agregados, permitiendo el producto que se está editando
+  const availableBatchs = batchs.filter(b => {
+    if (editingProductIndex !== null) {
+      const editingProduct = productsList[editingProductIndex];
+      if (b.productId === editingProduct.productId) {
+        return true;
+      }
+    }
+    return !productsList.some(p => p.productId === b.productId);
+  });
 
 
   const handleChangeProductForm = (value: Key | null) => {
     setProductFormData({ productId: String(value), quantity: 0 });
-    setSelectedProduct(availableBatchs.find(b => b.productId === Number(value)) || null);
+    const foundBatch = availableBatchs.find(b => b.productId === Number(value));
+    setSelectedProduct(
+      foundBatch
+        ? {
+          productId: foundBatch.productId,
+          productName: foundBatch.productName,
+          quantity: foundBatch.quantity,
+          price: foundBatch.price ?? 0,
+        }
+        : null
+    );
   };
 
   const handleAddProduct = () => {
+    console.log("🚀 ~ handleAddProduct ~ editingProductIndex:", editingProductIndex)
+    if (editingProductIndex !== null) {
+      const updatedProductsList = [...productsList];
+      const productToUpdate = updatedProductsList[editingProductIndex];
+
+      if (!selectedProduct || !productFormFata.quantity || productFormFata.quantity <= 0) {
+        toast.error("Selecciona un producto y cantidad válida");
+        return;
+      }
+
+      updatedProductsList[editingProductIndex] = {
+        ...productToUpdate,
+        selectedQuantity: productFormFata.quantity,
+        price: selectedProduct.price,
+      };
+      
+      setProductsList(updatedProductsList);
+      console.log("🚀 ~ handleAddProduct ~ updatedProductsList:", updatedProductsList)
+
+      const updatedOrderProducts = updatedProductsList.map(p => ({
+        productId: p.productId,
+        productName: p.productName,
+        quantity: p.selectedQuantity,
+        price: p.price,
+      }));
+
+      setOrderFormData((prev) => ({
+        ...prev,
+        products: updatedOrderProducts,
+      }));
+
+      setEditingProductIndex(null);
+      setProductFormData({ productId: "", quantity: 0 });
+      setSelectedProduct(null);
+      toast.success("Producto actualizado correctamente");
+      return;
+    }
+
     if (!selectedProduct || !productFormFata.quantity || productFormFata.quantity <= 0) {
       toast.error("Selecciona un producto y cantidad válida");
       return;
@@ -143,21 +197,43 @@ export default function OrderForm({
   };
 
   const handleDeleteProduct = (index: number) => {
-    setProductsList(productsList.filter((_, i) => i !== index));
+    const productToRemove = productsList[index];
+    const newProductsList = productsList.filter((_, i) => i !== index);
+    setProductsList(newProductsList);
+
+    setOrderFormData((prev) => ({
+      ...prev,
+      products: prev.products.filter(p => p.productId !== productToRemove.productId),
+    }));
+
+    toast.success("Producto eliminado del resumen");
   };
 
   const handleEditProduct = (index: number) => {
-    setEditIndex(index);
-    setEditForm({ quantity: productsList[index].selectedQuantity });
-  };
+    const productToEdit = productsList[index];
 
-  const handleSaveEdit = () => {
-    if (editIndex === null) return;
-    setProductsList(productsList.map((p, i) =>
-      i === editIndex ? { ...p, selectedQuantity: editForm.quantity } : p
-    ));
-    setEditIndex(null);
-    onOpenChange();
+    // Cierra el drawer primero
+    onOpenChangeDetailOrderDrawer();
+
+    // Limpia el estado para forzar la actualización del Autocomplete
+    setProductFormData({ productId: "", quantity: 0 });
+    setSelectedProduct(null);
+
+    // Actualiza el estado con el producto a editar después de un breve instante
+    setTimeout(() => {
+      setEditingProductIndex(index);
+      const originalBatch = batchs.find(b => b.productId === productToEdit.productId);
+      setSelectedProduct({
+        productId: productToEdit.productId,
+        productName: productToEdit.productName,
+        quantity: originalBatch?.quantity || productToEdit.quantity, // Usar la cantidad original del lote
+        price: productToEdit.price,
+      });
+      setProductFormData({
+        productId: String(productToEdit.productId),
+        quantity: productToEdit.selectedQuantity,
+      });
+    }, 50);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -166,8 +242,8 @@ export default function OrderForm({
 
     try {
       const response = isEditing
-        ? await confirmOrder(orderFormData)
-        : await createOrder(orderFormData);
+        ? await editOrder(orderId!, movementId!, orderFormData)
+        : await createOrder(orderFormData)
       if (response?.errors) {
         return toast.error("Ocurrió un error al procesar la solicitud.");
       }
@@ -223,7 +299,7 @@ export default function OrderForm({
                   startContent={
                     <Search className="text-default-400" strokeWidth={2.5} size={20} />
                   }
-                  value={productFormFata.productId}
+                  selectedKey={productFormFata.productId}
                   className="w-full"
 
                 >
@@ -273,13 +349,13 @@ export default function OrderForm({
                 color="primary"
                 className="w-full"
                 onPress={handleAddProduct}
+
                 isDisabled={!selectedProduct || !productFormFata.quantity || productFormFata.quantity <= 0}
               >
-                Agregar producto
+                {editingProductIndex !== null ? "Editar producto" : "Agregar producto"}
               </Button>
             </CardBody>
           </Card>
-
           <OrderDetail
             handleEditProduct={handleEditProduct}
             handleDeleteProduct={handleDeleteProduct}

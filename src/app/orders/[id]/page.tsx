@@ -1,8 +1,8 @@
-import PageTitle from "@/components/page-title";
 import db from "@/libs/db";
 import OrderForm from "../components/order-form";
 import { notFound } from "next/navigation";
 import { StatusPayment } from "@prisma/client";
+import FormPage from "@/components/layout/form-page";
 
 interface ShipmentEditPageProps {
   params: Promise<{ id: string }>;
@@ -18,7 +18,7 @@ export default async function ShipmentEditPage({
   const order = await db.order.findUnique({
     where: { id: orderId },
     include: {
-      movement: {
+      movements: {
         include: {
           movementDetail: {
             include: {
@@ -61,7 +61,7 @@ export default async function ShipmentEditPage({
     productId: b.productId,
     productName: products.find(p => p.id === b.productId)?.name || "",
     quantity: b._sum.marketQuantity || 0,
-    price: products.find(p => p.id === b.productId)?.price || "",
+    price: products.find(p => p.id === b.productId)?.price,
   }));
 
   const canEdit = order.statusPayment !== StatusPayment.PAID;
@@ -69,7 +69,7 @@ export default async function ShipmentEditPage({
   const initialData = {
     customerId: order?.customerId || undefined,
     products: Object.values(
-      order?.movement.movementDetail.reduce((acc, detail) => {
+      order?.movements[0].movementDetail.reduce((acc, detail) => {
         const productId = detail.batch.productId;
         if (!acc[productId]) {
           acc[productId] = {
@@ -86,17 +86,14 @@ export default async function ShipmentEditPage({
   };
 
   return (
-    <section className="pt-6 flex flex-col justify-between gap-6 px-6">
-      <PageTitle>
-        {canEdit ? `Editar pedido #${orderId}` : `Envío #${orderId}`}
-      </PageTitle>
+    <FormPage title={`Editar pedido #${orderId}`}>
       <OrderForm
         batchs={groupBatchByProduct}
-        movementId={order?.movementId}
-        canEdit={canEdit}
+        movementId={order?.movements[0].id}
+        orderId={orderId}
         customers={customers}
         initialData={initialData}
       />
-    </section>
+    </FormPage>
   );
 }

@@ -136,26 +136,28 @@ const CustomerForm = () => {
 }
 
 export default function FormWrapper({ isOpen, onOpenChange }: FormWrapperProps) {
-    return <Drawer
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        backdrop="blur"
-        placement="bottom"
-        size="xl"
-    >
-        <DrawerContent>
-            {() => (
-                <>
-                    <DrawerHeader className="flex flex-col gap-1">
-                        <h2 className="text-xl font-semibold">
-                            Agregar cliente
-                        </h2>
-                    </DrawerHeader>
-                    <DrawerBody className="pb-10 pt-2">
-                        <CustomerForm />
-                    </DrawerBody>
-                </>
-            )}
-        </DrawerContent>
-    </Drawer>
+    return (
+        <Drawer
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            backdrop="blur"
+            placement="bottom"
+            size="xl"
+        >
+            <DrawerContent>
+                {() => (
+                    <>
+                        <DrawerHeader className="flex flex-col gap-1">
+                            <h2 className="text-xl font-semibold">
+                                Agregar cliente
+                            </h2>
+                        </DrawerHeader>
+                        <DrawerBody className="pb-10 pt-2">
+                            <CustomerForm />
+                        </DrawerBody>
+                    </>
+                )}
+            </DrawerContent>
+        </Drawer>
+    )
 }

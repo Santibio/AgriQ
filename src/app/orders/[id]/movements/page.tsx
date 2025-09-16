@@ -2,12 +2,13 @@ import PageTitle from "@/components/page-title";
 import db from "@/libs/db";
 import PaymentOrderForm from "../../components/payment-order-form";
 import { notFound } from "next/navigation";
+import OrderMovements from "../../components/order-movements";
 
 interface ShipmentEditPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function PaymentOrderPAge({
+export default async function MovementsOrderPage({
   params,
 }: ShipmentEditPageProps) {
   // Espera params antes de usar sus propiedades
@@ -37,34 +38,12 @@ export default async function PaymentOrderPAge({
   if (!order) return notFound();
 
 
-  const parsedOrder = {
-    id: order.id,
-    customer: order?.customer,
-    products: Object.values(
-      order?.movements[0].movementDetail.reduce((acc, detail) => {
-        const productId = detail.batch.productId;
-        if (!acc[productId]) {
-          acc[productId] = {
-            productId,
-            productName: detail.batch.product.name,
-            quantity: 0,
-            price: detail.batch.product.price,
-          };
-        }
-        acc[productId].quantity += detail.quantity;
-        return acc;
-      }, {} as Record<number, { productId: number; productName: string; quantity: number; price: number }>)
-    ),
-  };
-
   return (
     <section className="flex flex-col justify-between gap-6 px-6">
       <PageTitle>
-        Cobro de Pedido #{order.id}
+        Movimientos del Pedido #{order.id}
       </PageTitle>
-      <PaymentOrderForm
-        order={parsedOrder}
-      />
+     <OrderMovements order={order} />
     </section>
   );
 }

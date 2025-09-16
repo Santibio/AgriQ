@@ -67,10 +67,11 @@ enum MovementType {
   RECEIVED_MARKET
   AVAILABLE
   ORDERED
-  SOLD
-  CANCELED
+  READY_TO_DELIVER
   DELIVERED
   NOT_DELIVERED
+  CANCELED
+  SOLD
   RETURNED
 }
 
@@ -83,7 +84,8 @@ model Movement {
   type           MovementType
   shipment       Shipment?
   discard        Discard?
-  Order          Order?
+  Order          Order? @relation(fields: [orderId], references: [id])
+  orderId        Int?
 }
 
 model MovementDetail {
@@ -160,8 +162,7 @@ enum StatusPayment {
 
 model Order {
   id                 Int           @id @default(autoincrement())
-  movement           Movement      @relation(fields: [movementId], references: [id])
-  movementId         Int           @unique
+  movements          Movement[]
   customer           Customer      @relation(fields: [customerId], references: [id])
   customerId         Int
   statusDoing        StatusDoing   @default(PENDING)

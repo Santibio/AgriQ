@@ -18,17 +18,21 @@ export default async function ProductionEditPage(
     where: { id: batchId },
   });
 
-  const products = await db.product.findMany();
+  const products = await db.product.findMany({
+    where: {
+      active: true
+    }
+  });
 
   if (!batch) return notFound();
 
   const hasMovement = Boolean(
     batch.marketQuantity ||
-      batch.sentQuantity ||
-      batch.discardedQuantity ||
-      batch.receivedQuantity ||
-      batch.soltQuantity ||
-      batch.reservedQuantity
+    batch.sentQuantity ||
+    batch.discardedQuantity ||
+    batch.receivedQuantity ||
+    batch.soltQuantity ||
+    batch.reservedQuantity
   );
 
   return (

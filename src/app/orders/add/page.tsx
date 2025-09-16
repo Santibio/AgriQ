@@ -30,11 +30,9 @@ export default async function ShipmentAddPage() {
     productId: b.productId,
     productName: products.find(p => p.id === b.productId)?.name || "",
     quantity: b._sum.marketQuantity || 0,
-    price: products.find(p => p.id === b.productId)?.price || "",
+    price: products.find(p => p.id === b.productId)?.price,
     image: products.find(p => p.id === b.productId)?.image || "",
   }));
-
-
 
   return (
     <FormPage title="Crear Pedido">
