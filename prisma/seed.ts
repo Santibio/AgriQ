@@ -94,6 +94,7 @@ async function main() {
 
   // Eliminar registros existentes
   await prisma.movementDetail.deleteMany();
+  await prisma.discard.deleteMany();
   await prisma.orderDetail.deleteMany();
   await prisma.order.deleteMany();
   await prisma.customer.deleteMany();
