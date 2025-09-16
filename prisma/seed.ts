@@ -114,18 +114,18 @@ async function main() {
   });
 
   // Obtener los primeros IDs de usuarios y productos creados
- /*  const userEve = await prisma.user.findFirst({
-    where: { username: "eve.perez" },
-  });
-  const userFabri = await prisma.user.findFirst({
-    where: { username: "fabri.perez" },
-  });
-  const productLettuce = await prisma.product.findFirst({
-    where: { name: "lechuga" },
-  });
-  const productTomato = await prisma.product.findFirst({
-    where: { name: "tomate" },
-  }); */
+  /*  const userEve = await prisma.user.findFirst({
+     where: { username: "eve.perez" },
+   });
+   const userFabri = await prisma.user.findFirst({
+     where: { username: "fabri.perez" },
+   });
+   const productLettuce = await prisma.product.findFirst({
+     where: { name: "lechuga" },
+   });
+   const productTomato = await prisma.product.findFirst({
+     where: { name: "tomate" },
+   }); */
 
   // Crear producciones
   /*  await prisma.production.createMany({
