@@ -1,7 +1,6 @@
 import db from "@/libs/db";
 import OrderForm from "../components/order-form";
 import { notFound } from "next/navigation";
-import { StatusPayment } from "@prisma/client";
 import FormPage from "@/components/layout/form-page";
 
 interface ShipmentEditPageProps {
@@ -64,7 +63,6 @@ export default async function ShipmentEditPage({
     price: products.find(p => p.id === b.productId)?.price,
   }));
 
-  const canEdit = order.statusPayment !== StatusPayment.PAID;
 
   const initialData = {
     customerId: order?.customerId || undefined,

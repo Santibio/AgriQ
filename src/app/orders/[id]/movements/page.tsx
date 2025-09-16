@@ -1,6 +1,5 @@
 import PageTitle from "@/components/page-title";
 import db from "@/libs/db";
-import PaymentOrderForm from "../../components/payment-order-form";
 import { notFound } from "next/navigation";
 import OrderMovements from "../../components/order-movements";
 
@@ -43,7 +42,7 @@ export default async function MovementsOrderPage({
       <PageTitle>
         Movimientos del Pedido #{order.id}
       </PageTitle>
-     <OrderMovements order={order} />
+      <OrderMovements order={order} />
     </section>
   );
 }

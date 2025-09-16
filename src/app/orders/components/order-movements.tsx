@@ -1,6 +1,4 @@
 import React, { JSX } from 'react';
-import { Card, CardBody } from "@heroui/react";
-import { capitalize } from "@/libs/utils";
 import { Order, Movement, MovementDetail, Batch, Product, Customer, MovementType } from "@prisma/client";
 import { DollarSign, PackageCheck, ShoppingCart, Truck, XCircle } from "lucide-react";
 
