@@ -6,7 +6,10 @@ export const AddProductFormSchema = z.object({
   active: z.boolean(),
   price: z
     .number()
-    .min(0, { message: "El precio debe ser un número positivo" })
+    .min(0, { message: "El precio debe ser un número positivo" }),
+  category: z.string(),
+  type: z.string(),
+  presentation: z.string(),
 });
 
 export type AddProductInputs = z.infer<typeof AddProductFormSchema>;

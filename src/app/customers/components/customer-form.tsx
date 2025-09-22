@@ -125,7 +125,7 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
           className="mt-5"
           isRequired
         >
-          {config.ficalInformation.map((info) => (
+          {config.fiscalInformation.map((info) => (
             <SelectItem key={info.id}>{info.label}</SelectItem>
           ))}
         </Select>

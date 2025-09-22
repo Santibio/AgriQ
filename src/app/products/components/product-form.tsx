@@ -1,8 +1,8 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Switch } from "@heroui/react";
-import { useState } from "react";
+import { Button, Input, Select, SelectItem, Switch } from "@heroui/react";
+import { useEffect, useMemo, useState } from "react";
 import { CloudUpload } from "lucide-react";
 import type { Product } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +17,7 @@ import { addProduct, editProduct } from "../actions";
 import { capitalize } from "@/libs/helpers/text";
 import { useRouter } from "next/navigation";
 import paths from "@/libs/paths";
+import config from "@/config";
 
 interface ProductFormProps {
   product?: Product;
@@ -33,6 +34,8 @@ export default function ProductForm({ product }: ProductFormProps) {
   const {
     control,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<FormInputs>({
     resolver: zodResolver(
@@ -43,10 +46,35 @@ export default function ProductForm({ product }: ProductFormProps) {
       price: product?.price || 0,
       active: product?.active !== undefined ? product.active : true,
       image: undefined,
+      category: product?.category || "",
+      type: product?.type || "",
+      presentation: product?.presentation || "",
     },
   });
 
+  const selectedCategory = watch("category");
+  const selectedType = watch("type");
+
   const [isLoading, setIsloading] = useState<boolean>(false);
+
+  useEffect(() => {
+    setValue("type", "");
+    setValue("presentation", "");
+  }, [selectedCategory, setValue]);
+
+  useEffect(() => {
+    setValue("presentation", "");
+  }, [selectedType, setValue]);
+
+  const typesForCategory = useMemo(() => {
+    if (!selectedCategory) return [];
+    return config.productCategories.find((cat) => cat.id === selectedCategory)?.type || [];
+  }, [selectedCategory]);
+
+  const presentationsForType = useMemo(() => {
+    if (!selectedType) return [];
+    return typesForCategory.find((t) => t.id === selectedType)?.presentation || [];
+  }, [selectedType, typesForCategory]);
 
   const onSubmit = async ({ name, active, image, price }: AddProductInputs) => {
     const formData = new FormData();
@@ -124,6 +152,68 @@ export default function ProductForm({ product }: ProductFormProps) {
             />
           )}
         />
+        <div className="flex gap-4">
+          <Controller
+            name="category"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Categoria"
+                placeholder="Selecciona la categoria"
+                selectedKeys={field.value ? [field.value] : []}
+                onChange={field.onChange}
+                isRequired
+              >
+                {config.productCategories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.label}
+                  </SelectItem>
+                ))}
+              </Select>
+            )}
+          />
+          <Controller
+            name="type"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Tipo"
+                placeholder="Selecciona el tipo"
+                selectedKeys={field.value ? [field.value] : []}
+                onChange={field.onChange}
+                isRequired
+                isDisabled={!selectedCategory}
+              >
+                {typesForCategory.map((type) => (
+                  <SelectItem key={type.id} value={type.id}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </Select>
+            )}
+          />
+        </div>
+        <Controller
+          name="presentation"
+          control={control}
+          render={({ field }) => (
+            <Select
+              label="Presentación"
+              placeholder="Selecciona la presentación"
+              selectedKeys={field.value ? [field.value] : []}
+              onChange={field.onChange}
+              isRequired
+              isDisabled={!selectedType}
+            >
+              {presentationsForType.map((presentation) => (
+                <SelectItem key={presentation.id} value={presentation.id}>
+                  {presentation.label}
+                </SelectItem>
+              ))}
+            </Select>
+          )}
+        />
+
         <Controller
           name="active"
           control={control}
@@ -180,27 +270,23 @@ export default function ProductForm({ product }: ProductFormProps) {
             return (
               <div className="flex items-center justify-center w-full">
                 <label
-                  className={`flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer text-gray-500 hover:bg-slate-100 hover:dark:bg-slate-900 ${
-                    isError ? "border-red-500 text-red-600" : ""
-                  }`}
+                  className={`flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer text-gray-500 hover:bg-slate-100 hover:dark:bg-slate-900 ${isError ? "border-red-500 text-red-600" : ""
+                    }`}
                 >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <CloudUpload
-                      className={`text-gray-500 ${
-                        isError ? "text-red-600" : ""
-                      }`}
+                      className={`text-gray-500 ${isError ? "text-red-600" : ""
+                        }`}
                     />
                     <p
-                      className={`mb-2 text-sm text-gray-500 dark:text-gray-400 ${
-                        isError ? "text-red-600" : ""
-                      }`}
+                      className={`mb-2 text-sm text-gray-500 dark:text-gray-400 ${isError ? "text-red-600" : ""
+                        }`}
                     >
                       <span className="font-semibold">Click to upload</span>
                     </p>
                     <p
-                      className={`text-xs text-gray-500 dark:text-gray-400 ${
-                        isError ? "text-red-600" : ""
-                      }`}
+                      className={`text-xs text-gray-500 dark:text-gray-400 ${isError ? "text-red-600" : ""
+                        }`}
                     >
                       Formatos soportados: JPG, JPEG, PNG, WEBP (MAX 2MB)
                     </p>
