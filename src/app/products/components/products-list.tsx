@@ -1,14 +1,15 @@
-"use client";
-import { Product } from "@prisma/client";
+'use client';
+import { Product } from '@prisma/client';
 import {
   CardBody,
   Card,
   Image,
-  Chip
-} from "@heroui/react";
-import Link from "next/link";
-import paths from "@/libs/paths";
-import EmptyListMsg from "@/components/empty-list";
+  Chip,
+} from '@heroui/react';
+import Link from 'next/link';
+import paths from '@/libs/paths';
+import EmptyListMsg from '@/components/empty-list';
+import { convertToArgentinePeso } from '@/libs/helpers/number';
 
 interface ProductsListProps {
   products: Product[];
@@ -41,8 +42,8 @@ export default function ProductsList({ products }: ProductsListProps) {
                         <h4 className="font-bold text-lg capitalize">{product.name}</h4>
                         <p className="text-xs text-slate-500">Código: {product.code}</p>
                       </div>
-                      <Chip color={product.active ? "success" : "danger"} variant="flat" size="sm">
-                        {product.active ? "Activo" : "Inactivo"}
+                      <Chip color={product.active ? 'success' : 'danger'} variant="flat" size="sm">
+                        {product.active ? 'Activo' : 'Inactivo'}
                       </Chip>
                     </div>
                     <div className="flex gap-2 flex-wrap mt-2">
@@ -53,7 +54,7 @@ export default function ProductsList({ products }: ProductsListProps) {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-lg">
-                      {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(product.price)}
+                      {convertToArgentinePeso(product.price)}
                     </p>
                   </div>
                 </div>

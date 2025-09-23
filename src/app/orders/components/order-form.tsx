@@ -15,6 +15,7 @@ import paths from "@/libs/paths";
 import FormWrapper from "@/components/layout/form-wrapper";
 import CustomerForm from "./customer-form";
 import OrderDetail from "./order-detail";
+import { convertToArgentinePeso } from "@/libs/helpers/number";
 
 interface Batch {
   productId: number;
@@ -332,14 +333,14 @@ export default function OrderForm({
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-default-600 font-normal text-sm">Precio unitario:</span>
                     <span className="text-default-900 font-semibold">
-                      {selectedProduct ? `$${Number(selectedProduct.price).toFixed(2)}` : "$0.00"}
+                      {selectedProduct ? `${convertToArgentinePeso(Number(selectedProduct.price))}` : "$0.00"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-default-600 font-medium text-sm">Precio total:</span>
                     <span className="text-primary font-bold">
                       {selectedProduct && productFormFata.quantity
-                        ? `$${(Number(selectedProduct.price) * productFormFata.quantity).toFixed(2)}`
+                        ? `${convertToArgentinePeso((Number(selectedProduct.price) * productFormFata.quantity))}`
                         : "$0.00"}
                     </span>
                   </div>
@@ -378,7 +379,7 @@ export default function OrderForm({
             </Button>
             <div className="items-center justify-between flex w-full">
               <span>Cantidad de productos: {productsList.length}</span>
-              <span className="text-lg font-semibold">Total: ${productsList.reduce((acc, p) => acc + (p.price * p.selectedQuantity), 0).toFixed(2)}</span>
+              <span className="text-lg font-semibold">Total: {convertToArgentinePeso(productsList.reduce((acc, p) => acc + (p.price * p.selectedQuantity), 0))}</span>
             </div>
           </Card>
         </div>

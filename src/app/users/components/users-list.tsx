@@ -10,6 +10,21 @@ interface UserListProps {
   users: User[];
 }
 
+
+function UserInfo({ user, roleLabel }: { user: User; roleLabel?: string }) {
+  return (
+    <div className="flex gap-4 items-center">
+      <Avatar src={user.avatar} showFallback />
+      <div className="flex flex-col">
+        <h3 className="text-md text-primary font-medium capitalize">
+          {`${user.lastName} ${user.name}`}
+        </h3>
+        <p className="text-slate-500 capitalize">{roleLabel || "---"}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function UserList({ users }: UserListProps) {
   return (
       <ul className="flex gap-2 flex-col">
@@ -45,16 +60,3 @@ export default function UserList({ users }: UserListProps) {
   );
 }
 
-function UserInfo({ user, roleLabel }: { user: User; roleLabel?: string }) {
-  return (
-    <div className="flex gap-4 items-center">
-      <Avatar src={user.avatar} showFallback />
-      <div className="flex flex-col">
-        <h3 className="text-md text-primary font-medium capitalize">
-          {`${user.lastName} ${user.name}`}
-        </h3>
-        <p className="text-slate-500 capitalize">{roleLabel || "---"}</p>
-      </div>
-    </div>
-  );
-}

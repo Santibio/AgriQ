@@ -15,10 +15,10 @@ import { capitalize } from "@/libs/utils";
 import EmptyListMsg from "@/components/empty-list";
 
 interface ShipmentsListProps {
-  list: shipmentWithRelations[];
+  list: ShipmentWithRelations[];
 }
 
-type shipmentWithRelations = Shipment & {
+type ShipmentWithRelations = Shipment & {
   movement: Movement & {
     movementDetail: (MovementDetail & {
       batch: Batch & {

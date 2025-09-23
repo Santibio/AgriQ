@@ -3,7 +3,6 @@
 import db from "@/libs/db";
 import paths from "@/libs/paths";
 import { revalidatePath } from "next/cache";
-// import { redirect } from "next/navigation";
 import { UserAddFormSchema, UserEditFormSchema } from "@/libs/schemas/users";
 import { saveImage } from "@/libs/helpers/images";
 import { encrypt } from "@/libs/helpers/encryptions";
@@ -147,11 +146,11 @@ export async function editUser(
   return { errors: false };
 }
 
-interface deleteUserResponse {
+interface DeleteUserResponse {
   error?: string;
 }
 
-export async function deleteUser(userId: number): Promise<deleteUserResponse> {
+export async function deleteUser(userId: number): Promise<DeleteUserResponse> {
   try {
     await db.user.update({
       where: {
@@ -176,7 +175,7 @@ export async function deleteUser(userId: number): Promise<deleteUserResponse> {
   }
 }
 
-export async function activeUser(userId: number): Promise<deleteUserResponse> {
+export async function activeUser(userId: number): Promise<DeleteUserResponse> {
   try {
     await db.user.update({
       where: {

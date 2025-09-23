@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import paths from "@/libs/paths";
 import FormWrapper from "@/components/layout/form-wrapper";
+import { convertToArgentinePeso } from "@/libs/helpers/number";
 
 interface ProductionFormProps {
   order: {
@@ -68,8 +69,8 @@ export default function PaymentOrderForm({
                     <div className="flex flex-col">
                       <span className="font-semibold">{capitalize(product.productName)}</span>
                       <span className="text-xs text-default-600">Cantidad: {product.quantity}</span>
-                      <span className="text-xs text-default-600">Precio: ${product.price}</span>
-                      <span className="text-xs text-default-600">Subtotal: ${product.price * product.quantity}</span>
+                      <span className="text-xs text-default-600">Precio: {convertToArgentinePeso(product.price)}</span>
+                      <span className="text-xs text-default-600">Subtotal: {convertToArgentinePeso(product.price * product.quantity)}</span>
                     </div>
 
                   </ListboxItem>
