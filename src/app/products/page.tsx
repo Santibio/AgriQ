@@ -5,6 +5,7 @@ import AddButton from "@/components/buttons/add-button";
 import PageSection from "@/components/layout/list-page";
 
 export default async function ProductsPage() {
+
   const products = await db.product.findMany({
     orderBy: [{ active: "desc" }, { name: "asc" }],
   });

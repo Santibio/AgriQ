@@ -13,14 +13,14 @@ import { generateNextProductCode } from "@/libs/helpers/products";
 
 interface ProductFormState {
   errors?:
-    | {
-        name?: string[];
-        image?: string[];
-        active?: string[];
-        price?: string[];
-        _form?: string[];
-      }
-    | false;
+  | {
+    name?: string[];
+    image?: string[];
+    active?: string[];
+    price?: string[];
+    _form?: string[];
+  }
+  | false;
 }
 
 export async function addProduct(
@@ -32,6 +32,9 @@ export async function addProduct(
     const active = formData.get("active") === "true";
     const image = formData.get("image") as File | null;
     const price = Number(formData.get("price") as string) || 0;
+    const category = formData.get("category") as string;
+    const type = formData.get("type") as string;
+    const presentation = formData.get("presentation") as string;
 
     // Validar los datos del formulario usando el esquema de Zod
     const parseResult = AddProductFormSchema.safeParse({
@@ -39,6 +42,9 @@ export async function addProduct(
       active,
       image,
       price,
+      category,
+      type,
+      presentation,
     });
 
     if (!parseResult.success) {
@@ -63,11 +69,15 @@ export async function addProduct(
         name: formattedName,
         active,
         image: imagePath,
-        code: await generateNextProductCode(),
+        code: await generateNextProductCode(category, type, presentation),
         price: price,
+        category,
+        type,
+        presentation,
       },
     });
   } catch (err) {
+    console.log("🚀 ~ addProduct ~ err:", err)
     return handleDatabaseError(err);
   }
   // Revalidar la ruta y redirigir
@@ -86,6 +96,9 @@ export async function editProduct(
     const active = formData.get("active") === "true";
     const image = formData.get("image") as File | null;
     const price = Number(formData.get("price") as string);
+    const category = formData.get("category") as string;
+    const type = formData.get("type") as string;
+    const presentation = formData.get("presentation") as string;
 
     // Validar los datos del formulario usando el esquema de Zod
     const parseResult = EditProductFormSchema.safeParse({
@@ -93,6 +106,9 @@ export async function editProduct(
       active,
       ...(image ? { image } : {}),
       price,
+      category,
+      type,
+      presentation,
     });
 
     if (!parseResult.success) {

@@ -80,7 +80,7 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
       <form onSubmit={handleSubmit} className="h-[70dvh] flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label="Nombre"
+            label="Nombre / Alias"
             placeholder="Ingresar nombre"
             name="name"
             onChange={handleOnchange}

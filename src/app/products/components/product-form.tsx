@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Select, SelectItem, Switch } from "@heroui/react";
+import { Button, Input, ScrollShadow, Select, SelectItem, Switch } from "@heroui/react";
 import { useEffect, useMemo, useState } from "react";
 import { CloudUpload } from "lucide-react";
 import type { Product } from "@prisma/client";
@@ -58,11 +58,13 @@ export default function ProductForm({ product }: ProductFormProps) {
   const [isLoading, setIsloading] = useState<boolean>(false);
 
   useEffect(() => {
+    if (isEditing) return;
     setValue("type", "");
     setValue("presentation", "");
   }, [selectedCategory, setValue]);
 
   useEffect(() => {
+    if (isEditing) return;
     setValue("presentation", "");
   }, [selectedType, setValue]);
 
@@ -76,11 +78,14 @@ export default function ProductForm({ product }: ProductFormProps) {
     return typesForCategory.find((t) => t.id === selectedType)?.presentation || [];
   }, [selectedType, typesForCategory]);
 
-  const onSubmit = async ({ name, active, image, price }: AddProductInputs) => {
+  const onSubmit = async ({ name, active, image, price, category, type, presentation }: AddProductInputs) => {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("active", String(active));
     formData.append("price", String(price));
+    formData.append("category", String(category));
+    formData.append("type", String(type));
+    formData.append("presentation", String(presentation));
     if (image) formData.append("image", image);
 
     setIsloading(true);
@@ -111,8 +116,8 @@ export default function ProductForm({ product }: ProductFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="h-[70dvh] flex flex-col gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col justify-between h-[calc(100vh-205px)]">
+      <ScrollShadow className="pb-1 flex-1 w-full flex gap-4 flex-col">
         <Controller
           name="name"
           control={control}
@@ -163,9 +168,10 @@ export default function ProductForm({ product }: ProductFormProps) {
                 selectedKeys={field.value ? [field.value] : []}
                 onChange={field.onChange}
                 isRequired
+                isDisabled={isEditing}
               >
                 {config.productCategories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
+                  <SelectItem key={category.id}>
                     {category.label}
                   </SelectItem>
                 ))}
@@ -182,10 +188,10 @@ export default function ProductForm({ product }: ProductFormProps) {
                 selectedKeys={field.value ? [field.value] : []}
                 onChange={field.onChange}
                 isRequired
-                isDisabled={!selectedCategory}
+                isDisabled={!selectedCategory || isEditing}
               >
                 {typesForCategory.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
+                  <SelectItem key={type.id}>
                     {type.label}
                   </SelectItem>
                 ))}
@@ -203,10 +209,10 @@ export default function ProductForm({ product }: ProductFormProps) {
               selectedKeys={field.value ? [field.value] : []}
               onChange={field.onChange}
               isRequired
-              isDisabled={!selectedType}
+              isDisabled={!selectedType || isEditing}
             >
               {presentationsForType.map((presentation) => (
-                <SelectItem key={presentation.id} value={presentation.id}>
+                <SelectItem key={presentation.id}>
                   {presentation.label}
                 </SelectItem>
               ))}
@@ -268,48 +274,32 @@ export default function ProductForm({ product }: ProductFormProps) {
               }
             };
             return (
-              <div className="flex items-center justify-center w-full">
-                <label
-                  className={`flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer text-gray-500 hover:bg-slate-100 hover:dark:bg-slate-900 ${isError ? "border-red-500 text-red-600" : ""
-                    }`}
-                >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <CloudUpload
-                      className={`text-gray-500 ${isError ? "text-red-600" : ""
-                        }`}
-                    />
-                    <p
-                      className={`mb-2 text-sm text-gray-500 dark:text-gray-400 ${isError ? "text-red-600" : ""
-                        }`}
-                    >
-                      <span className="font-semibold">Click to upload</span>
-                    </p>
-                    <p
-                      className={`text-xs text-gray-500 dark:text-gray-400 ${isError ? "text-red-600" : ""
-                        }`}
-                    >
-                      Formatos soportados: JPG, JPEG, PNG, WEBP (MAX 2MB)
-                    </p>
-                    {value?.name && (
-                      <p className="text-xs text-gray-500">
-                        Nombre del archivo: <span> {value.name}</span>
-                      </p>
-                    )}
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    onBlur={onBlur}
-                    ref={ref}
-                    className="hidden"
-                  />
-                </label>
-              </div>
+              <label
+                className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer text-gray-500 hover:bg-slate-100 hover:dark:bg-slate-900 ${isError ? "border-red-500 text-red-600" : ""}`}
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <CloudUpload className={`text-gray-500 ${isError ? "text-red-600" : ""}`} />
+                  <p className={`mb-2 text-sm text-gray-500 dark:text-gray-400 ${isError ? "text-red-600" : ""}`}>
+                    <span className="font-semibold">Click to upload</span>
+                  </p>
+                  <p className={`text-xs text-gray-500 dark:text-gray-400 ${isError ? "text-red-600" : ""}`}>
+                    Formats: JPG, JPEG, PNG, WEBP (MAX 2MB)
+                  </p>
+                  {value?.name && <p className="text-xs text-gray-500">File: {value.name}</p>}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  onBlur={onBlur}
+                  ref={ref}
+                  className="hidden"
+                />
+              </label>
             );
           }}
         />
-      </div>
+      </ScrollShadow>
       <Button
         type="submit"
         color="primary"

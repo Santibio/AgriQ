@@ -3,8 +3,8 @@ import { Product } from "@prisma/client";
 import {
   CardBody,
   Card,
-  CardFooter,
   Image,
+  Chip
 } from "@heroui/react";
 import Link from "next/link";
 import paths from "@/libs/paths";
@@ -15,36 +15,54 @@ interface ProductsListProps {
 }
 
 export default function ProductsList({ products }: ProductsListProps) {
+  if (!products.length)
+    return <EmptyListMsg text="No hay productos disponibles." />;
   return (
-      <ul className="gap-6 grid grid-cols-2 sm:grid-cols-4">
-        {products.length ? (
-          products.map((product) => (
-            <Link
-              key={product.id}
-              href={paths.productEdit(product.id.toString())}
-              className="w-full"
-            >
-              <Card shadow="sm" isPressable isDisabled={!product.active}>
-                <CardBody className="overflow-visible p-0">
+    <ul className="flex gap-4 flex-col">
+      {products.map((product) => (
+        <li key={product.id} className="w-full">
+          <Link
+            href={paths.productEdit(product.id.toString())}
+            className="w-full"
+          >
+            <Card shadow="none" isPressable isDisabled={!product.active} className="w-full border-1">
+              <CardBody className="p-4">
+                <div className="flex items-start gap-4">
                   <Image
-                    shadow="sm"
-                    radius="lg"
-                    width={200}
                     alt={product.name}
-                    className="object-cover h-[140px] w-[200px]"
                     src={product.image}
+                    width={80}
+                    height={80}
+                    className="object-cover rounded-lg"
                   />
-                </CardBody>
-                <CardFooter className="text-small justify-between">
-                  <b className="capitalize">{product.name}</b>
-                  <p className="text-default-500">{product.code}</p>
-                </CardFooter>
-              </Card>
-            </Link>
-          ))
-        ) : (
-          <EmptyListMsg text="No hay productos disponibles." />
-        )}
-      </ul>
+                  <div className="flex flex-col gap-1 flex-grow">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-bold text-lg capitalize">{product.name}</h4>
+                        <p className="text-xs text-slate-500">Código: {product.code}</p>
+                      </div>
+                      <Chip color={product.active ? "success" : "danger"} variant="flat" size="sm">
+                        {product.active ? "Activo" : "Inactivo"}
+                      </Chip>
+                    </div>
+                    <div className="flex gap-2 flex-wrap mt-2">
+                      <Chip color="primary" variant="bordered" size="sm" className="capitalize">{product.category}</Chip>
+                      <Chip color="secondary" variant="bordered" size="sm" className="capitalize">{product.type}</Chip>
+                      <Chip color="default" variant="bordered" size="sm" className="capitalize">{product.presentation}</Chip>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-lg">
+                      {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(product.price)}
+                    </p>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </Link>
+        </li>
+      ))
+      }
+    </ul>
   );
 }
