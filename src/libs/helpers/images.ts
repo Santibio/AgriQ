@@ -13,7 +13,7 @@ cloudinary.config({
 export async function saveImage(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  const result = await new Promise<string>((resolve, reject) => {
+  const resultedImage = await new Promise<string>((resolve, reject) => {
     cloudinary.uploader
       .upload_stream({}, (err, result) => {
         if (err) reject(err);
@@ -23,7 +23,7 @@ export async function saveImage(file: File): Promise<string> {
       .end(buffer);
   });
 
-  return result;
+  return resultedImage;
 }
 // Función para borrar una imagen en la carpeta 'public/images/avatars'
 export async function deleteImage(

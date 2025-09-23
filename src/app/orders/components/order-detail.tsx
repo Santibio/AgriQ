@@ -1,31 +1,31 @@
-import { DollarSign, Edit, Trash } from "lucide-react";
+import { DollarSign, Edit, Trash } from 'lucide-react';
 
 
-import { Button, Card, CardBody, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, Image } from "@heroui/react";
-import { capitalize } from "@/libs/utils";
+import { Button, Card, CardBody, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, Image } from '@heroui/react';
+import { capitalize } from '@/libs/utils';
+import { convertToArgentinePeso } from '@/libs/helpers/number';
 
 interface OrderDetailProps {
-    handleEditProduct: (index: number) => void;
-    handleDeleteProduct: (index: number) => void;
-    onOpenChange: () => void;
-    isOpen: boolean;
-    productsList: Array<{
-        productId: number;
-        productName: string;
-        quantity: number;
-        price: number;
-        selectedQuantity: number;
-        image?: string;
-    }>
+  handleEditProduct: (index: number) => void;
+  handleDeleteProduct: (index: number) => void;
+  onOpenChange: () => void;
+  isOpen: boolean;
+  productsList: Array<{
+    productId: number;
+    productName: string;
+    quantity: number;
+    price: number;
+    selectedQuantity: number;
+    image?: string;
+  }>
 }
 export default function OrderDetail({ productsList, isOpen, onOpenChange, handleDeleteProduct, handleEditProduct }: OrderDetailProps) {
-    console.log("🚀 ~ OrderDetail ~ productsList 2:", productsList)
 
-    if (!productsList || productsList.length === 0) {
-        return <div className="text-center text-gray-500 mt-10">No hay productos agregados al pedido.</div>;
-    }
+  if (!productsList || productsList.length === 0) {
+    return <div className="text-center text-gray-500 mt-10">No hay productos agregados al pedido.</div>;
+  }
 
-    return (
+  return (
 
         <Drawer
             isOpen={isOpen}
@@ -70,9 +70,9 @@ export default function OrderDetail({ productsList, isOpen, onOpenChange, handle
                                                                                 {product.selectedQuantity}
                                                                             </span>
                                                                             <span>×</span>
-                                                                            <span>${product.price}</span>
+                                                                            <span>{convertToArgentinePeso(product.price)}</span>
                                                                             <span>=</span>
-                                                                            <span className="font-semibold text-green-600">${product.price * product.quantity}</span>
+                                                                            <span className="font-semibold text-green-600">{convertToArgentinePeso(product.price * product.quantity)}</span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -108,7 +108,7 @@ export default function OrderDetail({ productsList, isOpen, onOpenChange, handle
                         <DrawerFooter className="bg-slate-50 p-6">
                             <div className="items-center justify-between flex w-full">
                                 <span>Cantidad de productos: {productsList.length}</span>
-                                <span className="text-lg font-semibold">Total: ${productsList.reduce((acc, p) => acc + (p.price * p.selectedQuantity), 0).toFixed(2)}</span>
+                                <span className="text-lg font-semibold">Total: {convertToArgentinePeso(productsList.reduce((acc, p) => acc + (p.price * p.selectedQuantity), 0))}</span>
                             </div>
                         </DrawerFooter>
                     </>
@@ -116,6 +116,6 @@ export default function OrderDetail({ productsList, isOpen, onOpenChange, handle
             </DrawerContent>
         </Drawer >
 
-    )
+  );
 
 }

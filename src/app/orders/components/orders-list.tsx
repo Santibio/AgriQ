@@ -21,10 +21,10 @@ import { setOrderStatusToCancel, setOrderStatusToDelivered, setOrderStatusToRead
 import { toast } from "sonner";
 
 interface OrderListProps {
-  list: shipmentWithRelations[];
+  list: OrderWithRelations[];
 }
 
-type shipmentWithRelations = Order & {
+type OrderWithRelations = Order & {
   movements: (Movement & {
     movementDetail: (MovementDetail & {
       batch: Batch & {

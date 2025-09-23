@@ -87,11 +87,11 @@ export async function editCustomer(
   return { errors: false };
 }
 
-interface deleteUserResponse {
+interface DeleteUserResponse {
   error?: string;
 }
 
-export async function deleteUser(userId: number): Promise<deleteUserResponse> {
+export async function deleteUser(userId: number): Promise<DeleteUserResponse> {
   try {
     await db.user.update({
       where: {

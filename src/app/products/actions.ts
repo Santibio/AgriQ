@@ -23,6 +23,38 @@ interface ProductFormState {
   | false;
 }
 
+// Función para manejar errores de la base de datos
+function handleDatabaseError(err: unknown): ProductFormState {
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    switch (err.code) {
+      case "P2002":
+        return {
+          errors: {
+            _form: ["El nombre del producto ya existe"],
+          },
+        };
+      default:
+        return {
+          errors: {
+            _form: [err.message],
+          },
+        };
+    }
+  } else if (err instanceof Error) {
+    return {
+      errors: {
+        _form: [err.message],
+      },
+    };
+  } else {
+    return {
+      errors: {
+        _form: ["Algo salió mal..."],
+      },
+    };
+  }
+}
+
 export async function addProduct(
   formData: FormData
 ): Promise<ProductFormState> {
@@ -77,7 +109,6 @@ export async function addProduct(
       },
     });
   } catch (err) {
-    console.log("🚀 ~ addProduct ~ err:", err)
     return handleDatabaseError(err);
   }
   // Revalidar la ruta y redirigir
@@ -163,34 +194,4 @@ export async function editProduct(
   return { errors: false };
 }
 
-// Función para manejar errores de la base de datos
-function handleDatabaseError(err: unknown): ProductFormState {
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    switch (err.code) {
-      case "P2002":
-        return {
-          errors: {
-            _form: ["El nombre del producto ya existe"],
-          },
-        };
-      default:
-        return {
-          errors: {
-            _form: [err.message],
-          },
-        };
-    }
-  } else if (err instanceof Error) {
-    return {
-      errors: {
-        _form: [err.message],
-      },
-    };
-  } else {
-    return {
-      errors: {
-        _form: ["Algo salió mal..."],
-      },
-    };
-  }
-}
+
