@@ -1,7 +1,7 @@
 "use server";
-import db from "@/libs/db";
-import paths from "@/libs/paths";
-import { getCurrentUser } from "@/libs/session";
+import db from "@/lib/db";
+import paths from "@/lib/paths";
+import { getCurrentUser } from "@/lib/session";
 import { MovementType, ShipmentStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 

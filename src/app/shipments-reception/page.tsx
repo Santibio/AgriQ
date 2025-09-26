@@ -1,5 +1,5 @@
 import PageSection from "@/components/layout/list-page";
-import db from "@/libs/db";
+import db from "@/lib/db";
 import ShipmentsReceptionList from "./components/shipments-reception-list";
 
 export default async function Shipments() {

@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/libs/session";
+import { getCurrentUser } from "@/lib/session";
 import React from "react";
 import Header from "./components/header";
 

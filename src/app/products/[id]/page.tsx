@@ -1,4 +1,4 @@
-import db from "@/libs/db";
+import db from "@/lib/db";
 import { notFound } from "next/navigation";
 import React from "react";
 import ProductForm from "../components/product-form";

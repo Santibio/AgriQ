@@ -1,7 +1,7 @@
 "use server";
 
-import db from "@/libs/db";
-import paths from "@/libs/paths";
+import db from "@/lib/db";
+import paths from "@/lib/paths";
 import { revalidatePath } from "next/cache";
 import { FiscalCondition } from "@prisma/client";
 

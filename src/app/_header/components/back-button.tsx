@@ -1,6 +1,6 @@
 "use client";
 
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 import { Button } from "@heroui/react";
 import { ChevronLeft } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";

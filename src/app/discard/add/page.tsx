@@ -1,5 +1,5 @@
 import PageTitle from "@/components/page-title";
-import db from "@/libs/db";
+import db from "@/lib/db";
 import BatchsList from "../components/batchs-list";
 
 export default async function Shipments() {

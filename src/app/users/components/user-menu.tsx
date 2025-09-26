@@ -1,5 +1,5 @@
 "use client";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 import {
   Dropdown,
   DropdownTrigger,

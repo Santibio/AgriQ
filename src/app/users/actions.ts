@@ -1,11 +1,11 @@
 "use server";
 
-import db from "@/libs/db";
-import paths from "@/libs/paths";
+import db from "@/lib/db";
+import paths from "@/lib/paths";
 import { revalidatePath } from "next/cache";
-import { UserAddFormSchema, UserEditFormSchema } from "@/libs/schemas/users";
-import { saveImage } from "@/libs/helpers/images";
-import { encrypt } from "@/libs/helpers/encryptions";
+import { UserAddFormSchema, UserEditFormSchema } from "@/lib/schemas/users";
+import { saveImage } from "@/lib/helpers/images";
+import { encrypt } from "@/lib/helpers/encryptions";
 import { Role } from "@prisma/client";
 
 interface UserFormState {

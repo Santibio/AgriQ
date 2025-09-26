@@ -1,6 +1,6 @@
 import React from "react";
 import OrderForm from "../components/order-form";
-import db from "@/libs/db";
+import db from "@/lib/db";
 import FormPage from "@/components/layout/form-page";
 
 export default async function ShipmentAddPage() {

@@ -1,4 +1,4 @@
-import db from "@/libs/db";
+import db from "@/lib/db";
 import ProductionForm from "../components/production-form";
 import FormPage from "@/components/layout/form-page";
 

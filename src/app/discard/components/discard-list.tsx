@@ -10,7 +10,7 @@ import {
   Discard,
 } from "@prisma/client";
 import { JSX } from "react";
-import { capitalize } from "@/libs/utils";
+import { capitalize } from "@/lib/utils";
 
 interface DiscardListProps {
   filteredMovements: MovementWithRelations[];

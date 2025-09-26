@@ -9,10 +9,10 @@ import {
   Product,
   Shipment,
 } from "@prisma/client";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 import { JSX } from "react";
 import EmptyListMsg from "@/components/empty-list";
-import { capitalize } from "@/libs/utils";
+import { capitalize } from "@/lib/utils";
 
 interface ShipmentsListProps {
   list: ShipmentWithRelations[];

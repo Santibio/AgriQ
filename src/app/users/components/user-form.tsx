@@ -17,12 +17,12 @@ import {
   EditInputs,
   UserAddFormSchema,
   UserEditFormSchema,
-} from "@/libs/schemas/users";
+} from "@/lib/schemas/users";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { usernameGenerator } from "@/libs/helpers/user";
+import { usernameGenerator } from "@/lib/helpers/user";
 import { addUser, editUser } from "../actions";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 import { useRouter } from "next/navigation";
 import config from "@/config";
 

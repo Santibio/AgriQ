@@ -15,14 +15,14 @@ import {
   Form,
 } from "@heroui/react";
 import moment from "moment";
-import { capitalize } from "@/libs/helpers/text";
+import { capitalize } from "@/lib/helpers/text";
 import EmptyListMsg from "@/components/empty-list";
 import { useState } from "react";
 import config from "@/config";
 import { createDiscard } from "../actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 
 interface DiscardListProps {
   batchs: ProductionWithRelations[];

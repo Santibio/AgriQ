@@ -1,7 +1,7 @@
-import db from "@/libs/db";
+import db from "@/lib/db";
 import AddButton from "@/components/buttons/add-button";
 import PageSection from "@/components/layout/list-page";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 import CustomerList from "./components/customers-list";
 
 export default async function CustomersPage() {

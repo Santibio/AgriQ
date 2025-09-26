@@ -1,10 +1,10 @@
 import { Product, Batch } from "@prisma/client";
 import { Image } from "@heroui/react";
 import moment from "moment";
-import { capitalize } from "@/libs/helpers/text";
+import { capitalize } from "@/lib/helpers/text";
 import EmptyListMsg from "@/components/empty-list";
 import Link from "next/link";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 
 interface ProductionsListProps {
   productions: ProductionWithRelations[];

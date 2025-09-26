@@ -1,13 +1,14 @@
 "use client";
 
-import { Button, Input, Select, SelectItem } from "@heroui/react";
+import { Input, Select, SelectItem } from "@heroui/react";
 import { useMemo, useState } from "react";
 import { addCustomer, editCustomer } from "../actions";
 import { toast } from "sonner";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 import { useRouter } from "next/navigation";
 import config from "@/config";
 import { Customer } from "@prisma/client";
+import FormWrapper from "@/components/layout/form-wrapper";
 
 interface CustomerFormProps {
   customer?: Customer;
@@ -76,12 +77,12 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="h-[70dvh] flex flex-col gap-4">
+      <FormWrapper onSubmit={handleSubmit} buttonLabel={isEditing ? "Editar Cliente" : "Agregar Cliente"} buttonProps={{ isLoading }}>
+        <div className="flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Nombre / Alias"
-            placeholder="Ingresar nombre"
+            placeholder="Ingresar nombre o alias de la empresa"
             name="name"
             onChange={handleOnchange}
             value={customerForm.name}
@@ -129,16 +130,7 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
             <SelectItem key={info.id}>{info.label}</SelectItem>
           ))}
         </Select>
-        <Button
-          isLoading={isLoading}
-          type="submit"
-          color="primary"
-          variant="ghost"
-          className="w-full mt-auto"
-        >
-          {isEditing ? "Editar Cliente" : "Agregar Cliente"}
-        </Button>
-      </form>
-    </div>
+        </div>
+      </FormWrapper>
   );
 }

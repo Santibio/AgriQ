@@ -12,11 +12,11 @@ import {
   AddProductInputs,
   EditProductFormSchema,
   EditProductInputs,
-} from "@/libs/schemas/products";
+} from "@/lib/schemas/products";
 import { addProduct, editProduct } from "../actions";
-import { capitalize } from "@/libs/helpers/text";
+import { capitalize } from "@/lib/helpers/text";
 import { useRouter } from "next/navigation";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 import config from "@/config";
 
 interface ProductFormProps {

@@ -1,7 +1,7 @@
-import PageTitle from "@/components/page-title";
-import db from "@/libs/db";
+import db from "@/lib/db";
 import CustomerForm from "../components/shipment-form";
 import { notFound } from "next/navigation";
+import FormPage from "@/components/layout/form-page";
 
 interface ShipmentEditPageProps {
   params: Promise<{ id: string }>;
@@ -64,15 +64,12 @@ export default async function ShipmentEditPage({
   const canEdit = shipment?.status === "PENDING";
 
   return (
-    <section className="pt-6 flex flex-col justify-between gap-6 px-6">
-      <PageTitle>
-        {canEdit ? `Editar envío #${shipmentId}` : `Envío #${shipmentId}`}
-      </PageTitle>
+    <FormPage title={canEdit ? `Editar envío #${shipmentId}` : `Envío #${shipmentId}`}>
       <CustomerForm
         batchs={allBatchs}
         movementId={shipment?.movementId}
         canEdit={canEdit}
       />
-    </section>
+    </FormPage>
   );
 }

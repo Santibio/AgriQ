@@ -2,8 +2,8 @@ import { DollarSign, Edit, Trash } from 'lucide-react';
 
 
 import { Button, Card, CardBody, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, Image } from '@heroui/react';
-import { capitalize } from '@/libs/utils';
-import { convertToArgentinePeso } from '@/libs/helpers/number';
+import { capitalize } from '@/lib/utils';
+import { convertToArgentinePeso } from '@/lib/helpers/number';
 
 interface OrderDetailProps {
   handleEditProduct: (index: number) => void;

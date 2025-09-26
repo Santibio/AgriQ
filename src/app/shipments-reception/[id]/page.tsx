@@ -1,4 +1,4 @@
-import db from "@/libs/db";
+import db from "@/lib/db";
 import ShipmentsReceptionForm from "../components/shipments-reception-form";
 import { notFound } from "next/navigation";
 import FormPage from "@/components/layout/form-page";

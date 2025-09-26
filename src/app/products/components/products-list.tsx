@@ -7,9 +7,9 @@ import {
   Chip,
 } from '@heroui/react';
 import Link from 'next/link';
-import paths from '@/libs/paths';
+import paths from '@/lib/paths';
 import EmptyListMsg from '@/components/empty-list';
-import { convertToArgentinePeso } from '@/libs/helpers/number';
+import { convertToArgentinePeso } from '@/lib/helpers/number';
 
 interface ProductsListProps {
   products: Product[];

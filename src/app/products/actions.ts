@@ -1,15 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import paths from "@/libs/paths";
-import db from "@/libs/db";
+import paths from "@/lib/paths";
+import db from "@/lib/db";
 import { Prisma } from "@prisma/client";
-import { saveImage } from "@/libs/helpers/images";
+import { saveImage } from "@/lib/helpers/images";
 import {
   AddProductFormSchema,
   EditProductFormSchema,
-} from "@/libs/schemas/products";
-import { generateNextProductCode } from "@/libs/helpers/products";
+} from "@/lib/schemas/products";
+import { generateNextProductCode } from "@/lib/helpers/products";
 
 interface ProductFormState {
   errors?:

@@ -1,6 +1,6 @@
-import db from "@/libs/db";
+import db from "@/lib/db";
 import ProductionsList from "./components/productions-list";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 import AddButton from "@/components/buttons/add-button";
 import PageSection from "@/components/layout/list-page";
 

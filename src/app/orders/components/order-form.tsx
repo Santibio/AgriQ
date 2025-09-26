@@ -2,7 +2,7 @@
 
 import { Customer } from "@prisma/client";
 import { Autocomplete, AutocompleteItem, Card, CardBody, Input, } from "@heroui/react";
-import { capitalize } from "@/libs/helpers/text";
+import { capitalize } from "@/lib/helpers/text";
 
 import { EyeIcon, Search } from "lucide-react";
 
@@ -11,11 +11,11 @@ import { Key, useState } from "react";
 import { Button, useDisclosure } from "@heroui/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 import FormWrapper from "@/components/layout/form-wrapper";
 import CustomerForm from "./customer-form";
 import OrderDetail from "./order-detail";
-import { convertToArgentinePeso } from "@/libs/helpers/number";
+import { convertToArgentinePeso } from "@/lib/helpers/number";
 
 interface Batch {
   productId: number;
@@ -55,7 +55,7 @@ export default function OrderForm({
   const { isOpen: isOpenCustomerDrawer, onOpen: onOpenCustomerDrawer, onOpenChange: onOpenChangeCustomerDrawer } = useDisclosure();
   const { isOpen: isOpenDetailOrderDrawer, onOpen: onOpenDetailOrderDrawer, onOpenChange: onOpenChangeDetailOrderDrawer } = useDisclosure();
 
-
+  const [isLoading, setIsLoading] = useState(false);
   const [orderFormData, setOrderFormData] = useState<{
     customerId: number;
     products: {
@@ -98,11 +98,8 @@ export default function OrderForm({
     price: p.price,
     selectedQuantity: p.quantity,
   })) : []);
-  console.log("🚀 ~ OrderForm ~ productsList:", productsList)
 
 
-  // const [editIndex, setEditIndex] = useState<number | null>(null);
-  // const [editForm, setEditForm] = useState<{ quantity: number }>({ quantity: 0 });
 
   // Filtrar productos ya agregados, permitiendo el producto que se está editando
   const availableBatchs = batchs.filter(b => {
@@ -132,7 +129,6 @@ export default function OrderForm({
   };
 
   const handleAddProduct = () => {
-    console.log("🚀 ~ handleAddProduct ~ editingProductIndex:", editingProductIndex)
     if (editingProductIndex !== null) {
       const updatedProductsList = [...productsList];
       const productToUpdate = updatedProductsList[editingProductIndex];
@@ -149,7 +145,6 @@ export default function OrderForm({
       };
       
       setProductsList(updatedProductsList);
-      console.log("🚀 ~ handleAddProduct ~ updatedProductsList:", updatedProductsList)
 
       const updatedOrderProducts = updatedProductsList.map(p => ({
         productId: p.productId,
@@ -238,7 +233,7 @@ export default function OrderForm({
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-
+    setIsLoading(true);
     e.preventDefault();
 
     try {
@@ -252,8 +247,9 @@ export default function OrderForm({
       toast.success("Orden creada correctamente");
       router.push(paths.orders());
     } catch (error) {
-      console.error("Error al crear la orden:", error);
       toast.error("Ocurrió un error al procesar la solicitud.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -263,6 +259,9 @@ export default function OrderForm({
         onSubmit={handleSubmit}
         buttonLabel="Confirmar"
         showScrollShadow={false}
+        buttonProps={{
+          isLoading,
+        }}
       >
         <div className="flex flex-col gap-6 w-full">
           <div className="flex  gap-2 w-full">

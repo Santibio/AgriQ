@@ -1,5 +1,5 @@
 import config from "@/config";
-import db from "@/libs/db";
+import db from "@/lib/db";
 
 export async function generateNextProductCode(category: string, type: string, presentation: string): Promise<string> {
   // 1. Obtener los códigos de la configuración

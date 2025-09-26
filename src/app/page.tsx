@@ -4,7 +4,7 @@ import RecentMovements from "@/components/recent-movements";
 import StatsCards from "@/components/stats-cards";
 import WelcomeBanner from "@/components/welcom-banner";
 /* import config from "@/config";
- */import { getCurrentUser } from "@/libs/session";
+ */import { getCurrentUser } from "@/lib/session";
 import { notFound } from "next/navigation";
 
 /* type Role = keyof typeof config.rolePermissions;

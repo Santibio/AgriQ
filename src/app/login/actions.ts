@@ -1,13 +1,13 @@
 "use server";
 
-import db from "@/libs/db";
-import paths from "@/libs/paths";
+import db from "@/lib/db";
+import paths from "@/lib/paths";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-import { compareHash } from "@/libs/helpers/encryptions";
+import { compareHash } from "@/lib/helpers/encryptions";
 
 const loginSchema = z.object({
   username: z

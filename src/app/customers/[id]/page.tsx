@@ -1,7 +1,7 @@
-import PageTitle from "@/components/page-title";
-import db from "@/libs/db";
+import db from "@/lib/db";
 import { notFound } from "next/navigation";
 import CustomerForm from "../components/customer-form";
+import FormPage from "@/components/layout/form-page";
 
 interface CustomerEditPageProps {
   params: Promise<{ id: string }>;
@@ -21,9 +21,8 @@ export default async function CustomerEditPage({
   if (!customer) return notFound();
 
   return (
-    <section className="pt-6 flex flex-col justify-between gap-6">
-      <PageTitle>Editar Cliente</PageTitle>
+    <FormPage title="Editar Cliente">
       <CustomerForm customer={customer} />
-    </section>
+    </FormPage>
   );
 }

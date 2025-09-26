@@ -1,62 +1,145 @@
-"use client"
-import { Card, Chip, Drawer, DrawerBody, DrawerContent, DrawerHeader, Listbox, ListboxItem, useDisclosure } from "@heroui/react";
+'use client'
+import {
+  Card,
+  Chip,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerHeader,
+  Listbox,
+  ListboxItem,
+  useDisclosure,
+} from '@heroui/react'
 
-import { CheckCheck, DollarSign, Edit, Eye, PackageCheck, PackageOpen, Trash } from "lucide-react";
-import moment from "moment";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  DollarSign,
+  Edit,
+  Eye,
+  PackageCheck,
+  PackageOpen,
+  Trash,
+  Truck,
+  XCircle,
+} from 'lucide-react'
+import moment from 'moment'
+import 'moment/locale/es'
+
 import {
   Movement,
   MovementDetail,
   Batch,
   Product,
   Order,
+  Customer,
   StatusDoing,
   StatusPayment,
-} from "@prisma/client";
-import { JSX, useState } from "react";
-import { capitalize } from "@/libs/utils";
-import EmptyListMsg from "@/components/empty-list";
-import { useRouter } from "next/navigation";
-import paths from "@/libs/paths";
-import { setOrderStatusToCancel, setOrderStatusToDelivered, setOrderStatusToReady } from "../actions";
-import { toast } from "sonner";
+} from '@prisma/client'
+import { JSX, useState } from 'react'
+import EmptyListMsg from '@/components/empty-list'
+import { useRouter } from 'next/navigation'
+import paths from '@/lib/paths'
+import {
+  setOrderStatusToCancel,
+  setOrderStatusToDelivered,
+  setOrderStatusToReady,
+} from '../actions'
+import { toast } from 'sonner'
+import { convertToArgentinePeso } from '@/lib/helpers/number'
+
+moment.locale('es')
 
 interface OrderListProps {
-  list: OrderWithRelations[];
+  list: OrderWithRelations[]
 }
 
 type OrderWithRelations = Order & {
   movements: (Movement & {
     movementDetail: (MovementDetail & {
       batch: Batch & {
-        product: Product;
-      };
-    })[];
-  })[];
-};
-
+        product: Product
+      }
+    })[]
+  })[]
+  customer: Customer
+  totalUniqueProducts?: number
+  totalProducts?: number
+}
 
 const STATUS_MAP: Record<
-  Order["statusDoing"],
-  { icon: JSX.Element; gradient: string; label: string }
+  Order['statusDoing'],
+  {
+    icon: JSX.Element
+    gradient: string
+    label: string
+    color: string
+    progress: string
+  }
 > = {
   PENDING: {
-    icon: <PackageOpen className="h-6 w-6 text-white" />,
-    gradient: "from-warning to-warning/50",
-    label: "Pendiente"
+    icon: <Clock className='h-6 w-6 text-white' />,
+    gradient: 'from-warning to-warning/50',
+    label: 'Pendiente de preparar',
+    color: 'text-warning',
+    progress: '25%',
   },
   READY_TO_DELIVER: {
-    icon: <PackageCheck className="h-6 w-6 text-white" />,
-    gradient: "from-primary to-primary/50",
-    label: "Preparado"
+    icon: <PackageCheck className='h-6 w-6 text-white' />,
+    gradient: 'from-primary to-primary/50',
+    label: 'Preparado',
+    color: 'text-primary',
+    progress: '75%',
   },
   DELIVERED: {
-    icon: <CheckCheck className="h-6 w-6 text-white" />,
-    gradient: "from-success to-success/50",
-    label: "Entregado"
+    icon: <Truck className='h-6 w-6 text-white' />,
+    gradient: 'from-success to-success/50',
+    label: 'Entregado',
+    color: 'text-success',
+    progress: '100%',
   },
-};
+}
 
-const getAvailableActions = (order: Order, router: ReturnType<typeof useRouter>, handlers: { handleStatusDoing: () => void, handleStatusPedingToDeliver: () => void, handleStatusPedingToCancel: () => void }) => {
+const STATUS_PAYMENT_MAP: Record<
+  Order['statusPayment'],
+  {
+    icon: JSX.Element
+    className: string
+    label: string
+  }
+> = {
+  UNPAID: {
+    icon: <AlertCircle className='h-4 w-4' />,
+    className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    label: 'Pendiente de pago',
+  },
+  PAID: {
+    icon: <CheckCircle2 className='h-4 w-4' />,
+    className: 'bg-green-100 text-green-800 border-green-200',
+    label: 'Pagado',
+  },
+  CANCELED: {
+    icon: <XCircle className='h-4 w-4' />,
+    className: 'bg-red-100 text-red-800 border-red-200',
+    label: 'Cancelado',
+  },
+  PARCIAL_PAID: {
+    icon: <PackageCheck className='h-4 w-4' />,
+    className: 'bg-blue-100 text-blue-800 border-blue-200',
+    label: 'Pago parcial',
+  },
+}
+
+const getAvailableActions = (
+  order: Order,
+  router: ReturnType<typeof useRouter>,
+  handlers: {
+    handleStatusDoing: () => void
+    handleStatusPedingToDeliver: () => void
+    handleStatusPedingToCancel: () => void
+  },
+) => {
   const actions = [
     {
       key: 'view_movements',
@@ -84,34 +167,39 @@ const getAvailableActions = (order: Order, router: ReturnType<typeof useRouter>,
       label: 'Preparar pedido',
       icon: <PackageOpen />,
       onPress: handlers.handleStatusDoing,
-      isVisible: order?.statusDoing === StatusDoing.PENDING && order.statusPayment !== StatusPayment.CANCELED,
+      isVisible:
+        order?.statusDoing === StatusDoing.PENDING &&
+        order.statusPayment !== StatusPayment.CANCELED,
     },
     {
       key: 'deliver',
       label: 'Entregar pedido',
       icon: <PackageOpen />,
       onPress: handlers.handleStatusPedingToDeliver,
-      isVisible: order?.statusDoing === StatusDoing.READY_TO_DELIVER && order?.statusPayment === StatusPayment.PAID,
+      isVisible:
+        order?.statusDoing === StatusDoing.READY_TO_DELIVER &&
+        order?.statusPayment === StatusPayment.PAID,
     },
-    
+
     {
       key: 'cancel',
-      label: <span className="text-red-500">Cancelar pedido</span>,
-      icon: <Trash className="text-red-500" />,
+      label: <span className='text-red-500'>Cancelar pedido</span>,
+      icon: <Trash className='text-red-500' />,
       onPress: handlers.handleStatusPedingToCancel,
-      isVisible: order?.statusDoing !== StatusDoing.DELIVERED && order?.statusPayment !== StatusPayment.CANCELED,
+      isVisible:
+        order?.statusDoing !== StatusDoing.DELIVERED &&
+        order?.statusPayment !== StatusPayment.CANCELED,
     },
-  ];
+  ]
 
-  return actions.filter(action => action.isVisible);
-};
+  return actions.filter(action => action.isVisible)
+}
 
 export default function OrderList({ list }: OrderListProps) {
   const router = useRouter()
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-
 
   const handleSelectOrder = (order: Order) => {
     setSelectedOrder(order)
@@ -123,18 +211,17 @@ export default function OrderList({ list }: OrderListProps) {
       const response = await setOrderStatusToReady(selectedOrder!.id)
 
       if (response?.errors) {
-        return toast.error("Ocurrió un error al procesar la solicitud.");
+        return toast.error('Ocurrió un error al procesar la solicitud.')
       }
 
-      toast.success("Pedido preparada correctamente");
-
+      toast.success('Pedido preparada correctamente')
     } catch (error) {
-      console.error("Error: ", error);
+      console.error('Error: ', error)
       toast.error(
-        "Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe."
-      );
+        'Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe.',
+      )
     } finally {
-      onOpenChange();
+      onOpenChange()
     }
   }
   const handleStatusPedingToDeliver = async () => {
@@ -142,18 +229,17 @@ export default function OrderList({ list }: OrderListProps) {
       const response = await setOrderStatusToDelivered(selectedOrder!.id)
 
       if (response?.errors) {
-        return toast.error("Ocurrió un error al procesar la solicitud.");
+        return toast.error('Ocurrió un error al procesar la solicitud.')
       }
 
-      toast.success("Pedido entregada correctamente");
-
+      toast.success('Pedido entregada correctamente')
     } catch (error) {
-      console.error("Error: ", error);
+      console.error('Error: ', error)
       toast.error(
-        "Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe."
-      );
+        'Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe.',
+      )
     } finally {
-      onOpenChange();
+      onOpenChange()
     }
   }
 
@@ -162,74 +248,107 @@ export default function OrderList({ list }: OrderListProps) {
       const response = await setOrderStatusToCancel(selectedOrder!.id)
 
       if (response?.errors) {
-        return toast.error("Ocurrió un error al procesar la solicitud.");
+        return toast.error('Ocurrió un error al procesar la solicitud.')
       }
 
-      toast.success("Pedido cancelada correctamente");
-
+      toast.success('Pedido cancelada correctamente')
     } catch (error) {
-      console.error("Error: ", error);
+      console.error('Error: ', error)
       toast.error(
-        "Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe."
-      );
+        'Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe.',
+      )
     } finally {
-      onOpenChange();
+      onOpenChange()
     }
   }
 
   if (!list || list.length === 0)
-    return <EmptyListMsg text="No hay envíos pendientes" />;
+    return <EmptyListMsg text='No hay envíos pendientes' />
 
   return (
     <>
-      <ul className="flex gap-2 flex-col  w-full">
-        {list.map((order) => (
+      <ul className='flex gap-2 flex-col  w-full'>
+        {list.map(order => (
           <li key={order.id}>
             <Card
               isPressable
               onPress={() => handleSelectOrder(order)}
-              className="w-full p-4 border"
-              shadow="none"
+              className='w-full p-4 border'
+              shadow='sm'
             >
-              <div className="flex gap-4 items-start">
+              <div className='flex gap-4 items-start'>
                 {/* Icono con fondo gradiente */}
                 <div
-                  className={`w-14 h-14 min-w-[3.5rem] rounded-lg bg-gradient-to-r ${STATUS_MAP?.[order?.statusDoing]?.gradient
-                    } flex items-center justify-center text-white text-xl`}
+                  className={`w-14 h-14 min-w-[3.5rem] rounded-lg bg-gradient-to-r ${
+                    STATUS_MAP?.[order?.statusDoing]?.gradient
+                  } flex items-center justify-center text-white text-xl shadow-sm`}
                 >
                   {STATUS_MAP[order.statusDoing]?.icon}
                 </div>
 
                 {/* Contenido */}
-                <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <span className="font-semibold text-lg">
-                      Pedido #{order.id}
-                    </span>
-                    <span className="text-slate-400 text-sm">
-                      {moment(order?.createdAt).fromNow()}
-                    </span>
+                <div className='flex-1'>
+                  <div className='flex justify-between items-start'>
+                    <div className='flex items-start flex-col'>
+                      <span className='font-semibold text-medium'>
+                        Pedido #{order.id}
+                      </span>
+                      <span className='text-sm text-gray-600'>
+                        {`${order.customer.name} ${order.customer.lastName}`}
+                      </span>
+                    </div>
+                    <div className='flex items-end flex-col'>
+                      <span className='text-xs text-gray-500'>
+                        {moment(order?.createdAt).locale('es').fromNow()}
+                      </span>
+                      <span className='text-sm font-semibold text-gray-900'>
+                        {convertToArgentinePeso(order.total)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col">
-                    <span>{STATUS_MAP?.[order?.statusDoing]?.label
-                    }</span>
-                    <span>{order.statusPayment}</span>
-                  </div>
-
-                  {/* Productos */}
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {order.movements[0]?.movementDetail.map((product) => (
-                      <Chip
-                        key={product.id}
-                        size="sm"
-                        variant="flat"
-                        color="primary"
-                        className="capitalize"
+                  <div className='flex justify-between mt-2 items-end'>
+                    <div className='flex flex-col gap-2'>
+                      <span
+                        className={`${
+                          STATUS_MAP?.[order?.statusDoing]?.color
+                        } text-xs font-semibold text-start`}
                       >
-                        {capitalize(product.batch.product.name)} × {product.quantity}
+                        {STATUS_MAP?.[order?.statusDoing]?.label}
+                      </span>
+                      <Chip
+                        size='sm'
+                        radius='sm'
+                        variant='flat'
+                        startContent={
+                          STATUS_PAYMENT_MAP?.[order?.statusPayment]?.icon
+                        }
+                        className={
+                          STATUS_PAYMENT_MAP?.[order?.statusPayment]?.className
+                        }
+                      >
+                        {STATUS_PAYMENT_MAP?.[order?.statusPayment]?.label}
                       </Chip>
-                    ))}
+                    </div>
+                    <div className='text-right'>
+                      <p className='text-xs text-gray-500'>
+                        {order.totalProducts}{' '}
+                        {order.totalProducts === 1 ? 'producto' : 'productos'}
+                      </p>
+                    </div>
                   </div>
+                </div>
+              </div>
+              {/* Progress Indicator */}
+              <div className='py-2 mt-4'>
+                <div className='w-full bg-gray-200 rounded-full h-1.5'>
+                  <div
+                    className={`h-1.5 rounded-full bg-gradient-to-r ${
+                      STATUS_MAP?.[order?.statusDoing]?.gradient
+                    } transition-all duration-500`}
+                    style={{
+                      width: STATUS_MAP?.[order?.statusDoing]?.progress || '0%',
+                    }}
+                  />
                 </div>
               </div>
             </Card>
@@ -239,23 +358,31 @@ export default function OrderList({ list }: OrderListProps) {
       <Drawer
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        backdrop="blur"
-        placement="bottom"
-        size="xl"
+        backdrop='blur'
+        placement='bottom'
+        size='xl'
       >
         <DrawerContent>
           {() => (
             <>
-              <DrawerHeader className="flex flex-col gap-1">
-                <h2 className="text-xl font-semibold">
+              <DrawerHeader className='flex flex-col gap-1'>
+                <h2 className='text-xl font-semibold'>
                   Pedido #{selectedOrder?.id}
                 </h2>
               </DrawerHeader>
-              <DrawerBody className="pb-10 pt-2">
+              <DrawerBody className='pb-10 pt-2'>
                 <div>
-                  <Listbox variant="faded">
-                    {getAvailableActions(selectedOrder!, router, { handleStatusDoing, handleStatusPedingToDeliver, handleStatusPedingToCancel }).map(action => (
-                      <ListboxItem key={action.key} startContent={action.icon} onPress={action.onPress}>
+                  <Listbox variant='faded'>
+                    {getAvailableActions(selectedOrder!, router, {
+                      handleStatusDoing,
+                      handleStatusPedingToDeliver,
+                      handleStatusPedingToCancel,
+                    }).map(action => (
+                      <ListboxItem
+                        key={action.key}
+                        startContent={action.icon}
+                        onPress={action.onPress}
+                      >
                         {action.label}
                       </ListboxItem>
                     ))}
@@ -267,5 +394,5 @@ export default function OrderList({ list }: OrderListProps) {
         </DrawerContent>
       </Drawer>
     </>
-  );
+  )
 }

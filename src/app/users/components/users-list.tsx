@@ -2,7 +2,7 @@ import type { User } from "@prisma/client";
 import { Avatar } from "@heroui/react";
 import UserMenu from "./user-menu";
 import Link from "next/link";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 import clsx from "clsx";
 import config from "@/config";
 

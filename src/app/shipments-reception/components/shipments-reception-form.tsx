@@ -20,8 +20,8 @@ import {
 import { createShipmentReception } from "../actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import paths from "@/libs/paths";
-import { capitalize } from "@/libs/utils";
+import paths from "@/lib/paths";
+import { capitalize } from "@/lib/utils";
 import FormWrapper from "@/components/layout/form-wrapper";
 
 type ShipmentFormProps = {

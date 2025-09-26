@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import paths from "@/libs/paths";
+import paths from "@/lib/paths";
 
 const quickActions = [
 

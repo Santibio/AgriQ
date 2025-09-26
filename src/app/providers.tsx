@@ -6,7 +6,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { useRouter } from "next/navigation";
 // import { useRef } from "react";
 // import { Provider } from "react-redux";
-// import { AppStore, makeStore } from "@/libs/redux/store";
+// import { AppStore, makeStore } from "@/lib/redux/store";
 
 interface ProvidersProps {
   children: React.ReactNode;

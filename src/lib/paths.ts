@@ -69,13 +69,13 @@ const paths = {
     return `/orders/add`;
   },
   orderToEdit(orderId: string) {
-    return `/orders/${orderId}`;
+    return `/orders/edit?id=${orderId}`;
   },
   orderToCharge(orderId: string) {
-    return `/orders/${orderId}/payment`;
+    return `/orders/payment?id=${orderId}`;
   },
   orderToMovements(orderId: string) {
-    return `/orders/${orderId}/movements`;
+    return `/orders/movements?id=${orderId}`;
   },
 };
 

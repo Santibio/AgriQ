@@ -13,8 +13,8 @@ import {
 import { createShipment, editShipment } from "../actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import paths from "@/libs/paths";
-import { capitalize } from "@/libs/utils";
+import paths from "@/lib/paths";
+import { capitalize } from "@/lib/utils";
 import EmptyListMsg from "@/components/empty-list";
 
 type ShipmentFormProps = {
@@ -67,7 +67,25 @@ export default function ShipmentForm({
   );
 
   const handleSelect = (batchId: number) => {
-    setSelected((prev) => ({ ...prev, [batchId]: !prev[batchId] }));
+    setSelected((prevSelected) => {
+      const newSelectedState = !prevSelected[batchId];
+
+      if (newSelectedState) {
+        // If the batch is being selected, restore its initial quantity.
+        setQuantities((prevQuantities) => ({
+          ...prevQuantities,
+          [batchId]: initialQuantities[batchId],
+        }));
+      } else {
+        // If the batch is being deselected, reset its quantity to 0.
+        setQuantities((prevQuantities) => ({
+          ...prevQuantities,
+          [batchId]: 0,
+        }));
+      }
+
+      return { ...prevSelected, [batchId]: newSelectedState };
+    });
   };
 
   const handleQuantityChange = (batchId: number, value: string) => {
@@ -138,8 +156,8 @@ export default function ShipmentForm({
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <ScrollShadow className="h-[65dvh]">
+    <form onSubmit={handleSubmit} className="flex flex-col justify-between h-[calc(100vh-210px)]">
+      <ScrollShadow className="pb-1 flex-1 w-full" size={100}>
         <div className="flex flex-col gap-6">
           {batchs.map((batch) => (
             <Card

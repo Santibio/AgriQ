@@ -1,11 +1,11 @@
 "use server";
-import db from "@/libs/db";
-import paths from "@/libs/paths";
+import db from "@/lib/db";
+import paths from "@/lib/paths";
 import {
   AddProductionInputs,
   CreateProductionFormSchema,
-} from "@/libs/schemas/production";
-import { getCurrentUser } from "@/libs/session";
+} from "@/lib/schemas/production";
+import { getCurrentUser } from "@/lib/session";
 import { MovementType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 // import { redirect } from "next/navigation";
