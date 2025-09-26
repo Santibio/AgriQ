@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation'
 import paths from '@/lib/paths'
 import FormWrapper from '@/components/layout/form-wrapper'
 import { convertToArgentinePeso } from '@/lib/helpers/number'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 interface ProductItem {
   productId: number
@@ -48,6 +48,8 @@ const columns = [
 
 export default function PaymentOrderForm({ order }: ProductionFormProps) {
   const router = useRouter()
+
+  const [isLoading, setIsLoading] = useState(false)
 
   const renderCell = useCallback(
     (product: ProductItem, columnKey: keyof ProductItem) => {
@@ -84,6 +86,7 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
   )
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    setIsLoading(true)
     e.preventDefault()
 
     try {
@@ -98,6 +101,8 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
     } catch (error) {
       console.error('Error al crear la orden:', error)
       toast.error('Ocurrió un error al procesar la solicitud.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -106,6 +111,7 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
       onSubmit={handleSubmit}
       buttonLabel='Confirmar'
       showScrollShadow={false}
+      buttonProps={{ isLoading }}
     >
       <div className='flex flex-col gap-6 w-full h-full'>
         <Input
@@ -119,10 +125,14 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
         <div>
           <span className='font-medium text-small'>Resumen</span>
           <Table
+            isHeaderSticky
             aria-label='order products'
             shadow='none'
-            className='w-[100vw] ml-[-15px] mt-[-6px]'
+            className='w-[100vw] ml-[-15px] mt-[-6px] max-w-[600px]'
             radius='md'
+            classNames={{
+              base: 'max-h-[55dvh] overflow-scroll',
+            }}
           >
             <TableHeader columns={columns} className='p-0'>
               {column => (
