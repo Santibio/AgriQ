@@ -3,11 +3,12 @@
 
 generator client {
   provider = "prisma-client-js"
+  connection_limit = 20 // Ajusta este número según tus necesidades
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_URL")
+  provider         = "postgresql"
+  url              = env("POSTGRES_URL")
 }
 
 enum Role {
