@@ -29,7 +29,20 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "AgriQ",
-  description: "Un aplicacion mobile para dar seguimiento a productos",
+  description: "Una aplicación móvil para dar seguimiento a productos",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'AgriQ',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+  },
 };
 
 export default function RootLayout({
@@ -43,6 +56,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased `}
       >
         <Providers>
+          
           <Header />
           <main className="max-w-[600px] m-auto pt-4">
             {children}
