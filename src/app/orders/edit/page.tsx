@@ -4,16 +4,16 @@ import { notFound } from 'next/navigation'
 import FormPage from '@/components/layout/form-page'
 
 interface ShipmentEditPageProps {
-  searchParams: {
-    id: string
-  }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+
 }
 
 export default async function ShipmentEditPage({
   searchParams,
 }: ShipmentEditPageProps) {
-  const orderId = await searchParams
-  const orderIdInt = parseInt(orderId.id)
+  const orderId = (await searchParams).id as string
+
+  const orderIdInt = parseInt(orderId)
 
   const order = await db.order.findUnique({
     where: { id: orderIdInt },

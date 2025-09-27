@@ -1,6 +1,6 @@
 'use client'
 
-import { Customer } from '@prisma/client'
+import { Customer, PaymentMethod } from '@prisma/client'
 import {
   Input,
   Table,
@@ -9,15 +9,19 @@ import {
   TableRow,
   TableCell,
   TableColumn,
+  Select,
+  SelectItem,
+  Button,
 } from '@heroui/react'
 import { capitalize } from '@/lib/helpers/text'
 import { confirmOrder } from '../actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { useState, useRef, useCallback } from 'react'
 import paths from '@/lib/paths'
 import FormWrapper from '@/components/layout/form-wrapper'
 import { convertToArgentinePeso } from '@/lib/helpers/number'
-import { useCallback, useState } from 'react'
+import { Upload } from 'lucide-react'
 
 interface ProductItem {
   productId: number
@@ -46,10 +50,55 @@ const columns = [
   { key: 'subtotal', label: 'Subtotal' },
 ]
 
+const paymentMethodsMap = {
+  CASH: 'Efectivo',
+  WIRE: 'Transferencia',
+}
+
 export default function PaymentOrderForm({ order }: ProductionFormProps) {
   const router = useRouter()
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
+    PaymentMethod.CASH,
+  )
+  const [paymentProof, setPaymentProof] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handlePaymentMethodChange = (value: PaymentMethod) => {
+    setPaymentMethod(value)
+    // Reset payment proof when changing payment method
+    if (value !== PaymentMethod.WIRE) {
+      setPaymentProof(null)
+    }
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setPaymentProof(e.target.files[0])
+    }
+  }
 
   const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    setIsLoading(true)
+    e.preventDefault()
+
+    try {
+      const response = await confirmOrder(order.id, paymentMethod, paymentProof)
+
+      if (response?.errors) {
+        return toast.error('Ocurrió un error al procesar la solicitud.')
+      }
+
+      toast.success('Cobro creado correctamente')
+      router.push(paths.orders())
+    } catch (error) {
+      console.error('Error al crear el cobro:', error)
+      toast.error('Ocurrió un error al procesar la solicitud.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const renderCell = useCallback(
     (product: ProductItem, columnKey: keyof ProductItem) => {
@@ -85,27 +134,6 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
     [],
   )
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    setIsLoading(true)
-    e.preventDefault()
-
-    try {
-      const response = await confirmOrder(order.id)
-
-      if (response?.errors) {
-        return toast.error('Ocurrió un error al procesar la solicitud.')
-      }
-
-      toast.success('Orden creada correctamente')
-      router.push(paths.orders())
-    } catch (error) {
-      console.error('Error al crear la orden:', error)
-      toast.error('Ocurrió un error al procesar la solicitud.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   return (
     <FormWrapper
       onSubmit={handleSubmit}
@@ -122,6 +150,49 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
           variant='flat'
           radius='sm'
         />
+        <div className='space-y-4'>
+          <Select
+            label='Forma de pago'
+            selectedKeys={[paymentMethod]}
+            onSelectionChange={keys => {
+              const selected = Array.from(keys)[0] as PaymentMethod
+              handlePaymentMethodChange(selected)
+            }}
+            variant='flat'
+            radius='sm'
+            labelPlacement='outside'
+          >
+            {Object.values(PaymentMethod).map(method => (
+              <SelectItem key={method}>{paymentMethodsMap[method]}</SelectItem>
+            ))}
+          </Select>
+
+          {paymentMethod === PaymentMethod.WIRE && (
+            <div className='flex flex-col gap-2'>
+              <input
+                type='file'
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept='image/*'
+                className='hidden'
+              />
+              <Button
+                variant='flat'
+                color={paymentProof ? 'success' : 'primary'}
+                onPress={() => fileInputRef.current?.click()}
+                className='w-full'
+                startContent={<Upload className='w-5 h-5' />}
+              >
+                {paymentProof ? 'Comprobante cargado' : 'Subir comprobante'}
+              </Button>
+              {paymentProof && (
+                <p className='text-xs text-gray-500 mt-1'>
+                  Archivo: {paymentProof.name}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
         <div>
           <span className='font-medium text-small'>Resumen</span>
           <Table

@@ -4,16 +4,14 @@ import { notFound } from 'next/navigation'
 import OrderMovements from '../components/order-movements'
 
 interface ShipmentEditPageProps {
-  searchParams: {
-    id: string
-  }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export default async function MovementsOrderPage({
   searchParams,
 }: ShipmentEditPageProps) {
-  const orderId = await searchParams
-  const orderIdInt = parseInt(orderId.id)
+  const orderId = (await searchParams).id as string
+  const orderIdInt = parseInt(orderId)
 
   const order = await db.order.findUnique({
     where: { id: orderIdInt },

@@ -372,7 +372,7 @@ export default function OrderList({ list }: OrderListProps) {
               </DrawerHeader>
               <DrawerBody className='pb-10 pt-2'>
                 <div>
-                  <Listbox variant='faded'>
+                  <Listbox>
                     {getAvailableActions(selectedOrder!, router, {
                       handleStatusDoing,
                       handleStatusPedingToDeliver,
