@@ -15,8 +15,8 @@ import { capitalize } from '@/lib/utils'
 import { convertToArgentinePeso } from '@/lib/helpers/number'
 
 interface OrderDetailProps {
-  handleEditProduct: (index: number) => void
-  handleDeleteProduct: (index: number) => void
+  handleEditProduct?: (index: number) => void
+  handleDeleteProduct?: (index: number) => void
   onOpenChange: () => void
   isOpen: boolean
   productsList: Array<{
@@ -73,7 +73,7 @@ export default function OrderDetail({
                         className='active:scale-[0.98] transition-transform'
                       >
                         <CardBody className='p-3'>
-                          <div className='flex items-center justify-between gap-3'>
+                          <div className='flex justify-between gap-3'>
                             {/* Imagen */}
                             <Image
                               src={product.image}
@@ -84,11 +84,11 @@ export default function OrderDetail({
                             />
 
                             {/* Info */}
-                            <div className='flex-1 min-w-0'>
-                              <h4 className='font-medium text-gray-900 text-sm truncate'>
+                            <div className='flex-1 min-w-0 flex flex-col justify-between'>
+                              <h4 className='font-medium text-gray-900 text-md truncate'>
                                 {capitalize(product.productName)}
                               </h4>
-                              <div className='text-xs text-gray-600 flex gap-1'>
+                              <div className='text-sm text-gray-600 flex gap-1'>
                                 <span>{product.selectedQuantity}×</span>
                                 <span>
                                   {convertToArgentinePeso(product.price)}
@@ -96,7 +96,7 @@ export default function OrderDetail({
                                 <span>=</span>
                                 <span className='font-semibold text-green-600'>
                                   {convertToArgentinePeso(
-                                    product.price * product.quantity,
+                                    product.price * product.selectedQuantity,
                                   )}
                                 </span>
                               </div>
@@ -104,22 +104,26 @@ export default function OrderDetail({
 
                             {/* Botones táctiles */}
                             <div className='flex items-center gap-2'>
-                              <Button
-                                variant='light'
-                                isIconOnly
-                                onPress={() => handleEditProduct(index)}
-                                className='h-9 w-9 rounded-full bg-blue-50 text-blue-600 active:bg-blue-100'
-                              >
-                                <Edit className='h-5 w-5' />
-                              </Button>
-                              <Button
-                                variant='light'
-                                isIconOnly
-                                onPress={() => handleDeleteProduct(index)}
-                                className='h-9 w-9 rounded-full bg-red-50 text-red-600 active:bg-red-100'
-                              >
-                                <Trash className='h-5 w-5' />
-                              </Button>
+                              {handleEditProduct && (
+                                <Button
+                                  variant='light'
+                                  isIconOnly
+                                  onPress={() => handleEditProduct(index)}
+                                  className='h-9 w-9 rounded-full bg-blue-50 text-blue-600 active:bg-blue-100'
+                                >
+                                  <Edit className='h-5 w-5' />
+                                </Button>
+                              )}
+                              {handleDeleteProduct && (
+                                <Button
+                                  variant='light'
+                                  isIconOnly
+                                  onPress={() => handleDeleteProduct(index)}
+                                  className='h-9 w-9 rounded-full bg-red-50 text-red-600 active:bg-red-100'
+                                >
+                                  <Trash className='h-5 w-5' />
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </CardBody>

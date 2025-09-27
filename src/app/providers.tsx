@@ -4,6 +4,7 @@ import { HeroUIProvider } from '@heroui/react'
 import { Toaster } from 'sonner'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useRouter } from 'next/navigation'
+import { LoadingProvider } from '@/providers/loading-provider'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -15,8 +16,10 @@ export default function Providers({ children }: ProvidersProps) {
   return (
     <HeroUIProvider locale='es-ES' navigate={router.push}>
       <NextThemesProvider attribute='class' defaultTheme='light'>
-        <Toaster position='top-center' richColors />
-        {children}
+        <LoadingProvider>
+          <Toaster position='top-center' richColors />
+          {children}
+        </LoadingProvider>
       </NextThemesProvider>
     </HeroUIProvider>
   )

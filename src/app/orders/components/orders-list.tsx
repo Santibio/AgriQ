@@ -18,6 +18,7 @@ import {
   DollarSign,
   Edit,
   Eye,
+  History,
   PackageCheck,
   PackageOpen,
   Trash,
@@ -48,6 +49,8 @@ import {
 } from '../actions'
 import { toast } from 'sonner'
 import { convertToArgentinePeso } from '@/lib/helpers/number'
+import OrderDetail from './order-detail'
+import { useLoading } from '@/providers/loading-provider'
 
 moment.locale('es')
 
@@ -138,13 +141,21 @@ const getAvailableActions = (
     handleStatusDoing: () => void
     handleStatusPedingToDeliver: () => void
     handleStatusPedingToCancel: () => void
+    handleOpenDetailOrderDrawer: () => void
   },
 ) => {
   const actions = [
     {
-      key: 'view_movements',
-      label: 'Ver movimientos del pedido',
+      key: 'view_details',
+      label: 'Detalle del pedido',
       icon: <Eye />,
+      onPress: () => handlers.handleOpenDetailOrderDrawer(),
+      isVisible: true,
+    },
+    {
+      key: 'view_movements',
+      label: 'Movimientos del pedido',
+      icon: <History />,
       onPress: () => router.push(paths.orderToMovements(order.id.toString())),
       isVisible: true,
     },
@@ -198,15 +209,50 @@ const getAvailableActions = (
 export default function OrderList({ list }: OrderListProps) {
   const router = useRouter()
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
+  const {
+    isOpen: isOpenDetailOrderDrawer,
+    onOpen: onOpenDetailOrderDrawer,
+    onOpenChange: onOpenChangeDetailOrderDrawer,
+  } = useDisclosure()
+
+  const { showLoading, hideLoading } = useLoading()
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [productsList, setProductsList] = useState<
+    Array<{
+      productId: number
+      productName: string
+      quantity: number
+      price: number
+      selectedQuantity: number
+      image?: string
+    }>
+  >([])
 
-  const handleSelectOrder = (order: Order) => {
+  const handleOpenDetailOrderDrawer = () => {
+    onOpenDetailOrderDrawer()
+    onOpenChange()
+  }
+
+  const handleSelectOrder = (order: OrderWithRelations) => {
     setSelectedOrder(order)
+
+    // Transform the data to match the expected type
+    const products = order.movements[0].movementDetail.map(detail => ({
+      productId: detail.batch.product.id,
+      productName: detail.batch.product.name, // Assuming 'name' exists on Product
+      quantity: detail.quantity,
+      price: detail.batch.product.price / detail.quantity, // Assuming 'price' exists on Product
+      selectedQuantity: detail.quantity, // Initialize selected quantity
+      image: detail.batch.product.image, // Assuming 'image' exists on Product
+    }))
+    setProductsList(products)
     onOpen()
   }
 
   const handleStatusDoing = async () => {
+    showLoading()
+    onOpenChange()
     try {
       const response = await setOrderStatusToReady(selectedOrder!.id)
 
@@ -222,9 +268,12 @@ export default function OrderList({ list }: OrderListProps) {
       )
     } finally {
       onOpenChange()
+      hideLoading()
     }
   }
   const handleStatusPedingToDeliver = async () => {
+    showLoading()
+    onOpenChange()
     try {
       const response = await setOrderStatusToDelivered(selectedOrder!.id)
 
@@ -239,11 +288,13 @@ export default function OrderList({ list }: OrderListProps) {
         'Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe.',
       )
     } finally {
-      onOpenChange()
+      hideLoading()
     }
   }
 
   const handleStatusPedingToCancel = async () => {
+    showLoading()
+    onOpenChange()
     try {
       const response = await setOrderStatusToCancel(selectedOrder!.id)
 
@@ -258,7 +309,7 @@ export default function OrderList({ list }: OrderListProps) {
         'Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe.',
       )
     } finally {
-      onOpenChange()
+      hideLoading()
     }
   }
 
@@ -377,6 +428,7 @@ export default function OrderList({ list }: OrderListProps) {
                       handleStatusDoing,
                       handleStatusPedingToDeliver,
                       handleStatusPedingToCancel,
+                      handleOpenDetailOrderDrawer,
                     }).map(action => (
                       <ListboxItem
                         key={action.key}
@@ -393,6 +445,13 @@ export default function OrderList({ list }: OrderListProps) {
           )}
         </DrawerContent>
       </Drawer>
+      {selectedOrder && (
+        <OrderDetail
+          productsList={productsList}
+          isOpen={isOpenDetailOrderDrawer}
+          onOpenChange={onOpenChangeDetailOrderDrawer}
+        />
+      )}
     </>
   )
 }

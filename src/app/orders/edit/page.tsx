@@ -53,14 +53,15 @@ export default async function ShipmentEditPage({
   const productIds = batchs.map(b => b.productId)
   const products = await db.product.findMany({
     where: { id: { in: productIds } },
-    select: { id: true, name: true, price: true },
+    select: { id: true, name: true, price: true, image: true },
   })
 
   const groupBatchByProduct = batchs.map(b => ({
     productId: b.productId,
     productName: products.find(p => p.id === b.productId)?.name || '',
     quantity: b._sum.marketQuantity || 0,
-    price: products.find(p => p.id === b.productId)?.price,
+    price: products.find(p => p.id === b.productId)?.price || 0,
+    image: products.find(p => p.id === b.productId)?.image || '',
   }))
 
   const initialData = {
@@ -74,18 +75,19 @@ export default async function ShipmentEditPage({
             productName: detail.batch.product.name,
             quantity: 0,
             price: detail.batch.product.price,
+            image: detail.batch.product.image,
           }
         }
         acc[productId].quantity += detail.quantity
         return acc
-      }, {} as Record<number, { productId: number; productName: string; quantity: number; price: number }>),
+      }, {} as Record<number, { productId: number; productName: string; quantity: number; price: number; image: string }>),
     ),
   }
 
   return (
     <FormPage title={`Editar pedido #${orderId}`}>
       <OrderForm
-        batchs={groupBatchByProduct}
+        products={groupBatchByProduct}
         movementId={order?.movements[0].id}
         orderId={orderIdInt}
         customers={customers}

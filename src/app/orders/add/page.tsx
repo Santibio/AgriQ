@@ -30,13 +30,13 @@ export default async function ShipmentAddPage() {
     productId: b.productId,
     productName: products.find(p => p.id === b.productId)?.name || "",
     quantity: b._sum.marketQuantity || 0,
-    price: products.find(p => p.id === b.productId)?.price,
+    price: products.find(p => p.id === b.productId)?.price || 0,
     image: products.find(p => p.id === b.productId)?.image || "",
   }));
 
   return (
     <FormPage title="Crear Pedido">
-      <OrderForm batchs={groupBatchByProduct} customers={customers}/>
+      <OrderForm products={groupBatchByProduct} customers={customers}/>
     </FormPage>
   );
 }

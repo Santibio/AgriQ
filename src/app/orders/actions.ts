@@ -283,7 +283,6 @@ export async function editOrder(
     revalidatePath(paths.orders())
     return { errors: false }
   } catch (error) {
-    console.log('error: ', error)
     if (error instanceof Error) {
       return {
         errors: {
@@ -315,27 +314,27 @@ export async function confirmOrder(
       }
     }
 
-    await db.$transaction(async tx => {
-      // 1. Obtener la orden y sus detalles
-      const order = await tx.order.findUnique({
-        where: { id: orderId },
-        include: {
-          movements: {
-            include: {
-              movementDetail: {
-                include: {
-                  batch: true,
-                },
+    // 1. Obtener la orden y sus detalles
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      include: {
+        movements: {
+          include: {
+            movementDetail: {
+              include: {
+                batch: true,
               },
             },
           },
         },
-      })
+      },
+    })
 
-      if (!order) {
-        throw new Error('Orden no encontrada')
-      }
-
+    if (!order) {
+      throw new Error('Orden no encontrada')
+    }
+    let movementId = 0
+    await db.$transaction(async tx => {
       // 2. Crear el movimiento de tipo SOLD
       const movement = await tx.movement.create({
         data: {
@@ -381,21 +380,22 @@ export async function confirmOrder(
             },
           },
         })
+        movementId = movement.id
       }
+    })
 
-      let paymentReceipt = ''
-      if (paymentProof) {
-        paymentReceipt = await saveImage(paymentProof)
-      }
+    let paymentReceipt = ''
+    if (paymentProof) {
+      paymentReceipt = await saveImage(paymentProof)
+    }
 
-      await db.sell.create({
-        data: {
-          orderId: order.id,
-          movementId: movement.id,
-          paymentMethod: paymentMethod,
-          paymentReceipt: paymentReceipt,
-        },
-      })
+    await db.sell.create({
+      data: {
+        orderId: order.id,
+        movementId: movementId,
+        paymentMethod: paymentMethod,
+        paymentReceipt: paymentReceipt,
+      },
     })
 
     revalidatePath(paths.orders())

@@ -23,16 +23,16 @@ import CustomerForm from './customer-form'
 import OrderDetail from './order-detail'
 import { convertToArgentinePeso } from '@/lib/helpers/number'
 
-interface Batch {
+interface Product {
   productId: number
   productName: string
   quantity: number
-  price?: number
-  image?: string
+  price: number
+  image: string // Hacemos que image sea obligatorio
 }
 
 interface ProductionFormProps {
-  batchs: Batch[]
+  products: Product[]
   customers: Customer[]
   movementId?: number
   orderId?: number
@@ -43,19 +43,18 @@ interface ProductionFormProps {
       productName: string
       quantity: number
       price: number
-      image?: string
+      image: string // Hacemos que image sea obligatorio
     }[]
   }
 }
 
 export default function OrderForm({
-  batchs,
+  products,
   customers,
   initialData,
   orderId,
   movementId,
 }: ProductionFormProps) {
-  console.log("🚀 ~ OrderForm ~ batchs:", batchs)
   const router = useRouter()
   const isEditing = Boolean(initialData)
 
@@ -78,6 +77,7 @@ export default function OrderForm({
       productName: string
       quantity: number
       price: number
+      image?: string
     }[]
   }>({
     customerId: initialData?.customerId || 0,
@@ -89,7 +89,7 @@ export default function OrderForm({
     productName: string
     quantity: number
     price: number
-    image?: string
+    image: string
   } | null>(null)
 
   const [productFormFata, setProductFormData] = useState({
@@ -108,7 +108,7 @@ export default function OrderForm({
       quantity: number
       price: number
       selectedQuantity: number
-      image?: string
+      image: string
     }>
   >(
     initialData?.products
@@ -118,13 +118,13 @@ export default function OrderForm({
           quantity: p.quantity,
           price: p.price,
           selectedQuantity: p.quantity,
-          image: p.image
+          image: p.image,
         }))
       : [],
   )
 
   // Filtrar productos ya agregados, permitiendo el producto que se está editando
-  const availableBatchs = batchs.filter(b => {
+  const availableProducts = products.filter(b => {
     if (editingProductIndex !== null) {
       const editingProduct = productsList[editingProductIndex]
       if (b.productId === editingProduct.productId) {
@@ -136,15 +136,15 @@ export default function OrderForm({
 
   const handleChangeProductForm = (value: Key | null) => {
     setProductFormData({ productId: String(value), quantity: 0 })
-    const foundBatch = availableBatchs.find(b => b.productId === Number(value))
+    const foundProduct = availableProducts.find(b => b.productId === Number(value))
     setSelectedProduct(
-      foundBatch
+      foundProduct
         ? {
-            productId: foundBatch.productId,
-            productName: foundBatch.productName,
-            quantity: foundBatch.quantity,
-            price: foundBatch.price ?? 0,
-            image: foundBatch.image
+            productId: foundProduct.productId,
+            productName: foundProduct.productName,
+            quantity: foundProduct.quantity,
+            price: foundProduct.price,
+            image: foundProduct.image,
           }
         : null,
     )
@@ -168,7 +168,6 @@ export default function OrderForm({
         ...productToUpdate,
         selectedQuantity: productFormFata.quantity,
         price: selectedProduct.price,
-        image: selectedProduct.image
       }
 
       setProductsList(updatedProductsList)
@@ -178,7 +177,7 @@ export default function OrderForm({
         productName: p.productName,
         quantity: p.selectedQuantity,
         price: p.price,
-        image: p.image
+        image: p.image,
       }))
 
       setOrderFormData(prev => ({
@@ -201,12 +200,13 @@ export default function OrderForm({
       toast.error('Selecciona un producto y cantidad válida')
       return
     }
-    setProductsList([
-      ...productsList,
+
+    setProductsList(prev => [
+      ...prev,
       {
         ...selectedProduct,
         selectedQuantity: productFormFata.quantity,
-        image: selectedProduct.image
+        image: selectedProduct.image, // Asegurar que la imagen se incluya
       },
     ])
     setProductFormData({ productId: '', quantity: 0 })
@@ -247,6 +247,24 @@ export default function OrderForm({
     // Cierra el drawer primero
     onOpenChangeDetailOrderDrawer()
 
+    // Establece el producto seleccionado con todos sus datos, incluyendo la imagen
+    setSelectedProduct({
+      productId: productToEdit.productId,
+      productName: productToEdit.productName,
+      quantity: productToEdit.quantity,
+      price: productToEdit.price,
+      image: productToEdit.image, // Aseguramos que la imagen se mantenga
+    })
+
+    // Establece los datos del formulario
+    setProductFormData({
+      productId: productToEdit.productId.toString(),
+      quantity: productToEdit.selectedQuantity,
+    })
+
+    // Establece el índice del producto que se está editando
+    setEditingProductIndex(index)
+
     // Limpia el estado para forzar la actualización del Autocomplete
     setProductFormData({ productId: '', quantity: 0 })
     setSelectedProduct(null)
@@ -254,7 +272,7 @@ export default function OrderForm({
     // Actualiza el estado con el producto a editar después de un breve instante
     setTimeout(() => {
       setEditingProductIndex(index)
-      const originalBatch = batchs.find(
+      const originalBatch = products.find(
         b => b.productId === productToEdit.productId,
       )
       setSelectedProduct({
@@ -262,6 +280,7 @@ export default function OrderForm({
         productName: productToEdit.productName,
         quantity: originalBatch?.quantity || productToEdit.quantity, // Usar la cantidad original del lote
         price: productToEdit.price,
+        image: productToEdit.image,
       })
       setProductFormData({
         productId: String(productToEdit.productId),
@@ -299,6 +318,8 @@ export default function OrderForm({
         showScrollShadow={false}
         buttonProps={{
           isLoading,
+          isDisabled:
+            !orderFormData.customerId || !orderFormData.products.length,
         }}
       >
         <div className='flex flex-col gap-6 w-full'>
@@ -330,7 +351,9 @@ export default function OrderForm({
             >
               {customers.map(customer => (
                 <AutocompleteItem key={customer.id}>
-                  {`${capitalize(customer.name)} ${capitalize(customer.lastName)}`}
+                  {`${capitalize(customer.name)} ${capitalize(
+                    customer.lastName,
+                  )}`}
                 </AutocompleteItem>
               ))}
             </Autocomplete>
@@ -350,7 +373,7 @@ export default function OrderForm({
                   label='Producto'
                   placeholder='Buscar'
                   onSelectionChange={handleChangeProductForm}
-                  defaultItems={availableBatchs}
+                  defaultItems={availableProducts}
                   startContent={
                     <Search
                       className='text-default-400'
@@ -361,9 +384,9 @@ export default function OrderForm({
                   selectedKey={productFormFata.productId}
                   className='w-full'
                 >
-                  {availableBatchs.map(batch => (
-                    <AutocompleteItem key={batch.productId}>
-                      {capitalize(batch.productName)}
+                  {availableProducts.map(product => (
+                    <AutocompleteItem key={product.productId}>
+                      {capitalize(product.productName)}
                     </AutocompleteItem>
                   ))}
                 </Autocomplete>

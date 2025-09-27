@@ -23,15 +23,13 @@ type OrderWithRelations = Order & {
       // Objeto para acumular cantidades por productoId
       const productTotals: Record<number, number> = {};
       
-      order.movements.forEach(movement => {
-        movement.movementDetail.forEach(detail => {
+      order.movements[0].movementDetail.forEach(detail => {
           const productId = detail.batch.productId;
           productTotals[productId] = (productTotals[productId] || 0) + detail.quantity;
           
           // Calcular el precio total para este detalle
           detail.batch.product.price = detail.batch.product.price * detail.quantity;
         });
-      });
       
       // Agregar el total de productos únicos al objeto de orden
       return {
