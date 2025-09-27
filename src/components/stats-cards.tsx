@@ -53,7 +53,7 @@ export default async function StatsCards() {
 
   const statsData: StatCardProps[] = [
     {
-      title: 'Producción hoy',
+      title: 'Producción de hoy',
       value: `${stats.productionStats.batchesToday} Lote${
         stats.productionStats.batchesToday === 1 ? '' : 's'
       }`,
@@ -64,6 +64,16 @@ export default async function StatsCards() {
       icon: TrendingUp,
     },
     {
+      title: 'Pedidos de la semana',
+      value: `${stats.ordersStats.ordersThisWeek}`,
+      change: `${stats.ordersStats.ordersChange >= 0 ? '+' : ''}${Math.round(
+        stats.ordersStats.ordersChange,
+      )}%`,
+      trend: stats.ordersStats.ordersChange >= 0 ? 'up' : 'down',
+      icon: Package,
+    },
+
+    {
       title: 'Ventas del mes',
       value: `$${stats.salesStats.monthlySales.toLocaleString()}`,
       change: `${stats.salesStats.salesChange >= 0 ? '+' : ''}${Math.round(
@@ -72,31 +82,19 @@ export default async function StatsCards() {
       trend: stats.salesStats.salesChange >= 0 ? 'up' : 'down',
       icon: DollarSign,
     },
-    {
-      title: 'Pedidos pendientes',
-      value: `${stats.ordersStats}`,
-      change: '',
-      trend: stats.ordersStats > 0 ? 'up' : 'down',
-      icon: Package,
-    },
-    // {
-    //   title: 'Envíos pendientes',
-    //   value: '23', // TODO: Obtener de la base de datos
-    //   change: '-5%', // TODO: Calcular el cambio real
-    //   trend: 'down',
-    //   icon: Truck,
-    // },
-    // {
-    //   title: 'Pedidos pendientes',
-    //   value: `${stats.pendingOrders}`,
-    //   change: stats.pendingOrders > 0 ? '+2' : '0',
-    //   trend: stats.pendingOrders > 0 ? 'up' : 'down',
-    //   icon: Package,
-    // },
   ]
+  // {
+  //   title: 'Envíos pendientes',
+  //   value: `${stats.shipmentsStats.shipmentsToday}`,
+  //   change: `${
+  //     stats.shipmentsStats.shipmentsChange >= 0 ? '+' : ''
+  //   }${Math.round(stats.shipmentsStats.shipmentsChange)}%`,
+  //   trend: stats.shipmentsStats.shipmentsChange >= 0 ? 'up' : 'down',
+  //   icon: Truck,
+  // },
 
   return (
-    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+    <div className='flex flex-col gap-4'>
       {statsData.map((stat, index) => (
         <StatCard key={index} {...stat} />
       ))}

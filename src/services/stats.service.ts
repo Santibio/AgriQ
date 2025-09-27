@@ -3,7 +3,7 @@
 import { PrismaClient } from '@prisma/client'
 import { getProductionStats } from './production.service'
 import { getSalesStats } from './sales.service'
-import { getPendingOrdersCount } from './order.service'
+import { getOrdersStats } from './order.service'
 
 const prisma = new PrismaClient()
 
@@ -12,13 +12,17 @@ interface Stats {
     batchesToday: number
     batchesYesterday: number
     productionChange: number
-  },
+  }
   salesStats: {
     monthlySales: number
     lastMonthSales: number
     salesChange: number
-  },
-  ordersStats: number
+  }
+  ordersStats: {
+    ordersThisWeek: number
+    ordersLastWeek: number
+    ordersChange: number
+  }
 }
 
 export default async function getStats(): Promise<Stats> {
@@ -27,7 +31,7 @@ export default async function getStats(): Promise<Stats> {
     const [productionStats, salesStats, ordersStats] = await Promise.all([
       getProductionStats(),
       getSalesStats(),
-      getPendingOrdersCount(),
+      getOrdersStats(),
     ])
 
     return {
