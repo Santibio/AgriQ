@@ -1,10 +1,10 @@
 import { Product, Batch } from '@prisma/client'
 import { Image } from '@heroui/react'
-import moment from 'moment'
 import { capitalize } from '@/lib/helpers/text'
 import EmptyListMsg from '@/components/empty-list'
 import Link from 'next/link'
 import paths from '@/lib/paths'
+import { timeAgo } from '@/lib/helpers/date'
 
 interface ProductionsListProps {
   productions: ProductionWithRelations[]
@@ -39,7 +39,7 @@ export default function ProductionsList({ productions }: ProductionsListProps) {
                   <div className='flex justify-between items-center'>
                     <span className='font-semibold text-xl'>{`Lote #${production.id}`}</span>
                     <span className='text-slate-500 text-sm'>
-                      {moment(production?.createdAt).fromNow()}
+                      {timeAgo(production?.createdAt)}
                     </span>
                   </div>
                   <div className='flex gap-2 justify-between items-center'>

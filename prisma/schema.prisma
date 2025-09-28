@@ -88,7 +88,7 @@ model Movement {
   type           MovementType
   shipment       Shipment?
   discard        Discard?
-  Order          Order?           @relation(fields: [orderId], references: [id])
+  order          Order?           @relation(fields: [orderId], references: [id])
   orderId        Int?
 }
 
@@ -118,7 +118,7 @@ model Customer {
   active          Boolean         @default(true)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
-  Order           Order[]
+  order           Order[]
 }
 
 enum ShipmentStatus {

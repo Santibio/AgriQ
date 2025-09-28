@@ -1,7 +1,6 @@
 import { Chip, Link } from "@heroui/react";
 
 import { CalendarArrowUp, CheckCheck, CircleX } from "lucide-react";
-import moment from "moment";
 import {
   Batch,
   Movement,
@@ -13,6 +12,7 @@ import paths from "@/lib/paths";
 import { JSX } from "react";
 import EmptyListMsg from "@/components/empty-list";
 import { capitalize } from "@/lib/utils";
+import { timeAgo } from "@/lib/helpers/date";
 
 interface ShipmentsListProps {
   list: ShipmentWithRelations[];
@@ -70,7 +70,7 @@ export default function ShipmentsList({ list }: ShipmentsListProps) {
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-xl">{`Envio #${shipment.id}`}</span>
                   <span className="text-slate-500 text-sm">
-                    {moment(shipment?.createdAt).fromNow()}
+                    {timeAgo(shipment?.createdAt)}
                   </span>
                 </div>
               </div>

@@ -25,8 +25,6 @@ import {
   Truck,
   XCircle,
 } from 'lucide-react'
-import moment from 'moment'
-import 'moment/locale/es'
 
 import {
   Movement,
@@ -51,8 +49,7 @@ import { toast } from 'sonner'
 import { convertToArgentinePeso } from '@/lib/helpers/number'
 import OrderDetail from './order-detail'
 import { useLoading } from '@/providers/loading-provider'
-
-moment.locale('es')
+import { timeAgo } from '@/lib/helpers/date'
 
 interface OrderListProps {
   list: OrderWithRelations[]
@@ -350,7 +347,7 @@ export default function OrderList({ list }: OrderListProps) {
                     </div>
                     <div className='flex items-end flex-col'>
                       <span className='text-xs text-gray-500'>
-                        {moment(order?.createdAt).locale('es').fromNow()}
+                        {timeAgo(order?.createdAt)}
                       </span>
                       <span className='text-sm font-semibold text-gray-900'>
                         {convertToArgentinePeso(order.total)}

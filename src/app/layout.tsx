@@ -3,11 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
 import Header from "./_header";
-import moment from "moment";
-import "moment/locale/es";
 import NavBar from "./_navbar";
 
-moment.locale("es");
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
