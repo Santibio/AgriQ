@@ -16,6 +16,8 @@ interface StatCardProps {
   icon: React.ComponentType<{ className?: string }>
 }
 
+import { convertToArgentinePeso } from '@/lib/helpers/number'
+
 function StatCard({ title, value, change, trend, icon: Icon }: StatCardProps) {
   return (
     <Card className='bg-white/70 backdrop-blur-sm border-white/20'>
@@ -75,7 +77,7 @@ export default async function StatsCards() {
 
     {
       title: 'Ventas del mes',
-      value: `$${stats.salesStats.monthlySales.toLocaleString()}`,
+      value: `${convertToArgentinePeso(stats.salesStats.monthlySales)}`,
       change: `${stats.salesStats.salesChange >= 0 ? '+' : ''}${Math.round(
         stats.salesStats.salesChange,
       )}%`,

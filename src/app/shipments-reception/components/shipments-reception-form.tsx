@@ -148,7 +148,7 @@ export default function ShipmentForm({
                   onChange={() => handleSelect(batch.id)}
                   aria-label={`Confirmar lote ${batch.id}`}
                   color="success"
-                ></Checkbox>
+                />
               </div>
               <div className="flex items-center gap-10 mt-2">
                 <div className="flex flex-col">
