@@ -1,6 +1,6 @@
 import db from "@/lib/db";
 import AddButton from "@/components/buttons/add-button";
-import PageSection from "@/components/layout/list-page";
+import ListPage from "@/components/layout/list-page";
 import paths from "@/lib/paths";
 import CustomerList from "./components/customers-list";
 
@@ -10,11 +10,11 @@ export default async function CustomersPage() {
   });
 
   return (
-    <PageSection
+    <ListPage
       title="Clientes"
       actions={<AddButton href={paths.customerAdd()}>Crear cliente</AddButton>}
     >
       <CustomerList customers={customers} />
-    </PageSection>
+    </ListPage>
   );
 }

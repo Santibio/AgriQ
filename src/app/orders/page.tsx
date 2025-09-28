@@ -1,5 +1,5 @@
 import AddButton from "@/components/buttons/add-button";
-import PageSection from "@/components/layout/list-page";
+import ListPage from "@/components/layout/list-page";
 import db from "@/lib/db";
 import Orderslist from "./components/orders-list";
 import paths from "@/lib/paths";
@@ -77,11 +77,11 @@ export default async function Orders() {
   const processedOrders = processOrders(currentOrders);
 
   return (
-    <PageSection
+    <ListPage
       title="Pedidos"
       actions={<AddButton href={paths.orderAdd()}>Crear pedido</AddButton>}
     >
       <Orderslist list={processedOrders} />
-    </PageSection>
+    </ListPage>
   );
 }

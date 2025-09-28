@@ -1,5 +1,5 @@
 import AddButton from "@/components/buttons/add-button";
-import PageSection from "@/components/layout/list-page";
+import ListPage from "@/components/layout/list-page";
 import db from "@/lib/db";
 import ShipmentsList from "./components/shipments-list";
 import paths from "@/lib/paths";
@@ -48,11 +48,11 @@ export default async function Shipments() {
   });
 
   return (
-    <PageSection
+    <ListPage
       title="Envíos"
       actions={<AddButton href={paths.shipmentAdd()}>Crear envío</AddButton>}
     >
       <ShipmentsList list={pendingShipments} />
-    </PageSection>
+    </ListPage>
   );
 }

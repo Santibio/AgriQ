@@ -1,4 +1,4 @@
-import PageSection from "@/components/layout/list-page";
+import ListPage from "@/components/layout/list-page";
 import db from "@/lib/db";
 import ShipmentsReceptionList from "./components/shipments-reception-list";
 
@@ -28,8 +28,8 @@ export default async function Shipments() {
   });
 
   return (
-    <PageSection title="Recepción de envíos">
+    <ListPage title="Recepción de envíos">
       <ShipmentsReceptionList list={filteredMovements} />
-    </PageSection>
+    </ListPage>
   );
 }
