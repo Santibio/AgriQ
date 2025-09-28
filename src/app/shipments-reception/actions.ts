@@ -59,6 +59,7 @@ export async function createShipmentReception(
         data: {
           type: MovementType.RECEIVED_MARKET,
           userId: user.id,
+          shipment: { connect: { id: shipmentId } },
         },
       });
 

@@ -1,20 +1,11 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
-  connection_limit = 20 // Ajusta este número según tus necesidades
+  provider         = "prisma-client-js"
+  connection_limit = "20"
 }
 
 datasource db {
-  provider         = "postgresql"
-  url              = env("POSTGRES_URL")
-}
-
-enum Role {
-  ADMIN
-  DEPOSIT
-  SELLER
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
 }
 
 model User {
@@ -25,8 +16,8 @@ model User {
   lastName String
   name     String
   avatar   String
-  movement Movement[]
   active   Boolean    @default(true)
+  movement Movement[]
 }
 
 model Product {
@@ -39,9 +30,9 @@ model Product {
   category     String
   type         String
   presentation String
-  products     Batch[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  products     Batch[]
 }
 
 model Batch {
@@ -57,55 +48,32 @@ model Batch {
   soltQuantity        Int              @default(0)
   discrepancyQuantity Int              @default(0)
   productId           Int
-  product             Product          @relation(fields: [productId], references: [id])
-  movementDetail      MovementDetail[]
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
-}
-
-enum MovementType {
-  STORED
-  DISCARDED
-  SENT
-  EDITED
-  RECEIVED_MARKET
-  AVAILABLE
-  ORDERED
-  READY_TO_DELIVER
-  DELIVERED
-  NOT_DELIVERED
-  CANCELED
-  SOLD
-  RETURNED
+  product             Product          @relation(fields: [productId], references: [id])
+  movementDetail      MovementDetail[]
 }
 
 model Movement {
   id             Int              @id @default(autoincrement())
-  movementDetail MovementDetail[]
-  user           User             @relation(fields: [userId], references: [id])
   userId         Int
   createdAt      DateTime         @default(now())
   type           MovementType
-  shipment       Shipment?
+  orderId        Int?
   discard        Discard?
   order          Order?           @relation(fields: [orderId], references: [id])
-  orderId        Int?
+  user           User             @relation(fields: [userId], references: [id])
+  movementDetail MovementDetail[]
+  shipment       Shipment?
 }
 
 model MovementDetail {
   id         Int      @id @default(autoincrement())
   movementId Int
-  movement   Movement @relation(fields: [movementId], references: [id])
   batchId    Int
-  batch      Batch    @relation(fields: [batchId], references: [id])
   quantity   Int
-}
-
-enum FiscalCondition {
-  RESPONSIBLE
-  MONOTAX
-  FINAL_CONSUMER
-  EXEMPT
+  batch      Batch    @relation(fields: [batchId], references: [id])
+  movement   Movement @relation(fields: [movementId], references: [id])
 }
 
 model Customer {
@@ -121,34 +89,98 @@ model Customer {
   order           Order[]
 }
 
-enum ShipmentStatus {
-  PENDING
-  RECEIVED_OK
-  RECEIVED_NO_OK
-}
-
 model Shipment {
   id         Int            @id @default(autoincrement())
   status     ShipmentStatus @default(PENDING)
   movementId Int            @unique
-  movement   Movement       @relation(fields: [movementId], references: [id])
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
-}
-
-enum DiscardReason {
-  DAMAGED
-  EXPIRED
-  OTHER
+  movement   Movement       @relation(fields: [movementId], references: [id])
 }
 
 model Discard {
   id         Int           @id @default(autoincrement())
   reason     DiscardReason
   movementId Int           @unique
-  movement   Movement      @relation(fields: [movementId], references: [id])
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
+  movement   Movement      @relation(fields: [movementId], references: [id])
+}
+
+model Order {
+  id                 Int           @id @default(autoincrement())
+  customerId         Int
+  statusDoing        StatusDoing   @default(PENDING)
+  statusPayment      StatusPayment @default(UNPAID)
+  total              Float
+  agreedDeliveryTime DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  movements          Movement[]
+  customer           Customer      @relation(fields: [customerId], references: [id])
+  details            OrderDetail[]
+}
+
+model OrderDetail {
+  id          Int      @id @default(autoincrement())
+  orderId     Int
+  productName String
+  quantity    Int
+  price       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  order       Order    @relation(fields: [orderId], references: [id])
+}
+
+model Sell {
+  id             Int           @id @default(autoincrement())
+  orderId        Int           @unique
+  movementId     Int           @unique
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  paymentMethod  PaymentMethod
+  paymentReceipt String
+}
+
+enum Role {
+  ADMIN
+  DEPOSIT
+  SELLER
+}
+
+enum MovementType {
+  STORED
+  DISCARDED
+  SENT
+  EDITED
+  RECEIVED_MARKET
+  AVAILABLE
+  ORDERED
+  READY_TO_DELIVER
+  DELIVERED
+  NOT_DELIVERED
+  CANCELLED
+  SOLD
+  RETURNED
+}
+
+enum FiscalCondition {
+  RESPONSIBLE
+  MONOTAX
+  FINAL_CONSUMER
+  EXEMPT
+}
+
+enum ShipmentStatus {
+  PENDING
+  RECEIVED_OK
+  RECEIVED_NO_OK
+}
+
+enum DiscardReason {
+  DAMAGED
+  EXPIRED
+  OTHER
 }
 
 enum StatusDoing {
@@ -161,45 +193,10 @@ enum StatusPayment {
   PAID
   UNPAID
   PARCIAL_PAID
-  CANCELED
-}
-
-model Order {
-  id                 Int           @id @default(autoincrement())
-  movements          Movement[]
-  customer           Customer      @relation(fields: [customerId], references: [id])
-  customerId         Int
-  statusDoing        StatusDoing   @default(PENDING)
-  statusPayment      StatusPayment @default(UNPAID)
-  details            OrderDetail[]
-  total              Float
-  agreedDeliveryTime DateTime?
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-}
-
-model OrderDetail {
-  id          Int      @id @default(autoincrement())
-  orderId     Int
-  order       Order    @relation(fields: [orderId], references: [id])
-  productName String
-  quantity    Int
-  price       Float
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  CANCELLED
 }
 
 enum PaymentMethod {
   CASH
   WIRE
-}
-
-model Sell {
-  id             Int           @id @default(autoincrement())
-  orderId        Int           @unique
-  movementId     Int           @unique
-  paymentMethod  PaymentMethod
-  paymentReceipt String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
 }

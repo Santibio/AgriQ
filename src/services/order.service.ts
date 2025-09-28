@@ -6,21 +6,16 @@ export async function getPendingOrdersCount(): Promise<number> {
   })
 }
 
-export async function getRecentMovements() {
-  return db.movement.findMany({
-    take: 5,
-    orderBy: { createdAt: 'desc' },
-    include: {
-      user: { select: { name: true } },
-      movementDetail: true,
-    },
-  })
-}
-
 export async function getOrdersStats() {
   const today = new Date()
-  const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)))
-  const startOfLastWeek = new Date(startOfWeek.getTime() - 7 * 24 * 60 * 60 * 1000)
+  const startOfWeek = new Date(
+    today.setDate(
+      today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1),
+    ),
+  )
+  const startOfLastWeek = new Date(
+    startOfWeek.getTime() - 7 * 24 * 60 * 60 * 1000,
+  )
 
   const [ordersThisWeek, ordersLastWeek] = await Promise.all([
     db.order.count({

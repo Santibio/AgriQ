@@ -77,6 +77,9 @@ const paths = {
   orderToMovements(orderId: string) {
     return `/orders/movements?id=${orderId}`;
   },
+  movements() {
+    return `/movements`;
+  },
 };
 
 export default paths;

@@ -36,7 +36,7 @@ const movementTypeMap: Partial<Record<MovementType, { icon: JSX.Element; label: 
     label: "Entregado",
     color: "green"
   },
-  [MovementType.CANCELED]: {
+  [MovementType.CANCELLED]: {
     icon: <XCircle className="h-5 w-5 text-white" />,
     label: "Cancelado",
     color: "red"

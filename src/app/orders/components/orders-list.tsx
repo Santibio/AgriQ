@@ -119,7 +119,7 @@ const STATUS_PAYMENT_MAP: Record<
     className: 'bg-green-100 text-green-800 border-green-200',
     label: 'Pagado',
   },
-  CANCELED: {
+  CANCELLED: {
     icon: <XCircle className='h-4 w-4' />,
     className: 'bg-red-100 text-red-800 border-red-200',
     label: 'Cancelado',
@@ -177,7 +177,7 @@ const getAvailableActions = (
       onPress: handlers.handleStatusDoing,
       isVisible:
         order?.statusDoing === StatusDoing.PENDING &&
-        order.statusPayment !== StatusPayment.CANCELED,
+        order.statusPayment !== StatusPayment.CANCELLED,
     },
     {
       key: 'deliver',
@@ -196,7 +196,7 @@ const getAvailableActions = (
       onPress: handlers.handleStatusPedingToCancel,
       isVisible:
         order?.statusDoing !== StatusDoing.DELIVERED &&
-        order?.statusPayment !== StatusPayment.CANCELED,
+        order?.statusPayment !== StatusPayment.CANCELLED,
     },
   ]
 

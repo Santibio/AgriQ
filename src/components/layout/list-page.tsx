@@ -1,6 +1,6 @@
-"use client";
-import { ReactNode } from "react";
-import PageTitle from "../page-title";
+'use client'
+import { ReactNode } from 'react'
+import PageTitle from '../page-title'
 import {
   Button,
   Drawer,
@@ -10,36 +10,46 @@ import {
   DrawerHeader,
   ScrollShadow,
   useDisclosure,
-} from "@heroui/react";
-import { ArrowDownWideNarrow } from "lucide-react";
+} from '@heroui/react'
+import { ArrowDownWideNarrow } from 'lucide-react'
 
 interface ListPageProps {
-  children: ReactNode;
-  title: string;
-  actions?: ReactNode;
+  children: ReactNode
+  title: string
+  actions?: ReactNode
+  classNameList?: {
+    containerList: string
+  }
 }
 
-export default function ListPage({ title, actions, children }: ListPageProps) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+export default function ListPage({
+  title,
+  actions,
+  children,
+  classNameList,
+}: ListPageProps) {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   return (
     <>
-      <section className="flex flex-col h-[calc(100vh-150px)] px-4 relative gap-2">
-        <div className="flex items-center justify-between">
+      <section className='flex flex-col h-[calc(100vh-150px)] px-4 relative gap-2'>
+        <div className='flex items-center justify-between'>
           <PageTitle>{title}</PageTitle>
           <Button
             isIconOnly
-            color="primary"
-            size="sm"
-            variant="flat"
+            color='primary'
+            size='sm'
+            variant='flat'
             onPress={onOpen}
             disabled
           >
-            <ArrowDownWideNarrow className="h-4 w-4 " color="blue" />
+            <ArrowDownWideNarrow className='h-4 w-4 ' color='blue' />
           </Button>
         </div>
         <ScrollShadow
-          className="pb-2 custom-scroll-shadow flex-1"
+          className={`pb-2 custom-scroll-shadow flex-1 ${
+            classNameList?.containerList || ''
+          }`}
           hideScrollBar
         >
           {children}
@@ -49,23 +59,23 @@ export default function ListPage({ title, actions, children }: ListPageProps) {
       <Drawer
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        backdrop="blur"
-        placement="bottom"
+        backdrop='blur'
+        placement='bottom'
       >
         <DrawerContent>
-          {(onClose) => (
+          {onClose => (
             <>
-              <DrawerHeader className="flex flex-col gap-1">
+              <DrawerHeader className='flex flex-col gap-1'>
                 Filtros y ordernamiento
               </DrawerHeader>
               <DrawerBody>
                 <p>En trabajo...</p>
               </DrawerBody>
               <DrawerFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
+                <Button color='danger' variant='light' onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary" onPress={onClose}>
+                <Button color='primary' onPress={onClose}>
                   Action
                 </Button>
               </DrawerFooter>
@@ -74,5 +84,5 @@ export default function ListPage({ title, actions, children }: ListPageProps) {
         </DrawerContent>
       </Drawer>
     </>
-  );
+  )
 }

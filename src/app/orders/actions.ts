@@ -631,7 +631,7 @@ export async function setOrderStatusToCancel(
       // 2. Crear el movimiento de tipo SOLD
       const movement = await tx.movement.create({
         data: {
-          type: MovementType.CANCELED,
+          type: MovementType.CANCELLED,
           userId: user.id,
         },
       })
@@ -679,7 +679,7 @@ export async function setOrderStatusToCancel(
       await tx.order.update({
         where: { id: orderId },
         data: {
-          statusPayment: StatusPayment.CANCELED,
+          statusPayment: StatusPayment.CANCELLED,
           movements: {
             connect: {
               id: movement.id,
