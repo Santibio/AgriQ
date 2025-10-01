@@ -50,7 +50,6 @@ export async function createOrder(formData: FormData): Promise<OrderFormState> {
           userId: user.id,
         },
       })
-      console.log('🚀 ~ createOrder ~ movement:', movement)
 
       // 2. Calcular el total de la orden
       let orderTotal = 0
@@ -137,6 +136,9 @@ export async function createOrder(formData: FormData): Promise<OrderFormState> {
             connect: {
               id: movement.id,
             },
+          },
+          details: {
+            create: orderDetails,
           },
         },
       })
@@ -389,7 +391,7 @@ export async function confirmOrder(
       paymentReceipt = await saveImage(paymentProof)
     }
 
-    await db.sell.create({
+    await db.sale.create({
       data: {
         orderId: order.id,
         movementId: movementId,

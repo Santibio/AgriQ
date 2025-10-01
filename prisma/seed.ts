@@ -95,6 +95,7 @@ async function main() {
   await prisma.movementDetail.deleteMany();
   await prisma.discard.deleteMany();
   await prisma.orderDetail.deleteMany();
+  await prisma.sale.deleteMany();  // Mover esto antes de order.deleteMany()
   await prisma.order.deleteMany();
   await prisma.customer.deleteMany();
   await prisma.shipment.deleteMany();

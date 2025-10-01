@@ -119,6 +119,7 @@ model Order {
   movements          Movement[]
   customer           Customer      @relation(fields: [customerId], references: [id])
   details            OrderDetail[]
+  sale               Sale?
 }
 
 model OrderDetail {
@@ -132,14 +133,15 @@ model OrderDetail {
   order       Order    @relation(fields: [orderId], references: [id])
 }
 
-model Sell {
+model Sale {
   id             Int           @id @default(autoincrement())
   orderId        Int           @unique
+  order          Order?        @relation(fields: [orderId], references: [id])
   movementId     Int           @unique
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
   paymentMethod  PaymentMethod
   paymentReceipt String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 enum Role {

@@ -1,5 +1,17 @@
 import db from '@/lib/db'
 
+export async function getSells() {
+  const sells = await db.sale.findMany({
+    include: {
+      order: {
+        include: { customer: true, details: true },
+      },
+    },
+  })
+  return sells
+}
+
+
 export async function getSalesStats() {
   const today = new Date()
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)

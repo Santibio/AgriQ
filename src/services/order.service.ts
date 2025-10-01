@@ -28,6 +28,7 @@ export async function getOrdersStats() {
     }),
   ])
 
+
   let ordersChange = 0
   if (ordersLastWeek > 0) {
     ordersChange = ((ordersThisWeek - ordersLastWeek) / ordersLastWeek) * 100

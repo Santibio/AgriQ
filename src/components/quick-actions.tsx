@@ -60,6 +60,7 @@ const quickActions = [
     icon: DollarSign,
     color: "bg-blue-500",
     gradient: "from-blue-400 to-blue-600",
+    link: paths.sales(),
   },
 
 ];

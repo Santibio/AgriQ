@@ -80,6 +80,9 @@ const paths = {
   movements() {
     return `/movements`;
   },
+  sales() {
+    return `/sales`;
+  },
 };
 
 export default paths;

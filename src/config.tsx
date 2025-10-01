@@ -126,7 +126,7 @@ const config: Config = {
     [PrismaRole.SELLER]: ["sales", "shipment-reception", "return", "reports"],
   },
   fiscalInformation: [
-    { id: "RESPONSIBLE", label: "Responsable" },
+    { id: "RESPONSIBLE", label: "Responsable Inscripto" },
     { id: "MONOTAX", label: "Monotributista" },
     { id: "FINAL_CONSUMER", label: "Consumidor Final" },
     { id: "EXEMPT", label: "Exento" },

@@ -16,6 +16,7 @@ export default async function PaymentOrderPAge({
   const order = await db.order.findUnique({
     where: { id: orderIdInt },
     include: {
+      details: true, // TODO: Sacar la info de aca
       movements: {
         include: {
           movementDetail: {
