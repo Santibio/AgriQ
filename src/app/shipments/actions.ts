@@ -56,7 +56,6 @@ export async function createShipment(
       // 2. Crear los detalles y actualizar los lotes
       for (const item of formData) {
         const { batchId, quantity, discrepancyQuantity } = item
-
         await tx.movementDetail.create({
           data: {
             movementId: movement.id,
