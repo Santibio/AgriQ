@@ -4,10 +4,11 @@ import React from "react";
 
 interface AddButtonProps {
   children: React.ReactNode;
-  href: string;
+  href?: string;
+  onPress?: () => void;
 }
 
-export default function AddButton({ children, href }: AddButtonProps) {
+export default function AddButton({ children, href, onPress }: AddButtonProps) {
   return (
     <Button
       color="primary"
@@ -15,6 +16,7 @@ export default function AddButton({ children, href }: AddButtonProps) {
       href={href}
       as={Link}
       startContent={<Plus className="h-[20px]" />}
+      onPress={onPress}
     >
       {children}
     </Button>

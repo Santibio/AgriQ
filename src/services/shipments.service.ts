@@ -29,3 +29,36 @@ export async function getShipmentsStats() {
 
   return { shipmentsToday, shipmentsYesterday, shipmentsChange }
 }
+
+export async function getShipments() {
+  const shipments = await db.shipment.findMany({
+    include: {
+      movement: {
+        include: {
+          movementDetail: {
+            include: {
+              batch: {
+                include: {
+                  product: true,
+                },
+              },
+            },
+            // Pre-sort details to get the first product alphabetically
+            orderBy: {
+              batch: {
+                product: {
+                  name: 'asc',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    // The primary DB sort is by date, we'll re-sort in memory by product name
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+  return shipments
+}

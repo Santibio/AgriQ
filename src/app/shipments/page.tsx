@@ -1,58 +1,25 @@
-import AddButton from "@/components/buttons/add-button";
-import ListPage from "@/components/layout/list-page";
-import db from "@/lib/db";
-import ShipmentsList from "./components/shipments-list";
-import paths from "@/lib/paths";
+import ListPage from '@/components/layout/list-page'
+import ShipmentsList from './components/shipments-list'
+import { getShipments } from '@/services/shipments.service'
+import ShipmentAction from './components/shipment-action'
 
 export default async function Shipments() {
-  const pendingShipments = await db.shipment.findMany({
-    where: { status: "PENDING" }, // TODO: deberian venir todos
-    include: {
-      movement: {
-        include: {
-          movementDetail: {
-            include: {
-              batch: {
-                include: {
-                  product: true,
-                },
-              },
-            },
-            // Pre-sort details to get the first product alphabetically
-            orderBy: {
-              batch: {
-                product: {
-                  name: "asc",
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    // The primary DB sort is by date, we'll re-sort in memory by product name
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const shipments = await getShipments()
 
   // Sort the shipments in-memory by the first product's name
-  pendingShipments.sort((a, b) => {
-    const productAName = a.movement?.movementDetail[0]?.batch.product.name;
-    const productBName = b.movement?.movementDetail[0]?.batch.product.name;
+  shipments.sort((a, b) => {
+    const productAName = a.movement?.movementDetail[0]?.batch.product.name
+    const productBName = b.movement?.movementDetail[0]?.batch.product.name
 
-    if (!productAName) return 1; // Shipments without products go to the end
-    if (!productBName) return -1;
+    if (!productAName) return 1 // Shipments without products go to the end
+    if (!productBName) return -1
 
-    return productAName.localeCompare(productBName);
-  });
+    return productAName.localeCompare(productBName)
+  })
 
   return (
-    <ListPage
-      title="Envíos"
-      actions={<AddButton href={paths.shipmentAdd()}>Crear envío</AddButton>}
-    >
-      <ShipmentsList list={pendingShipments} />
+    <ListPage title='Envíos' actions={<ShipmentAction />}>
+      <ShipmentsList list={shipments} />
     </ListPage>
-  );
+  )
 }
