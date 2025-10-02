@@ -44,6 +44,10 @@ const STATUS_MAP: Record<
     icon: <CircleX className='h-6 w-6 text-white' />,
     gradient: 'from-red-400 to-red-600',
   },
+  RETURNED: {
+    icon: <CircleX className='h-6 w-6 text-white' />,
+    gradient: 'from-red-400 to-red-600',
+  },
 }
 
 export default function ShipmentsList({ list }: ShipmentsListProps) {
