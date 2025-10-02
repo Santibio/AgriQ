@@ -23,7 +23,7 @@ type ShipmentFormProps = {
   batchs: (Batch & { product: Product; filtered?: boolean })[]
   movementId?: number // Agregado para manejar el modo de edición
   canEdit?: boolean // Indica si se puede editar el envío
-  isOriginDeposit: boolean
+  isOriginDeposit?: boolean
 }
 
 const quantityToCheck = (
@@ -68,13 +68,13 @@ export default function ShipmentForm({
   const [quantities, setQuantities] = useState<{ [batchId: number]: number }>(
     () =>
       Object.fromEntries(
-        batchs.map(b => [b.id, quantityToCheck(b, isEditing, isOriginDeposit)]),
+        batchs.map(b => [b.id, quantityToCheck(b, isEditing, isOriginDeposit ?? false)]),
       ),
   )
 
   const [initialQuantities] = useState<{ [batchId: number]: number }>(() =>
     Object.fromEntries(
-      batchs.map(b => [b.id, quantityToCheck(b, isEditing, isOriginDeposit)]),
+      batchs.map(b => [b.id, quantityToCheck(b, isEditing, isOriginDeposit ?? false)]),
     ),
   )
 
@@ -118,7 +118,7 @@ export default function ShipmentForm({
     try {
       const response = isEditing
         ? await editShipment(Number(movementId), formData)
-        : await createShipment(formData, isOriginDeposit)
+        : await createShipment(formData, isOriginDeposit ?? false)
 
       if (response?.errors) {
         return toast.error('Ocurrió un error al procesar la solicitud.')
