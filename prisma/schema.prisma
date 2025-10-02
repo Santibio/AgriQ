@@ -90,12 +90,14 @@ model Customer {
 }
 
 model Shipment {
-  id         Int            @id @default(autoincrement())
-  status     ShipmentStatus @default(PENDING)
-  movementId Int            @unique
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
-  movement   Movement       @relation(fields: [movementId], references: [id])
+  id          Int            @id @default(autoincrement())
+  status      ShipmentStatus @default(PENDING)
+  movementId  Int            @unique
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  movement    Movement       @relation(fields: [movementId], references: [id])
+  origin      Location       @default(DEPOSIT)
+  destination Location       @default(MARKET)
 }
 
 model Discard {
@@ -177,6 +179,7 @@ enum ShipmentStatus {
   PENDING
   RECEIVED_OK
   RECEIVED_NO_OK
+  RETURNED
 }
 
 enum DiscardReason {
@@ -201,4 +204,9 @@ enum StatusPayment {
 enum PaymentMethod {
   CASH
   WIRE
+}
+
+enum Location {
+  DEPOSIT
+  MARKET
 }

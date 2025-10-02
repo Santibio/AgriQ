@@ -26,8 +26,8 @@ const paths = {
   shipments() {
     return `/shipments`;
   },
-  shipmentAdd() {
-    return `/shipments/add`;
+  shipmentAdd(origin: string, destination: string) {
+    return `/shipments/add?origin=${origin}&destination=${destination}`;
   },
   shipmentEdit(shipmentId: string) {
     return `/shipments/${shipmentId}`;
