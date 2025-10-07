@@ -271,6 +271,7 @@ export async function editOrder(
         data: {
           customerId: formData.customerId,
           total: orderTotal,
+          statusDoing: StatusDoing.PENDING,
           details: {
             create: newOrderDetails.map(detail => ({
               productName: detail.productName,
@@ -689,6 +690,7 @@ export async function setOrderStatusToCancel(
         where: { id: orderId },
         data: {
           statusPayment: StatusPayment.CANCELLED,
+          statusDoing: StatusDoing.CANCELLED,
           movements: {
             connect: {
               id: movement.id,

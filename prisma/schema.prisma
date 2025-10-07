@@ -195,6 +195,7 @@ enum StatusDoing {
   PENDING
   READY_TO_DELIVER
   DELIVERED
+  CANCELLED
 }
 
 enum StatusPayment {

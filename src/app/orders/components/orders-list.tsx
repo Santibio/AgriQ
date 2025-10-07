@@ -70,14 +70,8 @@ type OrderWithRelations = Order & {
   totalProducts?: number
 }
 
-type StatusDoingWithCancelled =
-  | 'PENDING'
-  | 'CANCELLED'
-  | 'READY_TO_DELIVER'
-  | 'DELIVERED'
-
 const STATUS_MAP: Record<
-  StatusDoingWithCancelled,
+  Order['statusDoing'],
   {
     icon: JSX.Element
     gradient: string
@@ -315,10 +309,13 @@ export default function OrderList({ list }: OrderListProps) {
       if (response?.errors) {
         return toast.error('Ocurrió un error al procesar la solicitud.')
       }
+      const message =
+        selectedOrder?.statusDoing === 'PENDING'
+          ? 'Pedido cancelado correctamente'
+          : `Pedido cancelado correctamente.\nRecorda desarmar el pedido` // TODO: agregar salto de linea
 
-      toast.success('Pedido cancelada correctamente')
+      toast.success(message)
     } catch (error) {
-      console.error('Error: ', error)
       toast.error(
         'Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe.',
       )
@@ -334,8 +331,7 @@ export default function OrderList({ list }: OrderListProps) {
     <>
       <ul className='flex gap-2 flex-col  w-full'>
         {list.map(order => {
-          const isCancelled = order.statusPayment === 'CANCELLED'
-          const statusDoingKey = isCancelled ? 'CANCELLED' : order.statusDoing
+          const statusDoingKey = order.statusDoing
           return (
             <li key={order.id}>
               <Card
