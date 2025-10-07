@@ -22,7 +22,6 @@ import { Share2Icon } from 'lucide-react'
 const PAYMENT_METHODS = {
   WIRE: 'Transferencia',
   CASH: 'Efectivo',
-  CARD: 'Tarjeta',
 }
 
 const FISCAL_CONDITIONS: Record<FiscalCondition, string> = {
@@ -162,9 +161,33 @@ export default function SaleDetail({
                   </CardBody>
                   <CardFooter className='flex flex-col gap-2'>
                     <Divider />
-                    <div className='flex justify-between font-bold text-lg pt-2 w-full'>
-                      <span>Total</span>
-                      <span>{convertToArgentinePeso(sale.order.total)}</span>
+
+                    <div className='space-y-3 text-foreground flex flex-col w-full'>
+                      <div>
+                        <div className='flex justify-between items-center'>
+                          <span className='text-slate-500 text-sm'>
+                            Subtotal
+                          </span>
+                          <span className='text-base font-semibold'>
+                            {convertToArgentinePeso(sale.subtotal)}
+                          </span>
+                        </div>
+
+                        <div className='flex justify-between items-center'>
+                          <span className='text-slate-500 text-sm'>
+                            Descuento
+                          </span>
+                          <span className='text-base font-semibold text-danger'>
+                            -{convertToArgentinePeso(sale.discount)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className='flex justify-between items-center'>
+                        <span className='text-lg font-bold'>Total</span>
+                        <span className='text-lg font-bold text-success'>
+                          {convertToArgentinePeso(sale.total)}
+                        </span>
+                      </div>
                     </div>
                   </CardFooter>
                 </Card>

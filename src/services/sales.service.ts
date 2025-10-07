@@ -2,6 +2,9 @@ import db from '@/lib/db'
 
 export async function getSells() {
   const sells = await db.sale.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
     include: {
       order: {
         include: { customer: true, details: true },

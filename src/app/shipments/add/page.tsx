@@ -16,7 +16,7 @@ export default async function ShipmentAddPage({
   const isOriginDeposit = origin === Location.DEPOSIT
 
   const batchs = await db.batch.findMany({
-  include: {
+    include: {
       product: true,
     },
     where: {
@@ -33,11 +33,10 @@ export default async function ShipmentAddPage({
       },
     },
   })
-  console.log("🚀 ~ ShipmentAddPage ~ batchs:", batchs)
 
   return (
     <FormPage title='Crear Envío'>
-      <ShipmentForm batchs={batchs} isOriginDeposit={isOriginDeposit}/>
+      <ShipmentForm batchs={batchs} isOriginDeposit={isOriginDeposit} />
     </FormPage>
   )
 }

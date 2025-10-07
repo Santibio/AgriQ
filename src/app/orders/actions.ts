@@ -305,6 +305,7 @@ export async function confirmOrder(
   orderId: number,
   paymentMethod: PaymentMethod,
   paymentProof: File | null,
+  discount: number,
 ): Promise<OrderFormState> {
   try {
     const user = await getCurrentUser()
@@ -391,12 +392,18 @@ export async function confirmOrder(
       paymentReceipt = await saveImage(paymentProof)
     }
 
+    const subtotal = order.total
+    const total = subtotal - discount
+
     await db.sale.create({
       data: {
         orderId: order.id,
         movementId: movementId,
         paymentMethod: paymentMethod,
         paymentReceipt: paymentReceipt,
+        subtotal,
+        discount,
+        total,
       },
     })
 

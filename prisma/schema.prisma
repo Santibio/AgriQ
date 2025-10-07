@@ -144,6 +144,9 @@ model Sale {
   paymentReceipt String
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  discount       Float
+  subtotal       Float
+  total          Float
 }
 
 enum Role {

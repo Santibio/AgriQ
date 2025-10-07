@@ -27,7 +27,7 @@ export default function FormWrapper({
         children
       )}
       {showButton && (
-        <div className="pb-2 w-full">
+        <div className="pb-20 w-full">
           <Button
             variant="ghost"
             type="submit"

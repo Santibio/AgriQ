@@ -27,6 +27,8 @@ interface OrderDetailProps {
     selectedQuantity: number
     image?: string
   }>
+  total: number
+  discount?: number
 }
 export default function OrderDetail({
   productsList,
@@ -34,6 +36,8 @@ export default function OrderDetail({
   onOpenChange,
   handleDeleteProduct,
   handleEditProduct,
+  total,
+  discount,
 }: OrderDetailProps) {
   if (!productsList || productsList.length === 0) {
     return (
@@ -134,17 +138,21 @@ export default function OrderDetail({
               </div>
             </DrawerBody>
             <DrawerFooter className='bg-slate-50 p-6'>
-              <div className='items-center justify-between flex w-full'>
-                <span>Cantidad de productos: {productsList.length}</span>
-                <span className='text-lg font-semibold'>
-                  Total:{' '}
-                  {convertToArgentinePeso(
-                    productsList.reduce(
-                      (acc, p) => acc + p.price * p.selectedQuantity,
-                      0,
-                    ),
-                  )}
-                </span>
+              <div className='flex items-center justify-end w-full'>
+                {discount ? (
+                  <div className='flex flex-col items-end'>
+                    <span className='text-sm text-gray-400 line-through'>
+                      Total: {convertToArgentinePeso(total + discount)}
+                    </span>
+                    <span className='text-lg font-semibold text-success'>
+                      Total: {convertToArgentinePeso(total)}
+                    </span>
+                  </div>
+                ) : (
+                  <span className='text-lg font-semibold text-gray-900'>
+                    Total: {convertToArgentinePeso(total)}
+                  </span>
+                )}
               </div>
             </DrawerFooter>
           </>

@@ -467,6 +467,10 @@ export default function OrderForm({
             productsList={productsList}
             isOpen={isOpenDetailOrderDrawer}
             onOpenChange={onOpenChangeDetailOrderDrawer}
+            total={productsList.reduce(
+              (acc, p) => acc + p.price * p.selectedQuantity,
+              0,
+            )}
           />
         </div>
         <div className='mt-4  flex-1 flex items-end w-full'>

@@ -12,6 +12,10 @@ import {
   Select,
   SelectItem,
   Button,
+  NumberInput,
+  Card,
+  Divider,
+  CardBody,
 } from '@heroui/react'
 import { capitalize } from '@/lib/helpers/text'
 import { confirmOrder } from '../actions'
@@ -61,6 +65,7 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
     PaymentMethod.CASH,
   )
   const [paymentProof, setPaymentProof] = useState<File | null>(null)
+  const [discount, setDiscount] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handlePaymentMethodChange = (value: PaymentMethod) => {
@@ -84,7 +89,12 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
     e.preventDefault()
 
     try {
-      const response = await confirmOrder(order.id, paymentMethod, paymentProof)
+      const response = await confirmOrder(
+        order.id,
+        paymentMethod,
+        paymentProof,
+        discount,
+      )
 
       if (response?.errors) {
         return toast.error('Ocurrió un error al procesar la solicitud.')
@@ -128,11 +138,12 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
             </div>
           )
         default:
-          return String(cellValue)
       }
     },
     [],
   )
+
+  const total = order.subtotal - discount
 
   return (
     <FormWrapper
@@ -141,7 +152,7 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
       showScrollShadow={false}
       buttonProps={{ isLoading }}
     >
-      <div className='flex flex-col gap-6 w-full h-full'>
+      <div className='flex flex-col gap-6 w-full h-full pb-10'>
         <Input
           readOnly
           label='Cliente'
@@ -192,6 +203,13 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
               )}
             </div>
           )}
+          <NumberInput
+            label='Descuento'
+            value={discount}
+            onValueChange={setDiscount}
+            radius='sm'
+            variant='flat'
+          />
         </div>
         <div>
           <span className='font-medium text-small'>Resumen</span>
@@ -221,14 +239,36 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
             </TableBody>
           </Table>
         </div>
-
         <div className='flex-1 items-end justify-end flex'>
-          <span className='text-lg font-semibold'>
-            Total:
-            {convertToArgentinePeso(
-              order.products.reduce((acc, p) => acc + p.price * p.quantity, 0),
-            )}
-          </span>
+          <Card
+            className='flex w-full flex-col p-4 bg-slate-50 gap-4'
+            shadow='none'
+          >
+            <CardBody className='space-y-3 text-foreground'>
+              <div className='flex justify-between items-center'>
+                <span className='text-base'>Subtotal</span>
+                <span className='text-base font-semibold'>
+                  {convertToArgentinePeso(order.subtotal)}
+                </span>
+              </div>
+
+              <div className='flex justify-between items-center'>
+                <span className='text-base'>Descuento</span>
+                <span className='text-base font-semibold text-danger'>
+                  -{convertToArgentinePeso(discount)}
+                </span>
+              </div>
+
+              <Divider />
+
+              <div className='flex justify-between items-center'>
+                <span className='text-lg font-bold'>Total</span>
+                <span className='text-lg font-bold text-success'>
+                  {convertToArgentinePeso(total)}
+                </span>
+              </div>
+            </CardBody>
+          </Card>
         </div>
       </div>
     </FormWrapper>

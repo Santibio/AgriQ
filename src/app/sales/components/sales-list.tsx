@@ -81,7 +81,7 @@ function SaleCard({ sale, onSelectSale }: SaleCardProps) {
                 {fiscalConditionMap[sale.order.customer.fiscalCondition]}
               </span>
               <div className='mt-2 text-md text-muted-foreground'>
-                Total: {convertToArgentinePeso(sale.order.total)}
+                Total: {convertToArgentinePeso(sale.total)}
               </div>
             </div>
             <span className='text-slate-500 text-sm'>
