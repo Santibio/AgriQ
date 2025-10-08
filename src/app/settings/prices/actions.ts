@@ -3,7 +3,6 @@
 import db from '@/lib/db'
 import paths from '@/lib/paths'
 import { getCurrentUser } from '@/lib/session'
-import { Product } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 
 interface PricesFormState {
