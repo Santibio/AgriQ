@@ -1,88 +1,94 @@
 const paths = {
   home() {
-    return "/";
+    return '/'
   },
   login() {
-    return `/login`;
+    return `/login`
   },
   users() {
-    return `/users`;
+    return `settings/users`
   },
   userEdit(userId: string) {
-    return `/users/${userId}`;
+    return `users/${userId}`
   },
   userAdd() {
-    return "/users/add";
+    return 'users/add'
   },
   products() {
-    return `/products`;
+    return 'settings/products'
   },
   productAdd() {
-    return `/products/add`;
+    return 'products/add'
   },
   productEdit(productId: string) {
-    return `/products/${productId}`;
+    return `products/${productId}`
   },
   shipments() {
-    return `/shipments`;
+    return `/shipments`
   },
   shipmentAdd(origin: string, destination: string) {
-    return `/shipments/add?origin=${origin}&destination=${destination}`;
+    return `/shipments/add?origin=${origin}&destination=${destination}`
   },
   shipmentEdit(shipmentId: string) {
-    return `/shipments/${shipmentId}`;
+    return `/shipments/${shipmentId}`
   },
   production() {
-    return `/production`;
+    return `/production`
   },
   productionEdit(productionId: string) {
-    return `/production/${productionId}`;
+    return `/production/${productionId}`
   },
   productionAdd() {
-    return `/production/add`;
+    return `/production/add`
   },
   customers() {
-    return `/customers`;
+    return `/customers`
   },
   customerAdd() {
-    return `/customers/add`;
+    return `/customers/add`
   },
   customerEdit(customerId: string) {
-    return `/customers/${customerId}`;
+    return `/customers/${customerId}`
   },
   discard() {
-    return `/discard`;
+    return `/discard`
   },
   discardAdd() {
-    return `/discard/add`;
+    return `/discard/add`
   },
   shipmentReception() {
-    return `/shipments-reception`;
+    return `/shipments-reception`
   },
   shipmentReceptionEdit(shipmentId: string) {
-    return `/shipments-reception/${shipmentId}`;
+    return `/shipments-reception/${shipmentId}`
   },
   orders() {
-    return `/orders`;
+    return `/orders`
   },
   orderAdd() {
-    return `/orders/add`;
+    return `/orders/add`
   },
   orderToEdit(orderId: string) {
-    return `/orders/edit?id=${orderId}`;
+    return `/orders/edit?id=${orderId}`
   },
   orderToCharge(orderId: string) {
-    return `/orders/payment?id=${orderId}`;
+    return `/orders/payment?id=${orderId}`
   },
   orderToMovements(orderId: string) {
-    return `/orders/movements?id=${orderId}`;
+    return `/orders/movements?id=${orderId}`
   },
   movements() {
-    return `/movements`;
+    return `/movements`
   },
   sales() {
-    return `/sales`;
+    return `/sales`
   },
-};
+  prices() {
+    return `settings/prices`
+  },
+  profile() {
+    return `settings/profile`
+  },
+}
 
-export default paths;
+export default paths

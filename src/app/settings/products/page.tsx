@@ -1,6 +1,6 @@
 import db from "@/lib/db";
 import paths from "@/lib/paths";
-import ProductsList from "@/app/products/components/products-list";
+import ProductsList from "./components/products-list";
 import AddButton from "@/components/buttons/add-button";
 import ListPage from "@/components/layout/list-page";
 

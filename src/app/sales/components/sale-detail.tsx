@@ -102,7 +102,7 @@ export default function SaleDetail({
 
               {/* Pago */}
               <section className='flex flex-col gap-2'>
-                <h3 className='text-lg font-semibold text-gray-900'>Pago</h3>
+                <h3 className='text-lg font-semibold text-gray-900'>Cobro</h3>
                 <Card className='bg-white/70 backdrop-blur-sm border-white/20 h-full'>
                   <CardBody className='space-y-3'>
                     <div className='space-y-2 text-sm'>

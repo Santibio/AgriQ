@@ -1,5 +1,5 @@
 import PageTitle from "@/components/page-title";
-import UserForm from "@/app/users/components/user-form";
+import UserForm from "../components/user-form";
 import db from "@/lib/db";
 import { notFound } from "next/navigation";
 

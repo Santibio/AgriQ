@@ -39,11 +39,13 @@ interface Presentation {
   cod: number;
 }
 
+type Colors = "default" | "primary" | "secondary" | "success" | "warning" | "danger" | undefined;
+
 interface ProductType {
   id: string;
   label: string;
   cod: number;
-  color: string;
+  color: Colors;
   presentation: Presentation[];
 }
 
