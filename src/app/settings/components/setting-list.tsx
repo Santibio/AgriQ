@@ -1,4 +1,4 @@
-import { Card, CardBody, Divider } from '@heroui/react'
+import { Card, CardBody } from '@heroui/react'
 import Link from 'next/link'
 import { DollarSign, Users, User, ChevronRight, Apple } from 'lucide-react'
 import paths from '@/lib/paths'
@@ -32,29 +32,31 @@ const settings = [
 
 export default function SettingList() {
   return (
-    <Card shadow='sm' className='max-w-md w-full mx-auto mt-10'>
-      <CardBody className='p-2'>
-        <ul className='flex flex-col'>
-          {settings.map(({ label, href, icon: Icon, color }, index) => (
-            <li key={href}>
-              <Link
-                href={href}
-                className='flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150'
-              >
-                <div className='flex items-center gap-3'>
-                  <Icon size={20} className={color} />
-                  <span className='font-medium text-gray-800 dark:text-gray-100'>
-                    {label}
-                  </span>
-                </div>
-                <ChevronRight className='text-slate-500' />
-              </Link>
-
-              {index < settings.length - 1 && <Divider />}
-            </li>
+    <div className='max-w-md w-full mx-auto mt-6 '>
+      {/* Grupo estilo iOS */}
+      <Card className='bg-white/70 backdrop-blur-sm border-white/20 h-full'>
+        <CardBody className='p-0 divide-y divide-gray-200'>
+          {settings.map(({ label, href, icon: Icon, color }) => (
+            <Link
+              key={href}
+              href={href}
+              className='flex items-center justify-between px-5 py-4 active:bg-gray-100 transition-all duration-150'
+            >
+              <div className='flex items-center gap-3'>
+                <Icon
+                  size={20}
+                  className={`${color} drop-shadow-sm`}
+                  strokeWidth={2}
+                />
+                <span className='font-medium text-gray-900 text-[15px]'>
+                  {label}
+                </span>
+              </div>
+              <ChevronRight size={18} className='text-gray-400' />
+            </Link>
           ))}
-        </ul>
-      </CardBody>
-    </Card>
+        </CardBody>
+      </Card>
+    </div>
   )
 }
