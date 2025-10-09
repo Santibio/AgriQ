@@ -1,62 +1,102 @@
-import type { User } from "@prisma/client";
-import { Avatar } from "@heroui/react";
-import UserMenu from "./user-menu";
-import Link from "next/link";
-import paths from "@/lib/paths";
-import clsx from "clsx";
-import config from "@/config";
+// src/components/users/UserList.tsx
 
-interface UserListProps {
-  users: User[];
+import type { User } from '@prisma/client'
+import { Avatar, Chip } from '@heroui/react'
+import UserMenu from './user-menu'
+import Link from 'next/link'
+import paths from '@/lib/paths'
+import clsx from 'clsx'
+import config from '@/config'
+import CardWithShadow from '@/components/card-with-shadow'
+import type { Color } from '@/lib/schemas/general' // O el tipo de color de tu librería
+
+// --- Mapeo de estilos para los roles de usuario ---
+interface RoleStyle {
+  color: Color
+  variant: 'light' | 'flat' | 'solid'
 }
 
+const ROLE_STYLES: Record<string, RoleStyle> = {
+  ADMIN: { color: 'danger', variant: 'flat' },
+  SELLER: { color: 'primary', variant: 'flat' },
+  DEPOSIT: { color: 'secondary', variant: 'flat' },
+  default: { color: 'default', variant: 'flat' },
+}
 
-function UserInfo({ user, roleLabel }: { user: User; roleLabel?: string }) {
-  return (
-    <div className="flex gap-4 items-center">
-      <Avatar src={user.avatar} showFallback />
-      <div className="flex flex-col">
-        <h3 className="text-md text-primary font-medium capitalize">
-          {`${user.lastName} ${user.name}`}
-        </h3>
-        <p className="text-slate-500 capitalize">{roleLabel || "---"}</p>
-      </div>
-    </div>
-  );
+interface UserListProps {
+  users: User[]
 }
 
 export default function UserList({ users }: UserListProps) {
-  return (
-      <ul className="flex gap-2 flex-col">
-        {users.map((user) => {
-          const roleLabel = config.roles.find((r) => r.id === user.role)?.label;
+  if (!users?.length) {
+    return (
+      <p className='text-center text-slate-500'>No se encontraron usuarios.</p>
+    )
+  }
 
-          return (
-            <li key={user.id}>
-              <div
-                className={clsx(
-                  "flex border rounded-md p-1 gap-2 items-center justify-between",
-                  !user.active && "opacity-50"
-                )}
-              >
-                {user.active ? (
+  return (
+    <ul className='flex flex-col gap-3'>
+      {users.map(user => {
+        const roleConfig = config.roles.find(r => r.id === user.role)
+        const roleStyle = ROLE_STYLES[user.role] || ROLE_STYLES.default
+
+        return (
+          <li key={user.id}>
+            <CardWithShadow
+              className={clsx(
+                'transition-opacity',
+                !user.active && 'opacity-60',
+              )}
+            >
+              {/* Usamos un div relativo para posicionar el enlace superpuesto */}
+              <div className='relative flex items-center justify-between p-3'>
+                {/* Enlace superpuesto para usuarios activos */}
+                {user.active && (
                   <Link
                     href={paths.userEdit(user.id.toString())}
-                    className="w-full"
-                  >
-                    <UserInfo user={user} roleLabel={roleLabel} />
-                  </Link>
-                ) : (
-                  <div className="w-full">
-                    <UserInfo user={user} roleLabel={roleLabel} />
-                  </div>
+                    className='absolute inset-0 z-10'
+                    aria-label={`Editar usuario ${user.name}`}
+                  />
                 )}
-                <UserMenu userId={user.id} isActive={user.active} />
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-  );
-}
 
+                {/* Contenido visible (Avatar, Nombre y Rol) */}
+                <div className='flex items-center gap-4'>
+                  <Avatar
+                    src={user.avatar}
+                    showFallback
+                    className='flex-shrink-0'
+                  />
+                  <div className='flex flex-col'>
+                    <h3 className='font-bold capitalize text-slate-800'>
+                      {`${user.lastName}, ${user.name}`}
+                    </h3>
+                    {roleConfig && (
+                      <Chip
+                        size='sm'
+                        color={roleStyle.color}
+                        variant={roleStyle.variant}
+                        className='mt-1 w-fit' // w-fit para que el chip no ocupe todo el ancho
+                      >
+                        {roleConfig.label}
+                      </Chip>
+                    )}
+                  </div>
+                </div>
+
+                {/* Acciones y Estado (con z-index mayor para ser clickeable) */}
+                <div className='relative z-20 flex items-center gap-3'>
+                  {!user.active && (
+                    <Chip size='sm' color='danger' variant='light'>
+                      Inactivo
+                    </Chip>
+                  )}
+                  <UserMenu userId={user.id} isActive={user.active} />
+                </div>
+              </div>
+            </CardWithShadow>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
