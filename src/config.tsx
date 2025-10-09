@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { BarChart3, Home, Package, Settings, TrendingUp } from "lucide-react";
 
 import { Role as PrismaRole } from "@prisma/client";
+import { Color } from "./lib/schemas/general";
 
 interface NavItem {
   id: string;
@@ -39,13 +40,12 @@ interface Presentation {
   cod: number;
 }
 
-type Colors = "default" | "primary" | "secondary" | "success" | "warning" | "danger" | undefined;
 
 interface ProductType {
   id: string;
   label: string;
   cod: number;
-  color: Colors;
+  color: Color;
   presentation: Presentation[];
 }
 
@@ -143,7 +143,7 @@ const config: Config = {
       id: "aromaticas", label: "Aromaticas", cod: 1, type:
         [
           {
-            id: "secas", label: "Secas", cod: 1, color: "default", presentation: [
+            id: "secas", label: "Secas", cod: 1, color: "primary", presentation: [
               {
                 id: "paquete",
                 label: "Paquete",

@@ -1,26 +1,25 @@
-import PageTitle from "@/components/page-title";
-import UserForm from "../components/user-form";
-import db from "@/lib/db";
-import { notFound } from "next/navigation";
+import UserForm from '../components/user-form'
+import db from '@/lib/db'
+import { notFound } from 'next/navigation'
+import FormPage from '@/components/layout/form-page'
 
 interface UserEditPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string }>
 }
 
 export default async function UserEditPage(props: UserEditPageProps) {
-  const params = await props.params;
-  const userId = parseInt(params.id);
+  const params = await props.params
+  const userId = parseInt(params.id)
 
   const user = await db.user.findUnique({
     where: { id: userId },
-  });
+  })
 
-  if (!user) return notFound();
+  if (!user) return notFound()
 
   return (
-    <section className="flex flex-col justify-between gap-6">
-      <PageTitle>Editar Usuario</PageTitle>
+    <FormPage title='Editar Usuario'>
       <UserForm user={user} />
-    </section>
-  );
+    </FormPage>
+  )
 }

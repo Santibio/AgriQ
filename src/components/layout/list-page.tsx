@@ -17,23 +17,15 @@ interface ListPageProps {
   children: ReactNode
   title: string
   actions?: ReactNode
-  classNameList?: {
-    containerList: string
-  }
 }
 
-export default function ListPage({
-  title,
-  actions,
-  children,
-  classNameList,
-}: ListPageProps) {
+export default function ListPage({ title, actions, children }: ListPageProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   return (
     <>
-      <section className='flex flex-col h-[calc(100vh-150px)] px-4 relative gap-2'>
-        <div className='flex items-center justify-between'>
+      <section className='flex flex-col h-[calc(100vh-150px)]  relative gap-2'>
+        <div className='flex items-center justify-between px-4'>
           <PageTitle>{title}</PageTitle>
           <Button
             isIconOnly
@@ -46,15 +38,10 @@ export default function ListPage({
             <ArrowDownWideNarrow className='h-4 w-4 ' color='blue' />
           </Button>
         </div>
-        <ScrollShadow
-          className={`pb-2 custom-scroll-shadow flex-1 ${
-            classNameList?.containerList || ''
-          }`}
-          hideScrollBar
-        >
+        <ScrollShadow className='p-4 flex-1' hideScrollBar>
           {children}
         </ScrollShadow>
-        <div>{actions}</div>
+        <div className='px-4'>{actions}</div>
       </section>
       <Drawer
         isOpen={isOpen}

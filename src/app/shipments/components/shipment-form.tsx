@@ -68,13 +68,19 @@ export default function ShipmentForm({
   const [quantities, setQuantities] = useState<{ [batchId: number]: number }>(
     () =>
       Object.fromEntries(
-        batchs.map(b => [b.id, quantityToCheck(b, isEditing, isOriginDeposit ?? false)]),
+        batchs.map(b => [
+          b.id,
+          quantityToCheck(b, isEditing, isOriginDeposit ?? false),
+        ]),
       ),
   )
 
   const [initialQuantities] = useState<{ [batchId: number]: number }>(() =>
     Object.fromEntries(
-      batchs.map(b => [b.id, quantityToCheck(b, isEditing, isOriginDeposit ?? false)]),
+      batchs.map(b => [
+        b.id,
+        quantityToCheck(b, isEditing, isOriginDeposit ?? false),
+      ]),
     ),
   )
 

@@ -1,4 +1,4 @@
-import { Card, CardBody } from '@heroui/react'
+import { CardBody } from '@heroui/react'
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -17,10 +17,11 @@ interface StatCardProps {
 }
 
 import { convertToArgentinePeso } from '@/lib/helpers/number'
+import CardWithShadow from './card-with-shadow'
 
 function StatCard({ title, value, change, trend, icon: Icon }: StatCardProps) {
   return (
-    <Card className='bg-white/70 backdrop-blur-sm border-white/20'>
+    <CardWithShadow>
       <CardBody className='p-4'>
         <div className='flex items-center justify-between'>
           <div className='space-y-1'>
@@ -46,7 +47,7 @@ function StatCard({ title, value, change, trend, icon: Icon }: StatCardProps) {
           </div>
         </div>
       </CardBody>
-    </Card>
+    </CardWithShadow>
   )
 }
 

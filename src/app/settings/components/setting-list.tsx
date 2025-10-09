@@ -1,7 +1,8 @@
-import { Card, CardBody } from '@heroui/react'
+import { CardBody } from '@heroui/react'
 import Link from 'next/link'
 import { DollarSign, Users, User, ChevronRight, Apple } from 'lucide-react'
 import paths from '@/lib/paths'
+import CardWithShadow from '@/components/card-with-shadow'
 
 const settings = [
   {
@@ -34,7 +35,7 @@ export default function SettingList() {
   return (
     <div className='max-w-md w-full mx-auto mt-6 '>
       {/* Grupo estilo iOS */}
-      <Card className='bg-white/70 backdrop-blur-sm border-white/20 h-full'>
+      <CardWithShadow className='h-full'>
         <CardBody className='p-0 divide-y divide-gray-200'>
           {settings.map(({ label, href, icon: Icon, color }) => (
             <Link
@@ -56,7 +57,7 @@ export default function SettingList() {
             </Link>
           ))}
         </CardBody>
-      </Card>
+      </CardWithShadow>
     </div>
   )
 }

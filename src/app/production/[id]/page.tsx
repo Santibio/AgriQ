@@ -36,7 +36,7 @@ export default async function ProductionEditPage(
   );
 
   return (
-    <FormPage title={hasMovement ? "Detalle Lote" : "Editar Lote"}>
+    <FormPage title={hasMovement ? `Detalle Lote #${batch.id}` : `Editar Lote #${batch.id}`}>
       <ProductionForm
         products={products}
         batch={batch}

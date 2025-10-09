@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller } from 'react-hook-form'
 import {
   Avatar,
   Button,
@@ -8,38 +8,39 @@ import {
   Select,
   SelectItem,
   Switch,
-} from "@heroui/react";
-import { useEffect, useState } from "react";
-import { Camera, Eye, EyeOff } from "lucide-react";
-import type { User } from "@prisma/client";
+} from '@heroui/react'
+import { useEffect, useState } from 'react'
+import { Camera, Eye, EyeOff } from 'lucide-react'
+import type { User } from '@prisma/client'
 import {
   AddInputs,
   EditInputs,
   UserAddFormSchema,
   UserEditFormSchema,
-} from "@/lib/schemas/users";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { usernameGenerator } from "@/lib/helpers/user";
-import { addUser, editUser } from "../actions";
-import paths from "@/lib/paths";
-import { useRouter } from "next/navigation";
-import config from "@/config";
+} from '@/lib/schemas/users'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
+import { usernameGenerator } from '@/lib/helpers/user'
+import { addUser, editUser } from '../actions'
+import paths from '@/lib/paths'
+import { useRouter } from 'next/navigation'
+import config from '@/config'
+import FormWrapper from '@/components/layout/form-wrapper'
 
 interface UserFormProps {
-  user?: User;
+  user?: User
 }
 
 interface VisibilityState {
-  password: boolean;
-  confirmPassword: boolean;
+  password: boolean
+  confirmPassword: boolean
 }
 
 export default function UserForm({ user }: UserFormProps) {
-  const isEditing = Boolean(user);
-  type FormInputs = typeof isEditing extends boolean ? AddInputs : EditInputs;
+  const isEditing = Boolean(user)
+  type FormInputs = typeof isEditing extends boolean ? AddInputs : EditInputs
 
-  const router = useRouter();
+  const router = useRouter()
 
   const {
     control,
@@ -50,166 +51,172 @@ export default function UserForm({ user }: UserFormProps) {
     trigger,
   } = useForm<FormInputs>({
     resolver: zodResolver(isEditing ? UserEditFormSchema : UserAddFormSchema),
-    mode: "onChange",
+    mode: 'onChange',
     defaultValues: {
-      username: user?.username || "",
-      role: user?.role || "",
-      password: "",
-      confirmPassword: "",
-      lastName: user?.lastName || "",
-      name: user?.name || "",
+      username: user?.username || '',
+      role: user?.role || '',
+      password: '',
+      confirmPassword: '',
+      lastName: user?.lastName || '',
+      name: user?.name || '',
       avatar: undefined,
       active: isEditing ? user?.active : true,
     },
-  });
+  })
 
   const [isVisible, setIsVisible] = useState<VisibilityState>({
     password: false,
     confirmPassword: false,
-  });
+  })
 
-  const [isLoading, setIsloading] = useState<boolean>(false);
-  const [preview, setPreview] = useState<string>(user?.avatar || "");
+  const [isLoading, setIsloading] = useState<boolean>(false)
+  const [preview, setPreview] = useState<string>(user?.avatar || '')
 
   // Effect to update username whenever name or lastName changes
   useEffect(() => {
     if (!isEditing) {
-      const name = watch("name");
-      const lastName = watch("lastName");
-      const username = usernameGenerator(name, lastName);
-      setValue("username", username);
+      const name = watch('name')
+      const lastName = watch('lastName')
+      const username = usernameGenerator(name, lastName)
+      setValue('username', username)
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }
-  }, [watch("name"), watch("lastName"), isEditing]);
+  }, [watch('name'), watch('lastName'), isEditing])
 
   const onSubmit = async (data: FormInputs) => {
-    const isValid = await trigger();
-    if (!isValid) return; // Si hay errores, no envía el form
+    const isValid = await trigger()
+    if (!isValid) return // Si hay errores, no envía el form
 
-    const formData = new FormData();
+    const formData = new FormData()
     const fields = [
-      ["username", data.username],
-      ["role", data.role],
-      ["password", data.password],
-      ["confirmPassword", data.confirmPassword],
-      ["lastName", data.lastName],
-      ["name", data.name],
-      ["active", data.active ? "true" : "false"],
-    ];
+      ['username', data.username],
+      ['role', data.role],
+      ['password', data.password],
+      ['confirmPassword', data.confirmPassword],
+      ['lastName', data.lastName],
+      ['name', data.name],
+      ['active', data.active ? 'true' : 'false'],
+    ]
 
-    fields.forEach(([key, value]) => formData.append(key, value));
-    if (data.avatar) formData.append("avatar", data.avatar);
+    fields.forEach(([key, value]) => formData.append(key, value))
+    if (data.avatar) formData.append('avatar', data.avatar)
 
-    setIsloading(true);
+    setIsloading(true)
 
     try {
       const response =
         isEditing && user?.id
           ? await editUser(user.id, formData)
-          : await addUser(formData);
+          : await addUser(formData)
 
       if (response?.errors) {
         return toast.error(
-          "Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe."
-        );
+          'Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe.',
+        )
       }
 
       toast.success(
         isEditing
-          ? "Usuario actualizado correctamente"
-          : "Usuario creado correctamente"
-      );
-      router.push(paths.users());
+          ? 'Usuario actualizado correctamente'
+          : 'Usuario creado correctamente',
+      )
+      router.push('/' + paths.users())
     } catch (error) {
-      console.error("Error: ", error);
       toast.error(
-        "Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe."
-      );
+        'Ocurrió un error al procesar la solicitud. Revisa si el usuario ya existe.',
+      )
     } finally {
-      setIsloading(false);
+      setIsloading(false)
     }
-  };
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="h-[70dvh] flex flex-col gap-4">
+    <FormWrapper
+      onSubmit={handleSubmit(onSubmit)}
+      buttonLabel='Confirmar'
+      buttonProps={{
+        isDisabled: isLoading,
+        isLoading,
+      }}
+    >
+      <div className='flex flex-col gap-4'>
         <Controller
-          name="name"
+          name='name'
           control={control}
           render={({ field }) => (
             <Input
               {...field}
-              label="Nombre"
-              placeholder="Ingresar nombre"
+              label='Nombre'
+              placeholder='Ingresar nombre'
               isRequired
               isInvalid={!!errors.name}
               errorMessage={errors.name?.message}
-              onChange={(e) => {
+              onChange={e => {
                 const onlyLetters = e.target.value.replace(
                   /[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g,
-                  ""
-                );
-                e.target.value = onlyLetters;
-                field.onChange(e);
+                  '',
+                )
+                e.target.value = onlyLetters
+                field.onChange(e)
               }}
             />
           )}
         />
         <Controller
-          name="lastName"
+          name='lastName'
           control={control}
           render={({ field }) => (
             <Input
               {...field}
-              label="Apellido"
-              placeholder="Ingresar apellido"
+              label='Apellido'
+              placeholder='Ingresar apellido'
               isRequired
               isInvalid={!!errors.lastName}
               errorMessage={errors.lastName?.message}
-              onChange={(e) => {
+              onChange={e => {
                 const onlyLetters = e.target.value.replace(
                   /[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g,
-                  ""
-                );
-                e.target.value = onlyLetters;
-                field.onChange(e);
+                  '',
+                )
+                e.target.value = onlyLetters
+                field.onChange(e)
               }}
             />
           )}
         />
-        <div className="flex gap-4">
+        <div className='flex gap-4'>
           <Controller
-            name="password"
+            name='password'
             control={control}
             render={({ field }) => (
               <Input
                 {...field}
-                label={isEditing ? "Nueva contraseña" : "Contraseña"}
+                label={isEditing ? 'Nueva contraseña' : 'Contraseña'}
                 placeholder={
                   isEditing
-                    ? "Ingresar nueva contraseña"
-                    : "Ingresar  contraseña"
+                    ? 'Ingresar nueva contraseña'
+                    : 'Ingresar  contraseña'
                 }
                 isRequired={!isEditing}
-                type={isVisible.password ? "text" : "password"}
+                type={isVisible.password ? 'text' : 'password'}
                 isInvalid={!!errors.password}
                 errorMessage={errors.password?.message}
                 endContent={
                   <button
-                    aria-label="toggle password visibility"
-                    className="focus:outline-none"
-                    type="button"
+                    aria-label='toggle password visibility'
+                    className='focus:outline-none'
+                    type='button'
                     onClick={() =>
-                      setIsVisible((prev) => ({
+                      setIsVisible(prev => ({
                         ...prev,
                         password: !prev.password,
                       }))
                     }
                   >
                     {isVisible.password ? (
-                      <Eye className="w-[18px] text-default-400 pointer-events-none" />
+                      <Eye className='w-[18px] text-default-400 pointer-events-none' />
                     ) : (
-                      <EyeOff className="w-[18px] text-default-400 pointer-events-none" />
+                      <EyeOff className='w-[18px] text-default-400 pointer-events-none' />
                     )}
                   </button>
                 }
@@ -217,33 +224,33 @@ export default function UserForm({ user }: UserFormProps) {
             )}
           />
           <Controller
-            name="confirmPassword"
+            name='confirmPassword'
             control={control}
             render={({ field }) => (
               <Input
                 {...field}
-                label="Confirmar contraseña"
-                placeholder="Confirmar contraseña"
+                label='Confirmar contraseña'
+                placeholder='Confirmar contraseña'
                 isRequired={!isEditing}
-                type={isVisible.confirmPassword ? "text" : "password"}
+                type={isVisible.confirmPassword ? 'text' : 'password'}
                 isInvalid={!!errors.confirmPassword}
                 errorMessage={errors.confirmPassword?.message}
                 endContent={
                   <button
-                    aria-label="toggle password visibility"
-                    className="focus:outline-none"
-                    type="button"
+                    aria-label='toggle password visibility'
+                    className='focus:outline-none'
+                    type='button'
                     onClick={() =>
-                      setIsVisible((prev) => ({
+                      setIsVisible(prev => ({
                         ...prev,
                         confirmPassword: !prev.confirmPassword,
                       }))
                     }
                   >
                     {isVisible.confirmPassword ? (
-                      <Eye className="w-[18px] text-default-400 pointer-events-none" />
+                      <Eye className='w-[18px] text-default-400 pointer-events-none' />
                     ) : (
-                      <EyeOff className="w-[18px] text-default-400 pointer-events-none" />
+                      <EyeOff className='w-[18px] text-default-400 pointer-events-none' />
                     )}
                   </button>
                 }
@@ -252,109 +259,98 @@ export default function UserForm({ user }: UserFormProps) {
           />
         </div>
         <Controller
-          name="role"
+          name='role'
           control={control}
           render={({ field }) => (
             <Select
               {...field}
-              label="Rol"
-              placeholder="Tipo de usuario"
+              label='Rol'
+              placeholder='Tipo de usuario'
               isRequired
               isInvalid={!!errors.role}
               errorMessage={errors.role?.message}
               selectedKeys={[field.value]}
             >
-              {config.roles.map((role) => (
-                <SelectItem key={role.id}>
-                  {role.label}
-                </SelectItem>
+              {config.roles.map(role => (
+                <SelectItem key={role.id}>{role.label}</SelectItem>
               ))}
             </Select>
           )}
         />
-        <div className="flex gap-2">
+        <div className='flex gap-2'>
           <Controller
-            name="username"
+            name='username'
             control={control}
             render={({ field }) => {
               return (
                 <Input
                   {...field}
                   isDisabled
-                  label="Usuario"
-                  placeholder="Se genera automaticamente"
+                  label='Usuario'
+                  placeholder='Se genera automaticamente'
                   isInvalid={!!errors.username}
                   errorMessage={errors.username?.message}
                 />
-              );
+              )
             }}
           />
           <Controller
-            name="avatar"
+            name='avatar'
             control={control}
             render={({ field: { onChange, onBlur, ref, value } }) => {
               return (
                 <Button
                   isIconOnly
-                  variant="flat"
-                  className="h-full w min-w-[50px] bg-default-100"
+                  variant='flat'
+                  className='h-[-webkit-fill-available] min-w-[60px] bg-default-100'
                 >
-                  <label className="">
+                  <label className=''>
                     <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
+                      type='file'
+                      accept='image/*'
+                      onChange={e => {
+                        const file = e.target.files?.[0]
                         if (file) {
-                          onChange(file); // Asigna el archivo al estado del formulario
-                          const objectUrl = URL.createObjectURL(file); // Crea una URL de objeto para la imagen
-                          setPreview(objectUrl); // Almacena la URL para mostrarla en el avatar
+                          onChange(file) // Asigna el archivo al estado del formulario
+                          const objectUrl = URL.createObjectURL(file) // Crea una URL de objeto para la imagen
+                          setPreview(objectUrl) // Almacena la URL para mostrarla en el avatar
                         }
                       }}
                       onBlur={onBlur}
                       ref={ref}
-                      className="hidden"
+                      className='hidden'
                     />
                     {value || preview ? (
                       <Avatar src={preview} fallback />
                     ) : (
-                      <Camera className="stroke-slate-300" />
+                      <Camera className='stroke-slate-300' />
                     )}
                   </label>
                 </Button>
-              );
+              )
             }}
           />
         </div>
         {isEditing && (
           <Controller
-            name="active"
+            name='active'
             control={control}
             render={({ field: { value, onChange, ...field } }) => {
               return (
-                <div className="flex items-center gap-2 justify-between">
-                  <p className=" font-semibold">Activo</p>
+                <div className='flex items-center gap-2 justify-between'>
+                  <p className=' font-semibold'>Activo</p>
                   <Switch
                     {...field}
                     isSelected={value}
-                    onValueChange={(newValue) => onChange(newValue)}
-                    size="sm"
+                    onValueChange={newValue => onChange(newValue)}
+                    size='sm'
                   />
                 </div>
-              );
+              )
             }}
           />
         )}
       </div>
-      <Button
-        isLoading={isLoading}
-        type="submit"
-        color="primary"
-        variant="ghost"
-        className="w-full mt-6"
-      >
-        Confirmar
-      </Button>
-    </form>
-  );
+    </FormWrapper>
+  )
 }

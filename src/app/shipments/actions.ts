@@ -2,7 +2,7 @@
 import db from '@/lib/db'
 import paths from '@/lib/paths'
 import { getCurrentUser } from '@/lib/session'
-import { MovementType, ShipmentStatus } from '@prisma/client'
+import { Location, MovementType, ShipmentStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 
 interface ProductionFormState {
@@ -50,6 +50,8 @@ export async function createShipment(
           status: isOriginDeposit
             ? ShipmentStatus.PENDING
             : ShipmentStatus.RETURNED,
+          origin: isOriginDeposit ? Location.DEPOSIT : Location.MARKET,
+          destination: isOriginDeposit ? Location.MARKET : Location.DEPOSIT,
         },
       })
 

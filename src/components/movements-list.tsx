@@ -1,5 +1,5 @@
 import { capitalize } from '@/lib/utils'
-import { Card, CardBody, Chip } from '@heroui/react'
+import {  CardBody, Chip } from '@heroui/react'
 import type {
   Batch,
   Discard,
@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import { JSX, ReactNode } from 'react'
 import { timeAgo } from '@/lib/helpers/date'
+import CardWithShadow from './card-with-shadow'
 
 interface ParsedMovement {
   id: number
@@ -288,10 +289,7 @@ export default function MovementList({
   return (
     <div className='space-y-3'>
       {parsedMovements.map(movement => (
-        <Card
-          key={movement.id}
-          className='bg-white/70 backdrop-blur-sm border-white/20'
-        >
+        <CardWithShadow key={movement.id}>
           <CardBody className='p-4'>
             <div className='flex items-start space-x-3'>
               <div className={`p-2 rounded-lg ${movement.bgColor}`}>
@@ -315,7 +313,7 @@ export default function MovementList({
               </div>
             </div>
           </CardBody>
-        </Card>
+        </CardWithShadow>
       ))}
     </div>
   )

@@ -19,6 +19,7 @@ export type SaleWithRelations = Sale & {
   order: Order & {
     customer: Customer
     details: OrderDetail[]
+    sale: Sale
   }
 }
 

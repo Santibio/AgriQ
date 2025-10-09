@@ -105,7 +105,7 @@ export default function ProductForm({ product }: ProductFormProps) {
             ? "Producto actualizado correctamente"
             : "Producto creado correctamente"
         );
-        router.push(paths.products());
+        router.push('/' + paths.products());
       }
     } catch (error) {
       console.error(error);

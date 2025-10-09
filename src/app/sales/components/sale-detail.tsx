@@ -5,7 +5,6 @@ import {
   DrawerFooter,
   DrawerHeader,
   Button,
-  Card,
   CardBody,
   Chip,
   CardFooter,
@@ -18,6 +17,7 @@ import { FiscalCondition } from '@prisma/client'
 import { capitalize } from '@/lib/utils'
 import { convertToArgentinePeso } from '@/lib/helpers/number'
 import { Share2Icon } from 'lucide-react'
+import CardWithShadow from '@/components/card-with-shadow'
 
 const PAYMENT_METHODS = {
   WIRE: 'Transferencia',
@@ -74,7 +74,7 @@ export default function SaleDetail({
               <section className='flex flex-col gap-2'>
                 <h3 className='text-lg font-semibold text-gray-900'>Cliente</h3>
                 {/* Cliente */}
-                <Card className='bg-white/70 backdrop-blur-sm border-white/20 h-full'>
+                <CardWithShadow className='h-full'>
                   <CardBody className='space-y-2'>
                     <div className='space-y-1'>
                       <p className='font-medium text-gray-800'>
@@ -97,13 +97,13 @@ export default function SaleDetail({
                       </Chip>
                     </div>
                   </CardBody>
-                </Card>
+                </CardWithShadow>
               </section>
 
               {/* Pago */}
               <section className='flex flex-col gap-2'>
                 <h3 className='text-lg font-semibold text-gray-900'>Cobro</h3>
-                <Card className='bg-white/70 backdrop-blur-sm border-white/20 h-full'>
+                <CardWithShadow className='h-full'>
                   <CardBody className='space-y-3'>
                     <div className='space-y-2 text-sm'>
                       <div className='flex justify-between'>
@@ -127,7 +127,7 @@ export default function SaleDetail({
                       )}
                     </div>
                   </CardBody>
-                </Card>
+                </CardWithShadow>
               </section>
 
               {/* Productos */}
@@ -135,7 +135,7 @@ export default function SaleDetail({
                 <h3 className='text-lg font-semibold text-gray-900'>
                   Productos
                 </h3>
-                <Card className='bg-white/70 backdrop-blur-sm border-white/20 h-full'>
+                <CardWithShadow className='h-full'>
                   <CardBody className='space-y-3'>
                     <div className='divide-y divide-gray-100'>
                       {sale.order.details.map(item => (
@@ -190,7 +190,7 @@ export default function SaleDetail({
                       </div>
                     </div>
                   </CardFooter>
-                </Card>
+                </CardWithShadow>
               </section>
             </DrawerBody>
 

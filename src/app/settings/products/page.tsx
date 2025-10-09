@@ -1,21 +1,20 @@
-import db from "@/lib/db";
-import paths from "@/lib/paths";
-import ProductsList from "./components/products-list";
-import AddButton from "@/components/buttons/add-button";
-import ListPage from "@/components/layout/list-page";
+import db from '@/lib/db'
+import paths from '@/lib/paths'
+import ProductsList from './components/products-list'
+import AddButton from '@/components/buttons/add-button'
+import ListPage from '@/components/layout/list-page'
 
 export default async function ProductsPage() {
-
   const products = await db.product.findMany({
-    orderBy: [{ active: "desc" }, { name: "asc" }],
-  });
+    orderBy: [{ active: 'desc' }, { name: 'asc' }],
+  })
 
   return (
     <ListPage
-      title="Productos"
+      title='Productos'
       actions={<AddButton href={paths.productAdd()}>Crear producto</AddButton>}
     >
       <ProductsList products={products} />
     </ListPage>
-  );
+  )
 }

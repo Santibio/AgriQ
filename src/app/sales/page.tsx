@@ -7,6 +7,7 @@ type SaleWithOrder = Sale & {
   order: Order & {
     customer: Customer
     details: OrderDetail[]
+    sale: Sale
   }
 }
 
@@ -16,12 +17,7 @@ export default async function SalesPage() {
   )
 
   return (
-    <ListPage
-      title='Ventas'
-      classNameList={{
-        containerList: 'w-[120%] px-[10%] ml-[-10%] py-[18px]',
-      }}
-    >
+    <ListPage title='Ventas'>
       <SalesList sales={sales} />
     </ListPage>
   )
