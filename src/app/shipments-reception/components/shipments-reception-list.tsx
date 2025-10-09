@@ -63,7 +63,7 @@ export default function ShipmentsList({ list }: ShipmentsListProps) {
         return (
           <li key={shipment.id}>
             <Link
-              href={paths.shipmentEdit(shipment.id.toString())}
+              href={paths.shipmentReceptionEdit(shipment.id.toString())}
               className='w-full'
             >
               <CardWithShadow isPressable>
