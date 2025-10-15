@@ -3,7 +3,7 @@ import ListPage from '@/components/layout/list-page'
 
 export default function UsersPage() {
   return (
-    <ListPage title='Ajuste'>
+    <ListPage title='Ajustes'>
       <SettingList />
     </ListPage>
   )

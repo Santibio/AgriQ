@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button, CardBody } from '@heroui/react'
 import CardWithShadow from '@/components/card-with-shadow'
-import { ChevronRight } from 'lucide-react'
+import { Share } from 'lucide-react'
 
 // 1. Definimos el tipo de datos que recibirá el componente
 interface ChartDataItem {
@@ -18,56 +18,65 @@ const marketStockData: ChartDataItem[] = [
   { label: 'Lechuga Morada', value: 800, color: 'bg-teal-500' },
   { label: 'Rúcula', value: 650, color: 'bg-lime-500' },
   { label: 'Menta Fresca', value: 300, color: 'bg-emerald-500' },
-];
+]
 
 const warehouseStockData: ChartDataItem[] = [
   { label: 'Albahaca Fresca', value: 343, color: 'bg-cyan-500' },
   { label: 'Puerro', value: 302, color: 'bg-sky-500' },
   { label: 'Espinaca', value: 720, color: 'bg-green-600' },
   { label: 'Tomate Cherry', value: 988, color: 'bg-green-500' }, // Producto en común
-];
+]
 
 // Lógica mejorada para combinar datos
-const allLabels = Array.from(new Set([...marketStockData.map(i => i.label), ...warehouseStockData.map(i => i.label)]));
-const colorMap = new Map([...marketStockData, ...warehouseStockData].map(i => [i.label, i.color]));
+const allLabels = Array.from(
+  new Set([
+    ...marketStockData.map(i => i.label),
+    ...warehouseStockData.map(i => i.label),
+  ]),
+)
+const colorMap = new Map(
+  [...marketStockData, ...warehouseStockData].map(i => [i.label, i.color]),
+)
 
-const combinedStockData: ChartDataItem[] = allLabels.map(label => {
-  const marketValue = marketStockData.find(i => i.label === label)?.value || 0;
-  const warehouseValue = warehouseStockData.find(i => i.label === label)?.value || 0;
-  return {
-    label,
-    value: marketValue + warehouseValue,
-    color: colorMap.get(label) || 'bg-gray-500',
-  };
-}).sort((a, b) => b.value - a.value); // Ordenar de mayor a menor
-
+const combinedStockData: ChartDataItem[] = allLabels
+  .map(label => {
+    const marketValue = marketStockData.find(i => i.label === label)?.value || 0
+    const warehouseValue =
+      warehouseStockData.find(i => i.label === label)?.value || 0
+    return {
+      label,
+      value: marketValue + warehouseValue,
+      color: colorMap.get(label) || 'bg-gray-500',
+    }
+  })
+  .sort((a, b) => b.value - a.value) // Ordenar de mayor a menor
 
 // --- Componente principal que puedes usar en tu página ---
 
 export default function StockDistribution() {
-  const [filter, setFilter] = useState('ambos'); // 'mercado', 'deposito', 'ambos'
-  const [chartData, setChartData] = useState<ChartDataItem[]>([]);
+  const [filter, setFilter] = useState('ambos') // 'mercado', 'deposito', 'ambos'
+  const [chartData, setChartData] = useState<ChartDataItem[]>([])
 
   const dataMap = {
     mercado: marketStockData.sort((a, b) => b.value - a.value),
     deposito: warehouseStockData.sort((a, b) => b.value - a.value),
     ambos: combinedStockData,
-  };
+  }
 
-  const currentData = dataMap[filter as keyof typeof dataMap];
-  const maxValue = Math.max(...currentData.map(item => item.value));
+  const currentData = dataMap[filter as keyof typeof dataMap]
+  const maxValue = Math.max(...currentData.map(item => item.value))
 
   useEffect(() => {
     // Inicia con valores en 0 para la animación
-    setChartData(currentData.map(item => ({ ...item, value: 0 })));
+    setChartData(currentData.map(item => ({ ...item, value: 0 })))
 
     const timer = setTimeout(() => {
       // Actualiza a los valores reales para que la barra crezca
-      setChartData(currentData);
-    }, 100);
+      setChartData(currentData)
+    }, 100)
 
-    return () => clearTimeout(timer);
-  }, [filter, currentData]); // Se ejecuta cada vez que el filtro cambia
+    return () => clearTimeout(timer)
+  }, [filter, currentData]) // Se ejecuta cada vez que el filtro cambia
 
   return (
     <CardWithShadow>
@@ -78,13 +87,46 @@ export default function StockDistribution() {
               Stock de Productos
             </h3>
             <div className='flex gap-2'>
-              <button onClick={() => setFilter('mercado')} className={`px-3 py-1 text-sm rounded-md ${filter === 'mercado' ? 'bg-slate-800 text-white' : 'bg-slate-200'}`}>Mercado</button>
-              <button onClick={() => setFilter('deposito')} className={`px-3 py-1 text-sm rounded-md ${filter === 'deposito' ? 'bg-slate-800 text-white' : 'bg-slate-200'}`}>Depósito</button>
-              <button onClick={() => setFilter('ambos')} className={`px-3 py-1 text-sm rounded-md ${filter === 'ambos' ? 'bg-slate-800 text-white' : 'bg-slate-200'}`}>Ambos</button>
+              <Button
+                variant='flat'
+                size='sm'
+                onPress={() => setFilter('mercado')}
+                className={`text-sm rounded-md ${
+                  filter === 'mercado'
+                    ? 'bg-slate-800 text-white'
+                    : 'bg-slate-200'
+                }`}
+              >
+                Mercado
+              </Button>
+              <Button
+                variant='flat'
+                size='sm'
+                onPress={() => setFilter('deposito')}
+                className={`text-sm rounded-md ${
+                  filter === 'deposito'
+                    ? 'bg-slate-800 text-white'
+                    : 'bg-slate-200'
+                }`}
+              >
+                Depósito
+              </Button>
+              <Button
+                variant='flat'
+                size='sm'
+                onPress={() => setFilter('ambos')}
+                className={`text-sm rounded-md ${
+                  filter === 'ambos'
+                    ? 'bg-slate-800 text-white'
+                    : 'bg-slate-200'
+                }`}
+              >
+                Ambos
+              </Button>
             </div>
           </div>
           <Button isIconOnly variant='flat' size='sm'>
-            <ChevronRight className='w-4 h-4' />
+            <Share className='w-4 h-4' />
           </Button>
         </div>
         <div className='space-y-4'>

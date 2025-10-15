@@ -1,5 +1,3 @@
-// Tu componente principal (ej: ProductionReportWithDownloads.tsx)
-
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
@@ -88,44 +86,9 @@ export default function ProductionReportWithDownloads() {
       <CardWithShadow>
         <CardBody className='p-4 md:p-6'>
           <h3 className='text-lg font-semibold text-slate-800 mb-4'>
-            Reporte de Lotes de Producción
+            Descarga de Reportes
           </h3>
           {/* --- Filtros y Lista (sin cambios) --- */}
-          <div className='space-y-4 mb-4'>
-            <Input
-              placeholder='Buscar...'
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              startContent={<Search size={18} />}
-              variant='flat'
-            />
-            <div className='flex justify-center gap-2'>
-              <Chip
-                onClick={() => setTimeFilter('day')}
-                variant={timeFilter === 'day' ? 'solid' : 'flat'}
-                className='cursor-pointer'
-              >
-                Hoy
-              </Chip>
-              <Chip
-                onClick={() => setTimeFilter('week')}
-                variant={timeFilter === 'week' ? 'solid' : 'flat'}
-                className='cursor-pointer'
-              >
-                Semana
-              </Chip>
-              <Chip
-                onClick={() => setTimeFilter('month')}
-                variant={timeFilter === 'month' ? 'solid' : 'flat'}
-                className='cursor-pointer'
-              >
-                Mes
-              </Chip>
-            </div>
-          </div>
-          <div className='w-full rounded-lg bg-white border border-slate-200 mb-4'>
-            {/* ... (código de la lista ul) ... */}
-          </div>
 
           {/* --- ✨ Botones de Descarga --- */}
           <div className='mt-4 flex flex-col sm:flex-row gap-3'>
