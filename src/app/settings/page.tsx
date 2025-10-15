@@ -1,11 +1,10 @@
-import PageTitle from '@/components/page-title'
 import SettingList from './components/setting-list'
+import ListPage from '@/components/layout/list-page'
 
 export default function UsersPage() {
   return (
-    <section className='flex flex-col h-[calc(100vh-150px)] px-4 relative gap-2'>
-      <PageTitle>Ajustes</PageTitle>
+    <ListPage title='Ajuste'>
       <SettingList />
-    </section>
+    </ListPage>
   )
 }

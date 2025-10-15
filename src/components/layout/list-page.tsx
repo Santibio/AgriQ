@@ -17,9 +17,15 @@ interface ListPageProps {
   children: ReactNode
   title: string
   actions?: ReactNode
+  hasFilter?: boolean
 }
 
-export default function ListPage({ title, actions, children }: ListPageProps) {
+export default function ListPage({
+  title,
+  actions,
+  children,
+  hasFilter = false,
+}: ListPageProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   return (
@@ -27,16 +33,18 @@ export default function ListPage({ title, actions, children }: ListPageProps) {
       <section className='flex flex-col h-[calc(100vh-150px)]  relative gap-2'>
         <div className='flex items-center justify-between px-4'>
           <PageTitle>{title}</PageTitle>
-          <Button
-            isIconOnly
-            color='primary'
-            size='sm'
-            variant='flat'
-            onPress={onOpen}
-            disabled
-          >
-            <ArrowDownWideNarrow className='h-4 w-4 ' color='blue' />
-          </Button>
+          {hasFilter && (
+            <Button
+              isIconOnly
+              color='primary'
+              size='sm'
+              variant='flat'
+              onPress={onOpen}
+              disabled
+            >
+              <ArrowDownWideNarrow className='h-4 w-4 ' color='blue' />
+            </Button>
+          )}
         </div>
         <ScrollShadow className='p-4 flex-1' hideScrollBar>
           {children}

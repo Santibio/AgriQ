@@ -1,5 +1,5 @@
 import { Card } from '@heroui/react'
-import { cn } from '@/lib/utils'
+import { cx } from '@/lib/utils'
 
 interface CardWithShadowProps {
   className?: string
@@ -21,9 +21,10 @@ export default function CardWithShadow({
   href,
   ...props
 }: CardWithShadowProps) {
+  console.log("🚀 ~ CardWithShadow ~ className:", className)
   return (
     <Card
-      className={cn(
+      className={cx(
         'bg-white/70 backdrop-blur-sm border-white/20 w-full h-full',
         className,
       )}
