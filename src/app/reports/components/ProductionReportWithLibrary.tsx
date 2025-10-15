@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
-import { CardBody, Chip, Input, Button } from '@heroui/react'
+import { useState, useEffect } from 'react'
+import { CardBody, Button } from '@heroui/react'
 import CardWithShadow from '@/components/card-with-shadow'
-import { Search, Download, FileText } from 'lucide-react'
+import { Download, FileText } from 'lucide-react'
 import { CSVLink } from 'react-csv'
 import { PDFDownloadLink } from '@react-pdf/renderer'
 import BatchReportPDF from './BatchReportPDF' // Asegúrate de que la ruta sea correcta
@@ -40,33 +40,12 @@ const mockBatches: Batch[] = [
 ]
 
 export default function ProductionReportWithDownloads() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [timeFilter, setTimeFilter] = useState<'day' | 'week' | 'month'>('week')
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
     // Este estado es crucial para que PDFDownloadLink solo se renderice en el cliente
     setIsClient(true)
   }, [])
-
-  const filteredBatches = useMemo(() => {
-    // ... (lógica de filtrado sin cambios)
-    const now = new Date()
-    const oneDayInMillis = 24 * 60 * 60 * 1000
-    return mockBatches.filter(batch => {
-      const searchMatch = batch.product.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-      if (!searchMatch) return false
-      const diffInDays = Math.floor(
-        (now.getTime() - batch.createdAt.getTime()) / oneDayInMillis,
-      )
-      if (timeFilter === 'day' && diffInDays > 0) return false
-      if (timeFilter === 'week' && diffInDays > 7) return false
-      if (timeFilter === 'month' && diffInDays > 30) return false
-      return true
-    })
-  }, [searchTerm, timeFilter])
 
   // --- ✨ Preparación de datos para ambos reportes ---
   const csvHeaders = [
@@ -76,7 +55,7 @@ export default function ProductionReportWithDownloads() {
     { label: 'Fecha de Creación', key: 'createdAt' },
   ]
 
-  const reportData = filteredBatches.map(batch => ({
+  const reportData = mockBatches.map(batch => ({
     ...batch,
     createdAt: batch.createdAt.toISOString().slice(0, 10), // Formato YYYY-MM-DD
   }))
