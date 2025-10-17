@@ -1,180 +1,245 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { Button, Chip, Input } from '@heroui/react'
+import { useState, useMemo, useEffect } from 'react'
+import { Search, Boxes, AlertCircle, Download, Loader2 } from 'lucide-react'
+import { getProductionBatches, ProductionBatch } from '../actions'
 import CardWithShadow from '@/components/card-with-shadow'
-import { Search, Boxes, ChevronRight } from 'lucide-react'
 
-// --- Interfaces para los Datos ---
-interface Product {
-  name: string
-  image: string
+function ProductionSkeleton() {
+  return (
+    <ul>
+      {[...Array(3)].map((_, i) => (
+        <li
+          key={i}
+          className='flex items-center justify-between p-3 border-b border-slate-100 animate-pulse'
+        >
+          <div>
+            <div className='h-5 w-32 bg-slate-200 rounded-md mb-1.5'></div>
+            <div className='h-3 w-48 bg-slate-200 rounded-md'></div>
+          </div>
+          <div className='h-7 w-16 bg-slate-200 rounded-full'></div>
+        </li>
+      ))}
+    </ul>
+  )
 }
-
-interface Batch {
-  id: number
-  product: Product
-  initialQuantity: number
-  createdAt: Date
-}
-
-// --- DATOS DE EJEMPLO (reemplaza esto con tus datos reales) ---
-const mockBatches: Batch[] = [
-  {
-    id: 101,
-    product: { name: 'Tomate Cherry', image: '/images/tomato.jpg' },
-    initialQuantity: 250,
-    createdAt: new Date(),
-  },
-  {
-    id: 102,
-    product: { name: 'Lechuga Morada', image: '/images/lettuce.jpg' },
-    initialQuantity: 150,
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-  }, // Hace 3 días
-  {
-    id: 103,
-    product: { name: 'Albahaca Fresca', image: '/images/basil.jpg' },
-    initialQuantity: 80,
-    createdAt: new Date(),
-  },
-  {
-    id: 104,
-    product: { name: 'Zanahoria Baby', image: '/images/carrot.jpg' },
-    initialQuantity: 300,
-    createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
-  }, // Hace 8 días
-  {
-    id: 105,
-    product: { name: 'Rúcula Selvática', image: '/images/arugula.jpg' },
-    initialQuantity: 120,
-    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
-  }, // Hace 15 días
-]
 
 // --- Componente Principal del Dashboard ---
 export default function ProductionDashboard() {
+  const [rawData, setRawData] = useState<ProductionBatch[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [timeFilter, setTimeFilter] = useState<'day' | 'week' | 'month'>('week')
+  const [isDownloading, setIsDownloading] = useState(false)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const data = await getProductionBatches()
+        setRawData(data)
+      } catch (e) {
+        setError('No se pudieron cargar los lotes de producción.')
+        console.error(e)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
 
   const filteredBatches = useMemo(() => {
     const now = new Date()
-    // Milliseconds in a day, used for date difference calculation
     const oneDayInMillis = 24 * 60 * 60 * 1000
 
-    return mockBatches.filter(batch => {
-      // 1. Filtro por búsqueda de nombre (sin cambios)
+    return rawData.filter(batch => {
       const searchMatch = batch.product.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
       if (!searchMatch) return false
 
-      // 2. Filtro por período de tiempo (usando matemática nativa de Date)
-      const diffInMillis = now.getTime() - batch.createdAt.getTime()
+      const diffInMillis = now.getTime() - new Date(batch.createdAt).getTime()
       const diffInDays = Math.floor(diffInMillis / oneDayInMillis)
 
-      if (timeFilter === 'day' && diffInDays > 0) return false // Solo hoy
+      if (timeFilter === 'day' && diffInDays > 0) return false
       if (timeFilter === 'week' && diffInDays > 7) return false
       if (timeFilter === 'month' && diffInDays > 30) return false
 
       return true
     })
-  }, [searchTerm, timeFilter])
+  }, [searchTerm, timeFilter, rawData])
 
-  // Función para formatear la fecha usando Intl.DateTimeFormat (nativo de JS)
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('es-AR', {
       day: '2-digit',
-      month: 'short',
+      month: '2-digit',
       year: 'numeric',
-    }).format(date)
+    }).format(new Date(date))
+  }
+
+  const handleCsvExport = () => {
+    if (isDownloading || filteredBatches.length === 0) return
+    setIsDownloading(true)
+
+    const headers = [
+      'Número de Lote',
+      'Nombre Producto',
+      'Cantidad Producida',
+      'Creado Por',
+      'Fecha de Creación',
+    ]
+
+    const rows = filteredBatches.map(batch =>
+      [
+        batch.id,
+        `"${batch.product.name}"`, // comillas para evitar problemas con comas
+        batch.initialQuantity,
+        `"${batch.user.name} ${batch.user.lastName}"`,
+        formatDate(batch.createdAt),
+      ].join(','),
+    )
+
+    const csvContent = [headers.join(','), ...rows].join('\n')
+
+    const blob = new Blob([`\uFEFF${csvContent}`], {
+      type: 'text/csv;charset=utf-8;',
+    })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+
+    const date = new Date().toISOString().split('T')[0]
+    link.setAttribute('download', `lotes_produccion_${date}.csv`)
+
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    setTimeout(() => setIsDownloading(false), 1000)
+  }
+
+  const renderContent = () => {
+    if (loading) {
+      return <ProductionSkeleton />
+    }
+    if (error) {
+      return (
+        <div className='text-center py-10 px-4 text-red-600'>
+          <AlertCircle className='mx-auto w-10 h-10 mb-2' />
+          <p className='font-semibold'>Ocurrió un error</p>
+          <p className='text-sm text-slate-500'>{error}</p>
+        </div>
+      )
+    }
+    if (filteredBatches.length > 0) {
+      return (
+        <ul>
+          {filteredBatches.slice(0,5).map((batch, index) => (
+            <li
+              key={batch.id}
+              className={`flex items-center justify-between p-3 ${
+                index < filteredBatches.length - 1
+                  ? 'border-b border-slate-100'
+                  : ''
+              }`}
+            >
+              <div>
+                <p className='font-semibold text-slate-800 capitalize'>
+                  {batch.product.name}
+                </p>
+                <p className='text-xs text-slate-500'>
+                  Lote #{batch.id} • Por {batch.user.name} el{' '}
+                  {formatDate(batch.createdAt)}
+                </p>
+              </div>
+              <div className='flex items-center gap-1.5 text-blue-600 font-bold text-sm bg-blue-100 px-2.5 py-1 rounded-full'>
+                <Boxes size={14} />
+                <span>{batch.initialQuantity}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    return (
+      <div className='text-center py-10 px-4'>
+        <p className='text-slate-500'>No se encontraron lotes.</p>
+        <p className='text-sm text-slate-400'>
+          Intenta ajustar tu búsqueda o filtro.
+        </p>
+      </div>
+    )
   }
 
   return (
-    <CardWithShadow className='p-4 max-w-lg mx-auto'>
-      {/* --- Cabecera y Controles --- */}
-      <div className='mb-6 flex justify-between'>
-        <h3 className='text-lg font-semibold text-slate-800'>
-          Lotes de Producción
-        </h3>
-        <Button isIconOnly variant='flat' size='sm'>
-          <ChevronRight className='w-4 h-4' />
-        </Button>
-      </div>
-      <div className='space-y-4 mb-6'>
-        {/* Input de Búsqueda */}
-        <Input
-          placeholder='Buscar por nombre de producto...'
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          startContent={<Search className='text-slate-400' size={18} />}
-          variant='flat'
-          className='bg-white'
-        />
-
-        {/* Filtros de Tiempo */}
-        <div className='flex justify-center gap-2'>
-          <Chip
-            onClick={() => setTimeFilter('day')}
-            variant={timeFilter === 'day' ? 'solid' : 'flat'}
-            className='cursor-pointer'
+    <CardWithShadow>
+      <div className='p-6'>
+        <div className='mb-6 flex justify-between'>
+          <h3 className='text-lg font-semibold text-slate-800'>
+            Lotes de Producción
+          </h3>
+          <button
+            onClick={handleCsvExport}
+            disabled={isDownloading || filteredBatches.length === 0}
+            className='p-2 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            Hoy
-          </Chip>
-          <Chip
-            onClick={() => setTimeFilter('week')}
-            variant={timeFilter === 'week' ? 'solid' : 'flat'}
-            className='cursor-pointer'
-          >
-            Semana
-          </Chip>
-          <Chip
-            onClick={() => setTimeFilter('month')}
-            variant={timeFilter === 'month' ? 'solid' : 'flat'}
-            className='cursor-pointer'
-          >
-            Mes
-          </Chip>
+            {isDownloading ? (
+              <Loader2 className='w-4 h-4 animate-spin' />
+            ) : (
+              <Download className='w-4 h-4 text-slate-500' />
+            )}
+          </button>
         </div>
-      </div>
-
-      {/* --- Listado de Lotes --- */}
-      {/* --- Compact List --- */}
-      <div className='w-full rounded-lg bg-white border border-slate-200'>
-        {filteredBatches.length > 0 ? (
-          <ul>
-            {filteredBatches.map((batch, index) => (
-              <li
-                key={batch.id}
-                className={`flex items-center justify-between p-3 ${
-                  index < filteredBatches.length - 1
-                    ? 'border-b border-slate-100'
-                    : ''
-                }`}
-              >
-                <div>
-                  <p className='font-semibold text-slate-800'>
-                    {batch.product.name}
-                  </p>
-                  <p className='text-xs text-slate-500'>
-                    Lote #{batch.id} • {formatDate(batch.createdAt)}
-                  </p>
-                </div>
-                <div className='flex items-center gap-1.5 text-primary font-bold text-sm bg-primary/10 px-2.5 py-1 rounded-full'>
-                  <Boxes size={14} />
-                  <span>{batch.initialQuantity}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className='text-center py-10 px-4'>
-            <p className='text-slate-500'>No se encontraron lotes.</p>
-            <p className='text-sm text-slate-400'>
-              Intenta ajustar tu búsqueda o filtro.
-            </p>
+        <div className='space-y-4 mb-6'>
+          <div className='relative'>
+            <Search
+              className='absolute left-3 top-1/2 -translate-y-1/2 text-slate-400'
+              size={18}
+            />
+            <input
+              type='text'
+              placeholder='Buscar por nombre de producto...'
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className='w-full pl-10 pr-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none'
+            />
           </div>
-        )}
+          <div className='flex justify-center gap-2'>
+            <button
+              onClick={() => setTimeFilter('day')}
+              className={`px-3 py-1 rounded-full text-sm cursor-pointer ${
+                timeFilter === 'day'
+                  ? 'bg-slate-800 text-white'
+                  : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+              }`}
+            >
+              Hoy
+            </button>
+            <button
+              onClick={() => setTimeFilter('week')}
+              className={`px-3 py-1 rounded-full text-sm cursor-pointer ${
+                timeFilter === 'week'
+                  ? 'bg-slate-800 text-white'
+                  : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+              }`}
+            >
+              Semana
+            </button>
+            <button
+              onClick={() => setTimeFilter('month')}
+              className={`px-3 py-1 rounded-full text-sm cursor-pointer ${
+                timeFilter === 'month'
+                  ? 'bg-slate-800 text-white'
+                  : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+              }`}
+            >
+              Mes
+            </button>
+          </div>
+        </div>
+        <div className='w-full rounded-lg bg-white border border-slate-200'>
+          {renderContent()}
+        </div>
       </div>
     </CardWithShadow>
   )

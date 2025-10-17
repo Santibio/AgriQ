@@ -62,3 +62,194 @@ export async function getProductStock(): Promise<ProductStock[]> {
     return []
   }
 }
+
+// 1. Definimos la estructura de datos que devolverá la función
+export interface ProductionBatch {
+  id: number
+  initialQuantity: number
+  createdAt: Date
+  product: {
+    name: string
+  }
+  user: {
+    name: string
+    lastName: string
+  }
+}
+
+/**
+ * Obtiene los lotes de producción basados en los movimientos de tipo 'STORED'.
+ * Incluye el producto y el usuario que generó el movimiento.
+ * @returns Una promesa que resuelve a un array de ProductionBatch.
+ */
+export async function getProductionBatches(): Promise<ProductionBatch[]> {
+  try {
+    // 2. Buscamos los movimientos que representan la creación de un lote
+    const storedMovements = await db.movement.findMany({
+      where: {
+        type: 'STORED',
+        // Aseguramos que el movimiento tenga detalles asociados
+        movementDetail: {
+          some: {},
+        },
+      },
+      select: {
+        createdAt: true, // La fecha de creación es la del movimiento
+        user: {
+          // Incluimos el nombre y apellido del usuario creador
+          select: {
+            name: true,
+            lastName: true,
+          },
+        },
+        // Obtenemos el primer detalle del movimiento, que nos llevará al lote
+        movementDetail: {
+          take: 1, // Asumimos un lote por movimiento de creación
+          select: {
+            batch: {
+              // Del lote, obtenemos la información relevante
+              select: {
+                id: true,
+                initialQuantity: true,
+                product: {
+                  // Y del producto, solo necesitamos el nombre
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc', // Ordenamos por los más recientes
+      },
+    })
+
+    // 3. Mapeamos y aplanamos los datos para que sean fáciles de usar en el frontend
+    const batches = storedMovements
+      .map(movement => {
+        // Nos aseguramos de que todos los datos necesarios existan
+        const detail = movement.movementDetail[0]
+        if (!detail || !detail.batch || !movement.user) {
+          return null
+        }
+
+        return {
+          id: detail.batch.id,
+          initialQuantity: detail.batch.initialQuantity,
+          createdAt: movement.createdAt,
+          product: {
+            name: detail.batch.product.name,
+          },
+          user: {
+            name: movement.user.name,
+            lastName: movement.user.lastName,
+          },
+        }
+      })
+      .filter((batch): batch is ProductionBatch => batch !== null) // Filtramos cualquier resultado nulo
+
+    return batches
+  } catch (error) {
+    console.error('Error fetching production batches:', error)
+    return []
+  }
+}
+
+// 1. Definimos la estructura de los datos que devolverá la función
+export interface DiscardedProduct {
+  id: number
+  quantity: number
+  reason: string
+  createdAt: Date
+  product: {
+    name: string
+  }
+  user: {
+    name: string
+    lastName: string
+  }
+}
+
+// Mapeo de razones del enum a texto legible
+const reasonMap = {
+  DAMAGED: 'Dañado',
+  EXPIRED: 'Vencido',
+  OTHER: 'Otro',
+}
+
+/**
+ * Obtiene los productos descartados basados en los movimientos de tipo 'DISCARDED'.
+ * @returns Una promesa que resuelve a un array de DiscardedProduct.
+ */
+export async function getDiscardedProducts(): Promise<DiscardedProduct[]> {
+  try {
+    // 2. Buscamos los movimientos que representan un descarte
+    const discardMovements = await db.movement.findMany({
+      where: {
+        type: 'DISCARDED',
+        // Aseguramos que el movimiento tenga detalles y un motivo de descarte
+        movementDetail: { some: {} },
+        discard: { isNot: null },
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        user: {
+          select: { name: true, lastName: true },
+        },
+        discard: {
+          select: { reason: true },
+        },
+        movementDetail: {
+          take: 1, // Asumimos un producto por movimiento de descarte
+          select: {
+            quantity: true,
+            batch: {
+              select: {
+                product: {
+                  select: { name: true },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
+
+    // 3. Mapeamos los datos a una estructura limpia para el frontend
+    const discards = discardMovements
+      .map(movement => {
+        const detail = movement.movementDetail[0]
+        // Validamos que todos los datos necesarios existan
+        if (!detail || !detail.batch || !movement.user || !movement.discard) {
+          return null
+        }
+
+        return {
+          id: movement.id,
+          quantity: detail.quantity,
+          reason: reasonMap[movement.discard.reason] || movement.discard.reason,
+          createdAt: movement.createdAt,
+          product: {
+            name: detail.batch.product.name,
+          },
+          user: {
+            name: movement.user.name,
+            lastName: movement.user.lastName,
+          },
+        }
+      })
+      .filter((discard): discard is DiscardedProduct => discard !== null)
+
+    return discards
+  } catch (error) {
+    console.error('Error fetching discarded products:', error)
+    return []
+  }
+}
