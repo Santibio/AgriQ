@@ -7,7 +7,6 @@ import DiscardDashboard from './components/DiscardDashboard'
 import DiscardReasonSemiDonut from './components/DiscardReasonSemiDonut'
 import OrderStatusDonut from './components/OrderStatusDonut'
 import TopProductsDashboard from './components/TopProductsDashboard'
-import ProductionReportWithLibrary from './components/ProductionReportWithLibrary'
 
 export default function UsersPage() {
   return (
@@ -21,7 +20,6 @@ export default function UsersPage() {
         <TopProductsDashboard />
         <SimulatedSalesChart />
         <TopClientsDonut />
-        <ProductionReportWithLibrary />
       </div>
     </ListPage>
   )

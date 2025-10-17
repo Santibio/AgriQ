@@ -21,7 +21,6 @@ export default function CardWithShadow({
   href,
   ...props
 }: CardWithShadowProps) {
-  console.log("🚀 ~ CardWithShadow ~ className:", className)
   return (
     <Card
       className={cx(
