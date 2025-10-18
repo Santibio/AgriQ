@@ -30,7 +30,7 @@ export async function getSalesRanking({
   sortOrder: SortOrder
 }): Promise<SalesRank[]> {
   const now = new Date()
-  let startDate = new Date()
+  const startDate = new Date()
 
   // 1. Calculamos la fecha de inicio según el filtro de tiempo (LÓGICA CORREGIDA)
   switch (timeFilter) {
@@ -100,7 +100,6 @@ export async function getSalesRanking({
 
     return ranked.slice(0, 5) // Devolvemos solo los 5 primeros del ranking
   } catch (error) {
-    console.error('Error fetching sales ranking:', error)
     return []
   }
 }
@@ -114,10 +113,15 @@ export interface SalesChartData {
   percentageChange: number
 }
 
+// Definir un tipo para la venta con detalles del pedido
+type SaleWithDetails = {
+  order: {
+    details: { quantity: number; price: number }[]
+  } | null
+}
+
 // Helper para calcular el total de una venta
-const getSaleTotal = (
-  sale: any,
-): number => {
+const getSaleTotal = (sale: SaleWithDetails): number => {
   return (
     sale.order?.details.reduce(
       (sum: number, detail: { quantity: number; price: number }) =>
@@ -142,7 +146,11 @@ export async function getSalesChartData(
   // 1. Definir los rangos de fecha para el período actual y el anterior
   switch (timePeriod) {
     case 'today':
-      startDateCurrent = new Date(now.getFullYear(), now.getMonth(), now.getDate()) // Hoy a las 00:00
+      startDateCurrent = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+      ) // Hoy a las 00:00
       startDatePrevious = new Date(startDateCurrent)
       startDatePrevious.setDate(startDateCurrent.getDate() - 1) // Ayer a las 00:00
       break
@@ -189,8 +197,8 @@ export async function getSalesChartData(
       totalPrevious > 0
         ? ((totalCurrent - totalPrevious) / totalPrevious) * 100
         : totalCurrent > 0
-          ? 100
-          : 0
+        ? 100
+        : 0
 
     // 5. Agregar los datos para la serie del gráfico (LÓGICA CORREGIDA)
     let series: number[] = []
@@ -230,19 +238,21 @@ export async function getSalesChartData(
     } else if (timePeriod === '30d') {
       series = Array(4).fill(0)
       categories = ['22-30 días', '15-21 días', '8-14 días', 'Últimos 7 días']
-      const dayInMillis = 24 * 60 * 60 * 1000;
+      const dayInMillis = 24 * 60 * 60 * 1000
       currentSales.forEach(sale => {
-          const daysAgo = Math.floor((now.getTime() - sale.createdAt.getTime()) / dayInMillis);
-          if (daysAgo < 7) {
-              series[3] += getSaleTotal(sale);
-          } else if (daysAgo < 14) {
-              series[2] += getSaleTotal(sale);
-          } else if (daysAgo < 21) {
-              series[1] += getSaleTotal(sale);
-          } else if (daysAgo <= 30) {
-              series[0] += getSaleTotal(sale);
-          }
-      });
+        const daysAgo = Math.floor(
+          (now.getTime() - sale.createdAt.getTime()) / dayInMillis,
+        )
+        if (daysAgo < 7) {
+          series[3] += getSaleTotal(sale)
+        } else if (daysAgo < 14) {
+          series[2] += getSaleTotal(sale)
+        } else if (daysAgo < 21) {
+          series[1] += getSaleTotal(sale)
+        } else if (daysAgo <= 30) {
+          series[0] += getSaleTotal(sale)
+        }
+      })
     } else if (timePeriod === '90d') {
       series = Array(3).fill(0)
       const monthFormat = new Intl.DateTimeFormat('es-AR', { month: 'short' })
@@ -272,7 +282,6 @@ export async function getSalesChartData(
       percentageChange,
     }
   } catch (error) {
-    console.error('Error fetching sales chart data:', error)
     return { series: [], categories: [], totalSales: 0, percentageChange: 0 }
   }
 }
