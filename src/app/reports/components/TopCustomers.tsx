@@ -9,6 +9,8 @@ import {
   TimeFilter,
   MetricFilter,
 } from '../actions/customers.action'
+import CardWithShadow from '@/components/card-with-shadow'
+import { Button, Tab, Tabs } from '@heroui/react'
 
 // --- Componente Wrapper para ApexCharts (reutilizado) ---
 const ApexChart = ({
@@ -18,9 +20,9 @@ const ApexChart = ({
   height,
 }: {
   options: ApexOptions
-  series: any
-  type: any
-  height: any
+  series: number[]
+  type: string
+  height: string | number
 }) => {
   const chartRef = useRef<HTMLDivElement>(null)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -75,10 +77,12 @@ export default function ClientDonutDashboard() {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('year')
   const [metricFilter, setMetricFilter] = useState<MetricFilter>('price')
   const [isDownloading, setIsDownloading] = useState(false)
+  const [selectedSlice, setSelectedSlice] = useState<ChartSlice | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
+      setSelectedSlice(null) // Resetea la selección al cambiar de filtro
       try {
         const result = await getClientSalesRanking({
           timeFilter,
@@ -94,7 +98,13 @@ export default function ClientDonutDashboard() {
       }
     }
     fetchData()
-  }, [timeFilter, metricFilter]) // Se elimina sortOrder de las dependencias
+  }, [timeFilter, metricFilter])
+
+  const handleMetricChange = (key: React.Key) => {
+    if (key === 'quantity' || key === 'price') {
+      setMetricFilter(key as MetricFilter)
+    }
+  }
 
   const formatCurrency = (value: number) =>
     `$${new Intl.NumberFormat('es-AR').format(value)}`
@@ -122,13 +132,41 @@ export default function ClientDonutDashboard() {
   }, [data, metricFilter])
 
   const chartOptions: ApexOptions = {
-    chart: { type: 'donut', sparkline: { enabled: true } },
-    plotOptions: { pie: { donut: { size: '75%' } } },
+    chart: {
+      type: 'donut',
+      height: 180,
+      events: {
+        dataPointSelection: (_, __, config) => {
+          const index = config.dataPointIndex
+          if (chartData[index]) {
+            setSelectedSlice(chartData[index])
+          }
+        },
+      },
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '75%',
+          labels: {
+            show: true,
+            total: {
+              show: true,
+              showAlways: true,
+              label: `Total`,
+              fontSize: '14px',
+              color: '#6b7280',
+            },
+            value: { show: true, fontSize: '13px' },
+          },
+        },
+      },
+    },
+    dataLabels: { enabled: false },
     labels: chartData.map(d => d.name),
     colors: chartData.map(d => d.color),
-    stroke: { width: 4, colors: ['#fff'] },
     legend: { show: false },
-    dataLabels: { enabled: false },
+    stroke: { width: 3 },
   }
 
   const handleCsvExport = () => {
@@ -179,121 +217,131 @@ export default function ClientDonutDashboard() {
       )
     }
     return (
-      <div className='flex items-center gap-6 mt-4'>
-        <div className='w-1/2 flex-shrink-0'>
-          <ApexChart
-            options={chartOptions}
-            series={chartData.map(d => d.value)}
-            type='donut'
-            height={180}
-          />
-        </div>
-        <div className='w-1/2 flex-grow space-y-2'>
-          {chartData.map(slice => (
-            <div key={slice.name} className='flex items-center'>
-              <span
-                className='w-3 h-3 rounded-full mr-2'
-                style={{ backgroundColor: slice.color }}
-              />
-              <div className='flex justify-between w-full text-sm'>
-                <span className='text-slate-600 truncate pr-2'>
-                  {slice.name}
-                </span>
-                <span className='font-bold text-slate-800 whitespace-nowrap'>
-                  {metricFilter === 'price'
-                    ? formatCurrency(slice.value)
-                    : `${Math.round(slice.value)} u.`}
-                </span>
+      <>
+        <div className='flex items-center  mt-4'>
+          <div className='w-1/2 flex-shrink-0 cursor-pointer'>
+            <ApexChart
+              options={chartOptions}
+              series={chartData.map(d => d.value)}
+              type='donut'
+              height={180}
+            />
+          </div>
+          <div className='w-1/2 flex-grow space-y-2'>
+            {chartData.map(slice => (
+              <div
+                key={slice.name}
+                onClick={() => setSelectedSlice(slice)}
+                className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
+                  selectedSlice?.name === slice.name ? 'bg-slate-100' : ''
+                }`}
+              >
+                <div className='flex items-center gap-3'>
+                  <span
+                    className='w-1 h-6  rounded-sm'
+                    style={{ backgroundColor: slice.color }}
+                  ></span>
+                  <div className='flex flex-col'>
+                    <span className='text-slate-500 font-light text-small'>
+                      {slice.name}
+                    </span>
+                    <div className='flex justify-between w-full text-sm'>
+                      <span className='font-bold text-slate-800 whitespace-nowrap'>
+                        {metricFilter === 'price'
+                          ? formatCurrency(slice.value)
+                          : `${Math.round(slice.value)} u.`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
   return (
-    <div className='bg-white rounded-lg shadow-md border border-slate-200'>
-      <div className='p-4 md:p-6'>
+    <CardWithShadow>
+      <div className='p-6'>
         <div className='flex justify-between items-center mb-4'>
           <div>
-            <h3 className='text-lg font-bold text-slate-800'>Top 3 Clientes</h3>
+            <h3 className='text-lg font-semibold text-slate-800'>
+              Top 3 Clientes
+            </h3>
             <p className='text-xs text-slate-400'>
               Por {metricFilter === 'price' ? 'Facturación' : 'Cantidad'}
             </p>
           </div>
           <div className='flex items-center gap-2'>
-            <button
-              onClick={handleCsvExport}
-              disabled={isDownloading || loading || chartData.length === 0}
-              className='p-2 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed'
+            <Button
+              onPress={handleCsvExport}
+              isDisabled={isDownloading || loading || chartData.length === 0}
+              isIconOnly
+              size='sm'
+              variant='light'
+              isLoading={isDownloading}
             >
-              {isDownloading ? (
-                <Loader2 className='w-4 h-4 animate-spin' />
-              ) : (
-                <Download className='w-4 h-4 text-slate-500' />
-              )}
-            </button>
+              <Download className='w-4 h-4 text-slate-600' />
+            </Button>
           </div>
         </div>
-        <div className='flex flex-col gap-2'>
-          <div className='flex justify-between items-center bg-slate-100 p-1 rounded-full text-sm'>
-            <button
-              onClick={() => setTimeFilter('week')}
-              className={`w-full justify-center px-2 py-1 text-sm rounded-full ${
+        <div className='flex gap-4 mb-6 flex-col'>
+          <div className='flex justify-between items-center gap-2'>
+            <Button
+              onPress={() => setTimeFilter('week')}
+              size='sm'
+              className={`transition-colors flex-1 ${
                 timeFilter === 'week'
-                  ? 'bg-white shadow'
-                  : 'bg-transparent text-slate-600'
+                  ? 'bg-slate-800 text-white'
+                  : 'bg-zinc-100 text-zinc-500'
               }`}
             >
               Semana
-            </button>
-            <button
-              onClick={() => setTimeFilter('month')}
-              className={`w-full justify-center px-2 py-1 text-sm rounded-full ${
+            </Button>
+            <Button
+              size='sm'
+              onPress={() => setTimeFilter('month')}
+              className={`transition-colors flex-1 ${
                 timeFilter === 'month'
-                  ? 'bg-white shadow'
-                  : 'bg-transparent text-slate-600'
+                  ? 'bg-slate-800 text-white'
+                  : 'bg-zinc-100 text-zinc-500'
               }`}
             >
               Mes
-            </button>
-            <button
-              onClick={() => setTimeFilter('year')}
-              className={`w-full justify-center px-2 py-1 text-sm rounded-full ${
+            </Button>
+            <Button
+              size='sm'
+              onPress={() => setTimeFilter('year')}
+              className={`transition-colors flex-1 ${
                 timeFilter === 'year'
-                  ? 'bg-white shadow'
-                  : 'bg-transparent text-slate-600'
+                  ? 'bg-slate-800 text-white'
+                  : 'bg-zinc-100 text-zinc-500'
               }`}
             >
               Año
-            </button>
+            </Button>
           </div>
-          <div className='flex justify-between items-center bg-slate-100 p-1 rounded-full text-sm'>
-            <button
-              onClick={() => setMetricFilter('price')}
-              className={`w-full justify-center px-2 py-1 text-sm rounded-full ${
-                metricFilter === 'price'
-                  ? 'bg-white shadow'
-                  : 'bg-transparent text-slate-600'
-              }`}
-            >
-              Facturación
-            </button>
-            <button
-              onClick={() => setMetricFilter('quantity')}
-              className={`w-full justify-center px-2 py-1 text-sm rounded-full ${
-                metricFilter === 'quantity'
-                  ? 'bg-white shadow'
-                  : 'bg-transparent text-slate-600'
-              }`}
-            >
-              Cantidad
-            </button>
-          </div>
+          <Tabs
+            aria-label='Metric Filter'
+            selectedKey={metricFilter}
+            onSelectionChange={handleMetricChange}
+            size='sm'
+            fullWidth
+            radius='md'
+            classNames={{
+              tabContent:
+                'group-data-[selected=true]:text-white group-data-[selected=true]:font-normal',
+              cursor: 'w-full bg-slate-800 font-normal',
+            }}
+          >
+            <Tab key='quantity' title='Cantidad' />
+            <Tab key='price' title='Facturación' />
+          </Tabs>
         </div>
         {renderContent()}
       </div>
-    </div>
+    </CardWithShadow>
   )
 }
