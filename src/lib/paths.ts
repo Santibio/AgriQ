@@ -57,10 +57,10 @@ const paths = {
     return `/discard/add`
   },
   shipmentReception() {
-    return `/shipments-reception`
+    return `shipments/shipments-reception`
   },
   shipmentReceptionEdit(shipmentId: string) {
-    return `/shipments-reception/${shipmentId}`
+    return `/shipments/shipments-reception/${shipmentId}`
   },
   orders() {
     return `/orders`

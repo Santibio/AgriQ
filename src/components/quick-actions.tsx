@@ -1,9 +1,9 @@
 import { CardBody } from '@heroui/react'
 import {
-  Apple,
   CircleUser,
   DollarSign,
-  PackageCheck,
+  Package,
+  ShoppingCart,
   Trash2Icon,
   Truck,
 } from 'lucide-react'
@@ -14,20 +14,12 @@ import CardWithShadow from './card-with-shadow'
 
 const quickActions = [
   {
-    title: 'Envíos',
-    description: 'Seguimiento de envíos',
-    icon: Truck,
-    color: 'bg-purple-500',
-    gradient: 'from-purple-400 to-purple-600',
-    link: paths.shipments(),
-  },
-  {
-    title: 'Recepción de envíos',
-    description: 'Gestión de recepción de envíos',
-    icon: PackageCheck,
-    color: 'bg-teal-500',
-    gradient: 'from-green-400 to-green-600',
-    link: paths.shipmentReception(),
+    title: 'Producción',
+    description: 'Gestión de producción',
+    icon: Package,
+    color: 'bg-orange-500',
+    gradient: 'from-orange-400 to-orange-600',
+    link: paths.production(),
   },
   {
     title: 'Descartes',
@@ -38,12 +30,20 @@ const quickActions = [
     link: paths.discard(),
   },
   {
-    title: 'Productos',
-    description: 'Gestión de productos',
-    icon: Apple,
-    color: 'bg-orange-500',
-    gradient: 'from-orange-400 to-orange-600',
-    link: paths.products(),
+    title: 'Envíos',
+    description: 'Seguimiento de envíos',
+    icon: Truck,
+    color: 'bg-purple-500',
+    gradient: 'from-purple-400 to-purple-600',
+    link: paths.shipments(),
+  },
+  {
+    title: 'Pedidos',
+    description: 'Gestión de pedidos',
+    icon: ShoppingCart,
+    color: 'bg-yellow-500',
+    gradient: 'from-yellow-400 to-yellow-600',
+    link: paths.orders(),
   },
   {
     title: 'Clientes',

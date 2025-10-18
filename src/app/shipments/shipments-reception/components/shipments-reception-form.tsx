@@ -104,7 +104,7 @@ export default function ShipmentForm({
         return toast.error('Ocurrió un error al procesar la solicitud.')
       }
       toast.success('Recepción registrada correctamente')
-      router.push(paths.shipmentReception())
+      router.push(`/${paths.shipmentReception()}`)
     } catch (error) {
       console.error('Error al registrar la recepción:', error)
       toast.error('Ocurrió un error al procesar la solicitud.')
