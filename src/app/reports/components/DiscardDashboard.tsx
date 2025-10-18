@@ -1,9 +1,13 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { Search, Trash2, AlertCircle, Download, Loader2 } from 'lucide-react'
-import { getDiscardedProducts, DiscardedProduct } from '../actions'
+import { Trash2, AlertCircle, Download, Search } from 'lucide-react'
+import {
+  getDiscardedProducts,
+  DiscardedProduct,
+} from '../actions/discard.action'
 import CardWithShadow from '@/components/card-with-shadow'
+import { Button, Input } from '@heroui/react'
 
 function DiscardSkeleton() {
   return (
@@ -133,7 +137,7 @@ export default function DiscardDashboard() {
     if (filteredDiscards.length > 0) {
       return (
         <ul>
-          {filteredDiscards.slice(0,5).map((discard, index) => (
+          {filteredDiscards.slice(0, 5).map((discard, index) => (
             <li
               key={discard.id}
               className={`flex items-center justify-between p-3 ${
@@ -177,63 +181,58 @@ export default function DiscardDashboard() {
           <h3 className='text-lg font-semibold text-slate-800'>
             Productos Descartados
           </h3>
-          <button
-            onClick={handleCsvExport}
-            disabled={isDownloading || filteredDiscards.length === 0}
-            className='p-2 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed'
+          <Button
+            onPress={handleCsvExport}
+            isIconOnly
+            size='sm'
+            variant='light'
+            isLoading={isDownloading}
+            isDisabled={isDownloading || filteredDiscards.length === 0}
           >
-            {isDownloading ? (
-              <Loader2 className='w-4 h-4 animate-spin' />
-            ) : (
-              <Download className='w-4 h-4 text-slate-500' />
-            )}
-          </button>
+            <Download className='w-4 h-4 text-slate-600' />
+          </Button>
         </div>
-        <div className='space-y-4 mb-6'>
-          <div className='relative'>
-            <Search
-              className='absolute left-3 top-1/2 -translate-y-1/2 text-slate-400'
-              size={18}
-            />
-            <input
-              type='text'
-              placeholder='Buscar por nombre de producto...'
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className='w-full pl-10 pr-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none'
-            />
-          </div>
-          <div className='flex justify-center gap-2'>
-            <button
-              onClick={() => setTimeFilter('day')}
-              className={`px-3 py-1 rounded-full text-sm cursor-pointer ${
+        <div className='flex flex-col mb-6 gap-4'>
+          <Input
+            placeholder='Buscar por nombre de producto...'
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            startContent={<Search size={18} />}
+          />
+          <div className='flex gap-2 justify-between'>
+            <Button
+              onPress={() => setTimeFilter('day')}
+              size='sm'
+              className={`pransition-colors flex-1 ${
                 timeFilter === 'day'
                   ? 'bg-slate-800 text-white'
-                  : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  : 'bg-slate-200 hover:bg-slate-300'
               }`}
             >
               Hoy
-            </button>
-            <button
-              onClick={() => setTimeFilter('week')}
-              className={`px-3 py-1 rounded-full text-sm cursor-pointer ${
+            </Button>
+            <Button
+              onPress={() => setTimeFilter('week')}
+              size='sm'
+              className={`pransition-colors flex-1 ${
                 timeFilter === 'week'
                   ? 'bg-slate-800 text-white'
-                  : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  : 'bg-slate-200 hover:bg-slate-300'
               }`}
             >
               Semana
-            </button>
-            <button
-              onClick={() => setTimeFilter('month')}
-              className={`px-3 py-1 rounded-full text-sm cursor-pointer ${
+            </Button>
+            <Button
+              onPress={() => setTimeFilter('month')}
+              size='sm'
+              className={`pransition-colors flex-1 ${
                 timeFilter === 'month'
                   ? 'bg-slate-800 text-white'
-                  : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  : 'bg-slate-200 hover:bg-slate-300'
               }`}
             >
               Mes
-            </button>
+            </Button>
           </div>
         </div>
         <div className='w-full rounded-lg bg-white border border-slate-200'>
