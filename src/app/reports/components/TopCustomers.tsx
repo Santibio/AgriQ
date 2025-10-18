@@ -1,65 +1,66 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
-import dynamic from 'next/dynamic'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { ApexOptions } from 'apexcharts'
-import { CardBody, Chip, Button } from '@heroui/react'
-import CardWithShadow from '@/components/card-with-shadow'
-import { RefreshCw } from 'lucide-react'
+import { Download, Loader2, AlertCircle } from 'lucide-react'
+import {
+  getClientSalesRanking,
+  ClientSaleRank,
+  TimeFilter,
+  MetricFilter,
+} from '../actions/customers.action'
 
-// --- Importación dinámica de ApexCharts (solo se carga en el cliente) ---
-const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
-
-// --- Interfaces y Datos de Ejemplo (sin cambios) ---
-interface Sale {
-  clientName: string
-  quantitySold: number
-  price: number
-  saleDate: Date
+// --- Componente Wrapper para ApexCharts (reutilizado) ---
+const ApexChart = ({
+  options,
+  series,
+  type,
+  height,
+}: {
+  options: ApexOptions
+  series: any
+  type: any
+  height: any
+}) => {
+  const chartRef = useRef<HTMLDivElement>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
+  useEffect(() => {
+    if (
+      !document.querySelector(
+        'script[src="https://cdn.jsdelivr.net/npm/apexcharts"]',
+      )
+    ) {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/apexcharts'
+      script.onload = () => setIsLoaded(true)
+      document.head.appendChild(script)
+    } else {
+      setIsLoaded(true)
+    }
+  }, [])
+  useEffect(() => {
+    if (
+      isLoaded &&
+      chartRef.current &&
+      typeof window.ApexCharts !== 'undefined'
+    ) {
+      const chart = new window.ApexCharts(chartRef.current, {
+        ...options,
+        series,
+        chart: { ...options.chart, type, height },
+      })
+      chart.render()
+      return () => chart.destroy()
+    }
+  }, [options, series, type, height, isLoaded])
+  if (!isLoaded)
+    return (
+      <div className='h-full w-full flex items-center justify-center'>
+        <Loader2 className='w-6 h-6 animate-spin text-slate-400' />
+      </div>
+    )
+  return <div ref={chartRef} />
 }
-
-const mockSales: Sale[] = [
-  {
-    clientName: 'Supermercado Vea',
-    quantitySold: 50,
-    price: 5.5,
-    saleDate: new Date(),
-  },
-  {
-    clientName: 'Verdulería Don Pepe',
-    quantitySold: 30,
-    price: 3.0,
-    saleDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-  },
-  {
-    clientName: 'Distribuidora del Sur',
-    quantitySold: 80,
-    price: 2.5,
-    saleDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-  },
-  {
-    clientName: 'Restaurante La Casona',
-    quantitySold: 5,
-    price: 4.0,
-    saleDate: new Date(),
-  },
-  {
-    clientName: 'Almacén de Barrio',
-    quantitySold: 10,
-    price: 1.8,
-    saleDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-  },
-  {
-    clientName: 'Distribuidora del Sur',
-    quantitySold: 500,
-    price: 1.5,
-    saleDate: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000),
-  },
-]
-
-type TimeFilter = 'week' | 'month' | 'year'
-type MetricFilter = 'price' | 'quantity'
-type SortOrder = 'top' | 'bottom'
 
 interface ChartSlice {
   name: string
@@ -68,49 +69,46 @@ interface ChartSlice {
 }
 
 export default function ClientDonutDashboard() {
+  const [data, setData] = useState<ClientSaleRank[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('year')
   const [metricFilter, setMetricFilter] = useState<MetricFilter>('price')
-  const [sortOrder, setSortOrder] = useState<SortOrder>('top')
+  const [isDownloading, setIsDownloading] = useState(false)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const result = await getClientSalesRanking({
+          timeFilter,
+          metricFilter,
+          sortOrder: 'top', // Siempre pedimos el Top
+        })
+        setData(result)
+      } catch (e) {
+        setError('No se pudo cargar el ranking de clientes.')
+        console.error(e)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [timeFilter, metricFilter]) // Se elimina sortOrder de las dependencias
 
   const formatCurrency = (value: number) =>
     `$${new Intl.NumberFormat('es-AR').format(value)}`
 
-  // --- Lógica de datos (sin cambios, sigue siendo robusta) ---
-  const { chartData } = useMemo(() => {
-    // ... (misma lógica de filtrado y agregación)
-    const now = new Date()
-    const oneDayInMillis = 24 * 60 * 60 * 1000
-    const salesInPeriod = mockSales.filter(sale => {
-      const diffInDays = Math.floor(
-        (now.getTime() - sale.saleDate.getTime()) / oneDayInMillis,
-      )
-      if (timeFilter === 'week' && diffInDays > 7) return false
-      if (timeFilter === 'month' && diffInDays > 30) return false
-      return true
-    })
-    const aggregated = salesInPeriod.reduce((acc, sale) => {
-      if (!acc[sale.clientName]) {
-        acc[sale.clientName] = { totalQuantity: 0, totalPrice: 0 }
-      }
-      acc[sale.clientName].totalQuantity += sale.quantitySold
-      acc[sale.clientName].totalPrice += sale.quantitySold * sale.price
-      return acc
-    }, {} as Record<string, { totalQuantity: number; totalPrice: number }>)
-    const fullSortedList = Object.entries(aggregated)
-      .map(([name, data]) => ({ name, ...data }))
-      .sort((a, b) => {
-        const valueA = metricFilter === 'price' ? a.totalPrice : a.totalQuantity
-        const valueB = metricFilter === 'price' ? b.totalPrice : b.totalQuantity
-        return sortOrder === 'top' ? valueB - valueA : valueA - valueB
-      })
-    const top3 = fullSortedList.slice(0, 3)
-    const others = fullSortedList.slice(3)
-    const chartData: ChartSlice[] = top3.map((client, i) => ({
+  const chartData = useMemo((): ChartSlice[] => {
+    const top3 = data.slice(0, 3)
+    const others = data.slice(3)
+    const chartSlices: ChartSlice[] = top3.map((client, i) => ({
       name: client.name,
       value:
         metricFilter === 'price' ? client.totalPrice : client.totalQuantity,
       color: ['#6366F1', '#10B981', '#F59E0B'][i],
     }))
+
     if (others.length > 0) {
       const othersValue = others.reduce(
         (sum, client) =>
@@ -118,95 +116,184 @@ export default function ClientDonutDashboard() {
           (metricFilter === 'price' ? client.totalPrice : client.totalQuantity),
         0,
       )
-      chartData.push({ name: 'Otros', value: othersValue, color: '#6b7280' })
+      chartSlices.push({ name: 'Otros', value: othersValue, color: '#6b7280' })
     }
-    return { chartData }
-  }, [timeFilter, metricFilter, sortOrder])
+    return chartSlices
+  }, [data, metricFilter])
 
-  // --- Configuración de ApexCharts ---
-  const [options, setOptions] = useState<ApexOptions>({})
-  const [series, setSeries] = useState<number[]>([])
+  const chartOptions: ApexOptions = {
+    chart: { type: 'donut', sparkline: { enabled: true } },
+    plotOptions: { pie: { donut: { size: '75%' } } },
+    labels: chartData.map(d => d.name),
+    colors: chartData.map(d => d.color),
+    stroke: { width: 4, colors: ['#fff'] },
+    legend: { show: false },
+    dataLabels: { enabled: false },
+  }
 
-  useEffect(() => {
-    setSeries(chartData.map(d => d.value))
-    setOptions({
-      chart: { type: 'donut', sparkline: { enabled: true } }, // Sparkline es ideal aquí
-      plotOptions: { pie: { donut: { size: '75%' } } },
-      labels: chartData.map(d => d.name),
-      colors: chartData.map(d => d.color),
-      stroke: { width: 4, colors: ['#fff'] },
-      legend: { show: false }, // Se construye una leyenda personalizada
-      dataLabels: { enabled: false },
+  const handleCsvExport = () => {
+    if (isDownloading || chartData.length === 0) return
+    setIsDownloading(true)
+
+    const headers = [
+      'Cliente',
+      `Valor (${metricFilter === 'price' ? 'ARS' : 'Unidades'})`,
+    ]
+    const rows = chartData.map(item => `"${item.name}",${item.value}`)
+
+    const csvContent = [headers.join(','), ...rows].join('\n')
+    const blob = new Blob([`\uFEFF${csvContent}`], {
+      type: 'text/csv;charset=utf-8;',
     })
-  }, [chartData])
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    const date = new Date().toISOString().split('T')[0]
+    link.setAttribute('download', `top_clientes_${timeFilter}_${date}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    setTimeout(() => setIsDownloading(false), 1000)
+  }
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className='h-[240px] flex items-center justify-center'>
+          <Loader2 className='w-8 h-8 text-slate-400 animate-spin' />
+        </div>
+      )
+    }
+    if (error) {
+      return (
+        <div className='h-[240px] flex flex-col items-center justify-center text-red-600'>
+          <AlertCircle className='w-8 h-8 mb-2' />
+          <p className='font-semibold'>Error al cargar</p>
+        </div>
+      )
+    }
+    if (chartData.length === 0) {
+      return (
+        <div className='h-[240px] flex items-center justify-center'>
+          <p className='text-slate-500'>No hay ventas en este período.</p>
+        </div>
+      )
+    }
+    return (
+      <div className='flex items-center gap-6 mt-4'>
+        <div className='w-1/2 flex-shrink-0'>
+          <ApexChart
+            options={chartOptions}
+            series={chartData.map(d => d.value)}
+            type='donut'
+            height={180}
+          />
+        </div>
+        <div className='w-1/2 flex-grow space-y-2'>
+          {chartData.map(slice => (
+            <div key={slice.name} className='flex items-center'>
+              <span
+                className='w-3 h-3 rounded-full mr-2'
+                style={{ backgroundColor: slice.color }}
+              />
+              <div className='flex justify-between w-full text-sm'>
+                <span className='text-slate-600 truncate pr-2'>
+                  {slice.name}
+                </span>
+                <span className='font-bold text-slate-800 whitespace-nowrap'>
+                  {metricFilter === 'price'
+                    ? formatCurrency(slice.value)
+                    : `${Math.round(slice.value)} u.`}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <CardWithShadow>
-      <CardBody className='p-4 md:p-6'>
+    <div className='bg-white rounded-lg shadow-md border border-slate-200'>
+      <div className='p-4 md:p-6'>
         <div className='flex justify-between items-center mb-4'>
-          <h3 className='text-lg font-bold text-slate-800'>
-            {sortOrder === 'top' ? 'Top 3' : 'Bottom 3'} Clientes
-          </h3>
-          <Button
-            size='sm'
-            variant='flat'
-            onClick={() =>
-              setSortOrder(prev => (prev === 'top' ? 'bottom' : 'top'))
-            }
-            startContent={<RefreshCw size={14} />}
-          >
-            Ver {sortOrder === 'top' ? 'Menos' : 'Más'}
-          </Button>
-        </div>
-        <div className='flex justify-between items-center bg-slate-100 p-1 rounded-full text-sm mb-4'>
-          <Chip
-            onClick={() => setMetricFilter('price')}
-            variant={metricFilter === 'price' ? 'solid' : 'flat'}
-            className='cursor-pointer flex-1 justify-center'
-          >
-            Por Dinero
-          </Chip>
-          <Chip
-            onClick={() => setMetricFilter('quantity')}
-            variant={metricFilter === 'quantity' ? 'solid' : 'flat'}
-            className='cursor-pointer flex-1 justify-center'
-          >
-            Por Cantidad
-          </Chip>
-        </div>
-
-        {/* --- ✨ Contenedor Principal para Gráfico y Leyenda --- */}
-        <div className='flex items-center gap-6'>
-          {/* Contenedor del Gráfico */}
-          <div className='w-1/2 flex-shrink-0'>
-            <Chart
-              options={options}
-              series={series}
-              type='donut'
-              height={180}
-            />
+          <div>
+            <h3 className='text-lg font-bold text-slate-800'>Top 3 Clientes</h3>
+            <p className='text-xs text-slate-400'>
+              Por {metricFilter === 'price' ? 'Facturación' : 'Cantidad'}
+            </p>
           </div>
-          {/* Contenedor de la Leyenda Personalizada */}
-          <div className='w-1/2 flex-grow space-y-2'>
-            {chartData.map(slice => (
-              <div key={slice.name} className='flex items-center'>
-                <span
-                  className='w-3 h-3 rounded-full mr-2'
-                  style={{ backgroundColor: slice.color }}
-                ></span>
-                <div className='flex justify-between w-full text-sm'>
-                  <span className='text-slate-600'>{slice.name}</span>
-                  <span className='font-bold text-slate-800'>
-                    {metricFilter === 'price'
-                      ? formatCurrency(slice.value)
-                      : `${Math.round(slice.value)} u.`}
-                  </span>
-                </div>
-              </div>
-            ))}
+          <div className='flex items-center gap-2'>
+            <button
+              onClick={handleCsvExport}
+              disabled={isDownloading || loading || chartData.length === 0}
+              className='p-2 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              {isDownloading ? (
+                <Loader2 className='w-4 h-4 animate-spin' />
+              ) : (
+                <Download className='w-4 h-4 text-slate-500' />
+              )}
+            </button>
           </div>
         </div>
-      </CardBody>
-    </CardWithShadow>
+        <div className='flex flex-col gap-2'>
+          <div className='flex justify-between items-center bg-slate-100 p-1 rounded-full text-sm'>
+            <button
+              onClick={() => setTimeFilter('week')}
+              className={`w-full justify-center px-2 py-1 text-sm rounded-full ${
+                timeFilter === 'week'
+                  ? 'bg-white shadow'
+                  : 'bg-transparent text-slate-600'
+              }`}
+            >
+              Semana
+            </button>
+            <button
+              onClick={() => setTimeFilter('month')}
+              className={`w-full justify-center px-2 py-1 text-sm rounded-full ${
+                timeFilter === 'month'
+                  ? 'bg-white shadow'
+                  : 'bg-transparent text-slate-600'
+              }`}
+            >
+              Mes
+            </button>
+            <button
+              onClick={() => setTimeFilter('year')}
+              className={`w-full justify-center px-2 py-1 text-sm rounded-full ${
+                timeFilter === 'year'
+                  ? 'bg-white shadow'
+                  : 'bg-transparent text-slate-600'
+              }`}
+            >
+              Año
+            </button>
+          </div>
+          <div className='flex justify-between items-center bg-slate-100 p-1 rounded-full text-sm'>
+            <button
+              onClick={() => setMetricFilter('price')}
+              className={`w-full justify-center px-2 py-1 text-sm rounded-full ${
+                metricFilter === 'price'
+                  ? 'bg-white shadow'
+                  : 'bg-transparent text-slate-600'
+              }`}
+            >
+              Facturación
+            </button>
+            <button
+              onClick={() => setMetricFilter('quantity')}
+              className={`w-full justify-center px-2 py-1 text-sm rounded-full ${
+                metricFilter === 'quantity'
+                  ? 'bg-white shadow'
+                  : 'bg-transparent text-slate-600'
+              }`}
+            >
+              Cantidad
+            </button>
+          </div>
+        </div>
+        {renderContent()}
+      </div>
+    </div>
   )
 }
