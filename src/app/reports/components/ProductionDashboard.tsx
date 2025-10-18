@@ -204,7 +204,7 @@ export default function ProductionDashboard() {
               className={`pransition-colors flex-1 ${
                 timeFilter === 'day'
                   ? 'bg-slate-800 text-white'
-                  : 'bg-slate-200 hover:bg-slate-300'
+                  : 'bg-zinc-100 text-zinc-500'
               }`}
             >
               Hoy
@@ -215,7 +215,7 @@ export default function ProductionDashboard() {
               className={`pransition-colors flex-1 ${
                 timeFilter === 'week'
                   ? 'bg-slate-800 text-white'
-                  : 'bg-slate-200 hover:bg-slate-300'
+                  : 'bg-zinc-100 text-zinc-500'
               }`}
             >
               Semana
@@ -226,7 +226,7 @@ export default function ProductionDashboard() {
               className={`pransition-colors flex-1 ${
                 timeFilter === 'month'
                   ? 'bg-slate-800 text-white'
-                  : 'bg-slate-200 hover:bg-slate-300'
+                  : 'bg-zinc-100 text-zinc-500'
               }`}
             >
               Mes

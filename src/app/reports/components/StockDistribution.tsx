@@ -202,7 +202,6 @@ export default function StockDistribution() {
           </h3>
           <Button
             onPress={handleExcelExport}
-            disabled={isDownloading}
             isIconOnly
             size='sm'
             variant='light'
@@ -219,7 +218,7 @@ export default function StockDistribution() {
             className={`transition-colors flex-1 ${
               filter === 'mercado'
                 ? 'bg-slate-800 text-white'
-                : 'bg-slate-200 hover:bg-slate-300'
+                : 'bg-zinc-100 text-zinc-500'
             }`}
           >
             Mercado
@@ -230,7 +229,7 @@ export default function StockDistribution() {
             className={`transition-colors flex-1 ${
               filter === 'deposito'
                 ? 'bg-slate-800 text-white'
-                : 'bg-slate-200 hover:bg-slate-300'
+                : 'bg-zinc-100 text-zinc-500'
             }`}
           >
             Depósito
@@ -241,7 +240,7 @@ export default function StockDistribution() {
             className={`transition-colors flex-1 ${
               filter === 'ambos'
                 ? 'bg-slate-800 text-white'
-                : 'bg-slate-200 hover:bg-slate-300'
+                : 'bg-zinc-100 text-zinc-500'
             }`}
           >
             Ambos

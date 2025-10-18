@@ -264,7 +264,7 @@ export default function DiscardReasonDonut() {
             className={`transition-colors flex-1 ${
               timeFilter === 'month'
                 ? 'bg-slate-800 text-white'
-                : 'bg-slate-200 hover:bg-slate-300'
+                : 'bg-zinc-100 text-zinc-500'
             }`}
           >
             Mes
@@ -275,7 +275,7 @@ export default function DiscardReasonDonut() {
             className={`transition-colors flex-1 ${
               timeFilter === 'quarter'
                 ? 'bg-slate-800 text-white'
-                : 'bg-slate-200 hover:bg-slate-300'
+                : 'bg-zinc-100 text-zinc-500'
             }`}
           >
             3 Meses
@@ -286,7 +286,7 @@ export default function DiscardReasonDonut() {
             className={`pransition-colors flex-1 ${
               timeFilter === 'half'
                 ? 'bg-slate-800 text-white'
-                : 'bg-slate-200 hover:bg-slate-300'
+                : 'bg-zinc-100 text-zinc-500'
             }`}
           >
             6 Meses
@@ -297,7 +297,7 @@ export default function DiscardReasonDonut() {
             className={`transition-colors flex-1 ${
               timeFilter === 'year'
                 ? 'bg-slate-800 text-white'
-                : 'bg-slate-200 hover:bg-slate-300'
+                : 'bg-zinc-100 text-zinc-500'
             }`}
           >
             Año
