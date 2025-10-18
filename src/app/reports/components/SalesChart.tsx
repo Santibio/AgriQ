@@ -87,7 +87,6 @@ export default function SalesChart() {
       setLoading(true)
       try {
         const result = await getSalesChartData(timePeriod)
-        console.log('🚀 ~ fetchData ~ result:', result)
         setData(result)
       } catch (e) {
         setError('No se pudo cargar el gráfico de ventas.')
