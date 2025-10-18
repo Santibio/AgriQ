@@ -14,6 +14,8 @@ import {
   SalesChartData,
   TimePeriod,
 } from '../actions/sale.action'
+import CardWithShadow from '@/components/card-with-shadow'
+import { Button } from '@heroui/react'
 
 // --- Componente Wrapper para ApexCharts (reutilizado) ---
 const ApexChart = ({
@@ -85,7 +87,7 @@ export default function SalesChart() {
       setLoading(true)
       try {
         const result = await getSalesChartData(timePeriod)
-        console.log("🚀 ~ fetchData ~ result:", result)
+        console.log('🚀 ~ fetchData ~ result:', result)
         setData(result)
       } catch (e) {
         setError('No se pudo cargar el gráfico de ventas.')
@@ -218,68 +220,71 @@ export default function SalesChart() {
           />
         </div>
 
-        <div className='flex justify-between items-center border-t border-slate-200 pt-4 mt-4'>
-          <div className='flex gap-1 flex-wrap'>
-            <button
-              onClick={() => setTimePeriod('today')}
-              className={`px-3 py-1 text-sm rounded-full ${
+        <div className='flex justify-between border-t border-slate-200 pt-4 mt-4'>
+          <div className='flex gap-2 justify-between'>
+            <Button
+              onPress={() => setTimePeriod('today')}
+              size='sm'
+              className={`transition-colors flex-1 ${
                 timePeriod === 'today'
                   ? 'bg-slate-800 text-white'
                   : 'bg-zinc-100 text-zinc-500'
               }`}
             >
               Hoy
-            </button>
-            <button
-              onClick={() => setTimePeriod('7d')}
-              className={`px-3 py-1 text-sm rounded-full ${
+            </Button>
+            <Button
+              onPress={() => setTimePeriod('7d')}
+              size='sm'
+              className={`transition-colors flex-1 ${
                 timePeriod === '7d'
                   ? 'bg-slate-800 text-white'
                   : 'bg-zinc-100 text-zinc-500'
               }`}
             >
               7D
-            </button>
-            <button
-              onClick={() => setTimePeriod('30d')}
-              className={`px-3 py-1 text-sm rounded-full ${
+            </Button>
+            <Button
+              onPress={() => setTimePeriod('30d')}
+              size='sm'
+              className={`transition-colors flex-1 ${
                 timePeriod === '30d'
                   ? 'bg-slate-800 text-white'
                   : 'bg-zinc-100 text-zinc-500'
               }`}
             >
               30D
-            </button>
-            <button
-              onClick={() => setTimePeriod('90d')}
-              className={`px-3 py-1 text-sm rounded-full ${
+            </Button>
+            <Button
+              onPress={() => setTimePeriod('90d')}
+              size='sm'
+              className={`transition-colors flex-1 ${
                 timePeriod === '90d'
                   ? 'bg-slate-800 text-white'
                   : 'bg-zinc-100 text-zinc-500'
               }`}
             >
               90D
-            </button>
+            </Button>
           </div>
-          <button
-            onClick={handleCsvExport}
-            disabled={isDownloading || loading || data.series.length === 0}
-            className='p-2 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed'
+          <Button
+            onPress={handleCsvExport}
+            isDisabled={isDownloading || loading || data.series.length === 0}
+            isIconOnly
+            size='sm'
+            variant='light'
+            isLoading={isDownloading}
           >
-            {isDownloading ? (
-              <Loader2 className='w-4 h-4 animate-spin' />
-            ) : (
-              <Download className='w-4 h-4 text-slate-500' />
-            )}
-          </button>
+            <Download className='w-4 h-4 text-slate-600' />
+          </Button>
         </div>
       </>
     )
   }
 
   return (
-    <div className='bg-white rounded-lg shadow-md border border-slate-200'>
-      <div className='p-4 md:p-6'>{renderContent()}</div>
-    </div>
+    <CardWithShadow>
+      <div className='p-6'>{renderContent()}</div>
+    </CardWithShadow>
   )
 }
