@@ -196,47 +196,10 @@ export default function StockDistribution() {
   return (
     <CardWithShadow>
       <div className='p-6'>
-        <div className='flex justify-between items-start mb-4'>
-          <div className='flex flex-col gap-4'>
-            <h3 className='text-lg font-semibold text-slate-800'>
-              Stock de Productos
-            </h3>
-            <div className='flex gap-2 flex-wrap'>
-              <Button
-                onPress={() => setFilter('mercado')}
-                size='sm'
-                className={`transition-colors ${
-                  filter === 'mercado'
-                    ? 'bg-slate-800 text-white'
-                    : 'bg-slate-200 hover:bg-slate-300'
-                }`}
-              >
-                Mercado
-              </Button>
-              <Button
-                onPress={() => setFilter('deposito')}
-                size='sm'
-                className={`transition-colors ${
-                  filter === 'deposito'
-                    ? 'bg-slate-800 text-white'
-                    : 'bg-slate-200 hover:bg-slate-300'
-                }`}
-              >
-                Depósito
-              </Button>
-              <Button
-                onPress={() => setFilter('ambos')}
-                size='sm'
-                className={`transition-colors ${
-                  filter === 'ambos'
-                    ? 'bg-slate-800 text-white'
-                    : 'bg-slate-200 hover:bg-slate-300'
-                }`}
-              >
-                Ambos
-              </Button>
-            </div>
-          </div>
+        <div className='mb-4 flex justify-between'>
+          <h3 className='text-lg font-semibold text-slate-800'>
+            Stock de Productos
+          </h3>
           <Button
             onPress={handleExcelExport}
             disabled={isDownloading}
@@ -247,6 +210,41 @@ export default function StockDistribution() {
             isDisabled={isDownloading}
           >
             <Download className='w-4 h-4 text-slate-600' />
+          </Button>
+        </div>
+        <div className='flex gap-2 justify-between mb-6'>
+          <Button
+            onPress={() => setFilter('mercado')}
+            size='sm'
+            className={`transition-colors flex-1 ${
+              filter === 'mercado'
+                ? 'bg-slate-800 text-white'
+                : 'bg-slate-200 hover:bg-slate-300'
+            }`}
+          >
+            Mercado
+          </Button>
+          <Button
+            onPress={() => setFilter('deposito')}
+            size='sm'
+            className={`transition-colors flex-1 ${
+              filter === 'deposito'
+                ? 'bg-slate-800 text-white'
+                : 'bg-slate-200 hover:bg-slate-300'
+            }`}
+          >
+            Depósito
+          </Button>
+          <Button
+            onPress={() => setFilter('ambos')}
+            size='sm'
+            className={`transition-colors flex-1 ${
+              filter === 'ambos'
+                ? 'bg-slate-800 text-white'
+                : 'bg-slate-200 hover:bg-slate-300'
+            }`}
+          >
+            Ambos
           </Button>
         </div>
         <div className='space-y-4'>
