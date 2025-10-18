@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Download, AlertCircle, Loader2 } from 'lucide-react'
+import { Download, AlertCircle } from 'lucide-react'
 // Se corrige la ruta de importación para que sea relativa
-import { getProductStock, ProductStock } from '../actions'
+import { getProductStock, ProductStock } from '../actions/stock.action'
 import CardWithShadow from '@/components/card-with-shadow'
+import { Button } from '@heroui/react'
 
 // --- LIBRERÍAS DE EXPORTACIÓN ---
 // Se cargarán desde un CDN al hacer click.
@@ -201,49 +202,52 @@ export default function StockDistribution() {
               Stock de Productos
             </h3>
             <div className='flex gap-2 flex-wrap'>
-              <button
-                onClick={() => setFilter('mercado')}
-                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              <Button
+                onPress={() => setFilter('mercado')}
+                size='sm'
+                className={`transition-colors ${
                   filter === 'mercado'
                     ? 'bg-slate-800 text-white'
                     : 'bg-slate-200 hover:bg-slate-300'
                 }`}
               >
                 Mercado
-              </button>
-              <button
-                onClick={() => setFilter('deposito')}
-                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              </Button>
+              <Button
+                onPress={() => setFilter('deposito')}
+                size='sm'
+                className={`transition-colors ${
                   filter === 'deposito'
                     ? 'bg-slate-800 text-white'
                     : 'bg-slate-200 hover:bg-slate-300'
                 }`}
               >
                 Depósito
-              </button>
-              <button
-                onClick={() => setFilter('ambos')}
-                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              </Button>
+              <Button
+                onPress={() => setFilter('ambos')}
+                size='sm'
+                className={`transition-colors ${
                   filter === 'ambos'
                     ? 'bg-slate-800 text-white'
                     : 'bg-slate-200 hover:bg-slate-300'
                 }`}
               >
                 Ambos
-              </button>
+              </Button>
             </div>
           </div>
-          <button
-            onClick={handleExcelExport}
+          <Button
+            onPress={handleExcelExport}
             disabled={isDownloading}
-            className='p-2 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed'
+            isIconOnly
+            size='sm'
+            variant='light'
+            isLoading={isDownloading}
+            isDisabled={isDownloading}
           >
-            {isDownloading ? (
-              <Loader2 className='w-4 h-4 animate-spin' />
-            ) : (
-              <Download className='w-4 h-4 text-slate-600' />
-            )}
-          </button>
+            <Download className='w-4 h-4 text-slate-600' />
+          </Button>
         </div>
         <div className='space-y-4'>
           {animatedData.length > 0 ? (
