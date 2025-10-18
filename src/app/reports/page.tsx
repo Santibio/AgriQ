@@ -4,7 +4,7 @@ import StockDistribution from './components/StockDistribution'
 import TopClientsDonut from './components/TopCustomers'
 import ProductionDashboard from './components/ProductionDashboard'
 import DiscardDashboard from './components/DiscardDashboard'
-import DiscardReasonSemiDonut from './components/DiscardReasonSemiDonut'
+import DiscardReasonDonut from './components/DiscardReasonDonut'
 import OrderStatusDonut from './components/OrderStatusDonut'
 import TopProductsDashboard from './components/TopProductsDashboard'
 
@@ -15,7 +15,7 @@ export default function UsersPage() {
         <StockDistribution />
         <ProductionDashboard />
         <DiscardDashboard />
-        <DiscardReasonSemiDonut />
+        <DiscardReasonDonut />
         <OrderStatusDonut />
         <TopProductsDashboard />
         <SimulatedSalesChart />

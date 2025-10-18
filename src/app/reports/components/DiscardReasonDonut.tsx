@@ -7,7 +7,9 @@ import {
   getDiscardReasonStats,
   DiscardReasonStat,
   TimeFilter,
-} from '../actions'
+} from '../actions/discard.action'
+import CardWithShadow from '@/components/card-with-shadow'
+import { Button } from '@heroui/react'
 
 // --- Componente Wrapper para ApexCharts ---
 // Carga la librería desde un CDN y renderiza el gráfico manualmente para evitar errores de compilación.
@@ -79,7 +81,7 @@ interface SelectedSlice {
   color: string
 }
 
-export default function DiscardReasonSemiDonut() {
+export default function DiscardReasonDonut() {
   const [data, setData] = useState<DiscardReasonStat[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -104,11 +106,6 @@ export default function DiscardReasonSemiDonut() {
     fetchData()
   }, [timeFilter])
 
-  // Calcula el total para usarlo en el JSX y en el gráfico
-  const totalDiscards = useMemo(() => {
-    return data.reduce((sum, item) => sum + item.count, 0)
-  }, [data])
-
   const { series, options } = useMemo(() => {
     const chartSeries = data.map(item => item.count)
     const chartOptions: ApexOptions = {
@@ -126,18 +123,19 @@ export default function DiscardReasonSemiDonut() {
       },
       plotOptions: {
         pie: {
-          startAngle: -90,
-          endAngle: 90,
           offsetY: 0,
           donut: {
-            size: '80%',
+            size: '75%',
             labels: {
               show: true,
-              name: { show: false },
-              value: { show: false },
               total: {
-                show: false, // Ocultamos el total del centro para dar espacio
+                show: true,
+                showAlways: true,
+                label: `Total`,
+                fontSize: '14px',
+                color: '#6b7280',
               },
+              value: { show: true },
             },
           },
         },
@@ -146,7 +144,7 @@ export default function DiscardReasonSemiDonut() {
       labels: data.map(item => item.reason),
       colors: data.map(item => item.color),
       legend: { show: false },
-      stroke: { width: 0 },
+      stroke: { width: 3 },
     }
     return { series: chartSeries, options: chartOptions }
   }, [data])
@@ -202,7 +200,7 @@ export default function DiscardReasonSemiDonut() {
       )
     }
     return (
-      <div className='grid grid-cols-1 md:grid-cols-2 items-center gap-4 mt-4'>
+      <div className='grid grid-cols-2 gap-4 mt-4 '>
         {/* Gráfico */}
         <div className='relative h-40 flex items-center justify-center cursor-pointer'>
           <ApexChart
@@ -214,20 +212,18 @@ export default function DiscardReasonSemiDonut() {
           />
         </div>
         {/* Leyenda */}
-        <div className='w-full space-y-3'>
+        <div className='w-full flex flex-col gap-2 mt-2'>
           {data.map(item => (
             <div
               key={item.reason}
               onClick={() => setSelectedSlice(item)}
               className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
-                selectedSlice?.reason === item.reason
-                  ? 'bg-slate-100 scale-105'
-                  : ''
+                selectedSlice?.reason === item.reason ? 'bg-slate-100' : ''
               }`}
             >
               <div className='flex items-center gap-3'>
                 <span
-                  className='w-3 h-3 rounded-full'
+                  className='w-1 h-5  rounded-sm'
                   style={{ backgroundColor: item.color }}
                 ></span>
                 <span className='text-slate-600 font-medium'>
@@ -243,86 +239,72 @@ export default function DiscardReasonSemiDonut() {
   }
 
   return (
-    <div className='bg-white rounded-lg shadow-md border border-slate-200'>
-      <div className='p-4 md:p-6 overflow-hidden'>
-        <div className='flex justify-between items-center mb-1'>
+    <CardWithShadow>
+      <div className='p-6'>
+        <div className='flex justify-between items-center mb-6'>
           <h3 className='text-lg font-semibold text-slate-800'>
             Motivos de Descarte
           </h3>
-          <button
-            onClick={handleCsvExport}
-            disabled={isDownloading || loading || data.length === 0}
-            className='p-2 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed'
+          <Button
+            onPress={handleCsvExport}
+            isIconOnly
+            size='sm'
+            variant='light'
+            isDisabled={isDownloading || loading || data.length === 0}
+            isLoading={isDownloading}
           >
-            {isDownloading ? (
-              <Loader2 className='w-4 h-4 animate-spin' />
-            ) : (
-              <Download className='w-4 h-4 text-slate-500' />
-            )}
-          </button>
+            <Download className='w-4 h-4 text-slate-600' />
+          </Button>
         </div>
-
-        {/* --- Sección de Total --- */}
-        <div className='my-4 p-4 bg-slate-50 rounded-lg'>
-          <p className='text-sm text-slate-600 font-medium'>
-            Total descartado en período
-          </p>
-          {loading ? (
-            <div className='h-8 w-24 bg-slate-200 rounded-md animate-pulse mt-1'></div>
-          ) : (
-            <p className='text-3xl font-bold text-red-600'>
-              {totalDiscards}{' '}
-              <span className='text-lg font-medium text-slate-500'>
-                unidades
-              </span>
-            </p>
-          )}
-        </div>
-
-        <div className='flex gap-2 mb-3 flex-wrap'>
-          <button
-            onClick={() => setTimeFilter('month')}
-            className={`px-3 py-1 text-sm rounded-md transition-colors ${
+        {/* Filtros */}
+        <div className='flex gap-2 justify-between mb-4'>
+          <Button
+            onPress={() => setTimeFilter('month')}
+            size='sm'
+            className={`transition-colors flex-1 ${
               timeFilter === 'month'
                 ? 'bg-slate-800 text-white'
-                : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                : 'bg-slate-200 hover:bg-slate-300'
             }`}
           >
             Mes
-          </button>
-          <button
-            onClick={() => setTimeFilter('quarter')}
-            className={`px-3 py-1 text-sm rounded-md transition-colors ${
+          </Button>
+          <Button
+            onPress={() => setTimeFilter('quarter')}
+            size='sm'
+            className={`transition-colors flex-1 ${
               timeFilter === 'quarter'
                 ? 'bg-slate-800 text-white'
-                : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                : 'bg-slate-200 hover:bg-slate-300'
             }`}
           >
             3 Meses
-          </button>
-          <button
-            onClick={() => setTimeFilter('half')}
-            className={`px-3 py-1 text-sm rounded-md transition-colors ${
+          </Button>
+          <Button
+            onPress={() => setTimeFilter('half')}
+            size='sm'
+            className={`pransition-colors flex-1 ${
               timeFilter === 'half'
                 ? 'bg-slate-800 text-white'
-                : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                : 'bg-slate-200 hover:bg-slate-300'
             }`}
           >
             6 Meses
-          </button>
-          <button
-            onClick={() => setTimeFilter('year')}
-            className={`px-3 py-1 text-sm rounded-md transition-colors ${
+          </Button>
+          <Button
+            onPress={() => setTimeFilter('year')}
+            size='sm'
+            className={`transition-colors flex-1 ${
               timeFilter === 'year'
                 ? 'bg-slate-800 text-white'
-                : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                : 'bg-slate-200 hover:bg-slate-300'
             }`}
           >
             Año
-          </button>
+          </Button>
         </div>
         {renderChartAndLegend()}
       </div>
-    </div>
+    </CardWithShadow>
   )
 }

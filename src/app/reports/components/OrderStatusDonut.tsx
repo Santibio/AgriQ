@@ -7,6 +7,8 @@ import {
   getOrderStatusStatsForToday,
   OrderStatusStat,
 } from '../actions/order.action'
+import CardWithShadow from '@/components/card-with-shadow'
+import { Button } from '@heroui/react'
 
 // --- Componente Wrapper para ApexCharts (reutilizado) ---
 const ApexChart = ({
@@ -96,8 +98,7 @@ export default function OrderStatusDonut() {
     fetchData()
   }, []) // Array vacío para que se ejecute solo una vez
 
-  const { totalOrders, series, options } = useMemo(() => {
-    const total = data.reduce((sum, item) => sum + item.count, 0)
+  const { series, options } = useMemo(() => {
     const chartSeries = data.map(item => item.count)
     const chartOptions: ApexOptions = {
       chart: {
@@ -122,7 +123,6 @@ export default function OrderStatusDonut() {
                 label: `Total Pedidos`,
                 fontSize: '14px',
                 color: '#6b7280',
-                formatter: () => `${total}`,
               },
               value: { show: true },
             },
@@ -133,9 +133,9 @@ export default function OrderStatusDonut() {
       labels: data.map(item => item.status),
       colors: data.map(item => item.color),
       legend: { show: false },
-      stroke: { width: 4, colors: ['#fff'] },
+      stroke: { width: 3 },
     }
-    return { totalOrders: total, series: chartSeries, options: chartOptions }
+    return { series: chartSeries, options: chartOptions }
   }, [data])
 
   const handleCsvExport = () => {
@@ -184,8 +184,8 @@ export default function OrderStatusDonut() {
       )
     }
     return (
-      <div className='grid grid-cols-1 md:grid-cols-2 items-center gap-4 mt-4'>
-        <div className='h-48 flex items-center justify-center cursor-pointer'>
+      <div className='grid grid-cols-2 gap-4 mt-4 '>
+        <div className='relative h-40 flex items-center justify-center cursor-pointer'>
           <ApexChart
             options={options}
             series={series}
@@ -200,21 +200,19 @@ export default function OrderStatusDonut() {
               key={item.status}
               onClick={() => setSelectedSlice(item)}
               className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
-                selectedSlice?.status === item.status
-                  ? 'bg-slate-100 scale-105'
-                  : ''
+                selectedSlice?.status === item.status ? 'bg-slate-100' : ''
               }`}
             >
               <div className='flex items-center gap-3'>
                 <span
-                  className='w-3 h-3 rounded-full'
+                  className='w-1 h-5  rounded-sm'
                   style={{ backgroundColor: item.color }}
                 ></span>
                 <span className='text-slate-600 font-medium'>
                   {item.status}
                 </span>
               </div>
-              <span className='font-bold text-slate-800'>{item.count}</span>
+              <span className='font-bold text-slate-800'>{item.count} u.</span>
             </div>
           ))}
         </div>
@@ -223,29 +221,28 @@ export default function OrderStatusDonut() {
   }
 
   return (
-    <div className='bg-white rounded-lg shadow-md border border-slate-200'>
-      <div className='p-4 md:p-6'>
+    <CardWithShadow>
+      <div className='p-6'>
         <div className='flex justify-between items-center mb-1'>
           <h3 className='text-lg font-semibold text-slate-800'>
             Estado de cobro de Pedidos
           </h3>
-          <button
-            onClick={handleCsvExport}
-            disabled={isDownloading || loading || data.length === 0}
-            className='p-2 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed'
+          <Button
+            onPress={handleCsvExport}
+            isIconOnly
+            size='sm'
+            variant='light'
+            isDisabled={isDownloading || loading || data.length === 0}
+            isLoading={isDownloading}
           >
-            {isDownloading ? (
-              <Loader2 className='w-4 h-4 animate-spin' />
-            ) : (
-              <Download className='w-4 h-4 text-slate-500' />
-            )}
-          </button>
+            <Download className='w-4 h-4 text-slate-600' />
+          </Button>
         </div>
         <p className='text-sm text-slate-500 mb-3'>
           Resumen de los pedidos del día.
         </p>
         {renderContent()}
       </div>
-    </div>
+    </CardWithShadow>
   )
 }
