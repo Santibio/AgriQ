@@ -62,7 +62,7 @@ export default function ProductionForm({
           response.errors._form?.[0] || 'An unexpected error occurred.'
         toast.error(errorMessage)
       } else {
-        toast.success('Lote creado correctamente')
+        toast.success(isEditing ? 'Lote editado correctamente' : 'Lote creado correctamente')
         router.push(paths.production())
       }
     } catch (error) {

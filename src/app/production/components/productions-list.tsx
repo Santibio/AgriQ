@@ -44,7 +44,7 @@ export default function ProductionsList({ productions }: ProductionsListProps) {
                       </span>
                     </div>
                     <div className='flex gap-2 justify-between items-center'>
-                      <span className='rounded-lg  text-slate-400 font-semibold'>
+                      <span className='rounded-lg  text-slate-400 font-light'>
                         {capitalize(production.product.name)}
                       </span>
                       <span className='rounded-lg  text-slate-400 font-bold text-sm'>

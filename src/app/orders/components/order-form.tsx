@@ -136,7 +136,9 @@ export default function OrderForm({
 
   const handleChangeProductForm = (value: Key | null) => {
     setProductFormData({ productId: String(value), quantity: 0 })
-    const foundProduct = availableProducts.find(b => b.productId === Number(value))
+    const foundProduct = availableProducts.find(
+      b => b.productId === Number(value),
+    )
     setSelectedProduct(
       foundProduct
         ? {
@@ -452,7 +454,8 @@ export default function OrderForm({
                 isDisabled={
                   !selectedProduct ||
                   !productFormFata.quantity ||
-                  productFormFata.quantity <= 0
+                  productFormFata.quantity <= 0 ||
+                  selectedProduct?.quantity < productFormFata.quantity
                 }
               >
                 {editingProductIndex !== null

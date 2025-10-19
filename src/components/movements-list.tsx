@@ -1,5 +1,5 @@
 import { capitalize } from '@/lib/utils'
-import {  CardBody, Chip } from '@heroui/react'
+import { CardBody, Chip } from '@heroui/react'
 import type {
   Batch,
   Discard,
@@ -38,6 +38,7 @@ interface ParsedMovement {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   color: string
   bgColor: string
+  userName: string
 }
 
 type MovementDetailWithRelations = MovementDetail & {
@@ -229,11 +230,20 @@ const movementTypeMap: MovementTypeMap = {
     },
   },
   EDITED: {
-    title: 'Edición',
+    title: 'Lote editado',
     icon: Edit,
     color: 'text-yellow-600',
     status: movementStatusMap.completed,
     bgColor: 'bg-yellow-100',
+    description: movement => {
+      const productName = `${movement?.movementDetail[0].batch.product.name}`
+      const newQuantity = movement.movementDetail[0].quantity
+      return (
+        <span>
+          {capitalize(productName)} - Nueva cantidad: {newQuantity}
+        </span>
+      )
+    },
   },
   AVAILABLE: {
     title: 'Disponible',
@@ -266,6 +276,7 @@ const parseRecentMovements = (
     const typeConfig = movementTypeMap[movementType]
 
     const description = movementTypeMap[movement.type].description?.(movement)
+    const userName = `${movement.user.name} ${movement.user.lastName}`
 
     return {
       id: movement.id,
@@ -276,6 +287,7 @@ const parseRecentMovements = (
       icon: typeConfig.icon,
       color: typeConfig.color,
       bgColor: typeConfig.bgColor,
+      userName,
     }
   })
 }
@@ -309,7 +321,9 @@ export default function MovementList({
                   </Chip>
                 </div>
                 <p className='text-sm text-gray-600'>{movement.description}</p>
-                <p className='text-xs text-gray-500 mt-1'>{movement.time}</p>
+                <p className='text-xs text-gray-500 mt-1'>
+                  {movement.time} por {movement.userName}
+                </p>
               </div>
             </div>
           </CardBody>
