@@ -7,6 +7,7 @@ import DiscardDashboard from './components/DiscardDashboard'
 import DiscardReasonDonut from './components/DiscardReasonDonut'
 import OrderStatusDonut from './components/OrderStatusDonut'
 import TopProductsDashboard from './components/TopProductsDashboard'
+import OrderCancellationDonut from './components/OrderCancellationDonut'
 
 export default function UsersPage() {
   return (
@@ -17,6 +18,7 @@ export default function UsersPage() {
         <DiscardDashboard />
         <DiscardReasonDonut />
         <OrderStatusDonut />
+        <OrderCancellationDonut />
         <TopProductsDashboard />
         <SimulatedSalesChart />
         <TopClientsDonut />

@@ -109,6 +109,14 @@ model Discard {
   movement   Movement      @relation(fields: [movementId], references: [id])
 }
 
+enum CancelReason {
+  CUSTOMER_REQUEST
+  OUT_OF_STOCK
+  ORDER_LOADED_ERROR
+  PAYMENT_EXPIRED
+  OTHERS
+}
+
 model Order {
   id                 Int           @id @default(autoincrement())
   customerId         Int
@@ -122,6 +130,7 @@ model Order {
   customer           Customer      @relation(fields: [customerId], references: [id])
   details            OrderDetail[]
   sale               Sale?
+  cancelReason       CancelReason?
 }
 
 model OrderDetail {

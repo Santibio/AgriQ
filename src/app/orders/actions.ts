@@ -4,6 +4,7 @@ import { saveImage } from '@/lib/helpers/images'
 import paths from '@/lib/paths'
 import { getCurrentUser } from '@/lib/session'
 import {
+  CancelReason,
   MovementType,
   PaymentMethod,
   StatusDoing,
@@ -606,6 +607,7 @@ export async function setOrderStatusToDelivered(
 
 export async function setOrderStatusToCancel(
   orderId: number,
+  reason: CancelReason,
 ): Promise<OrderFormState> {
   try {
     const user = await getCurrentUser()
@@ -670,6 +672,9 @@ export async function setOrderStatusToCancel(
               },
             },
           })
+          await tx.sale.delete({
+            where: { orderId: orderId },
+          })
         } else {
           await tx.batch.update({
             where: { id: detail.batchId },
@@ -691,6 +696,7 @@ export async function setOrderStatusToCancel(
         data: {
           statusPayment: StatusPayment.CANCELLED,
           statusDoing: StatusDoing.CANCELLED,
+          cancelReason: reason,
           movements: {
             connect: {
               id: movement.id,

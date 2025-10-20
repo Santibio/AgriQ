@@ -51,6 +51,7 @@ import { convertToArgentinePeso } from '@/lib/helpers/number'
 import OrderDetail from './order-detail'
 import { useLoading } from '@/providers/loading-provider'
 import { timeAgo } from '@/lib/helpers/date'
+import CancellationModal, { CancellationReason } from './cancel-order-modal'
 
 interface OrderListProps {
   list: OrderWithRelations[]
@@ -146,8 +147,8 @@ const getAvailableActions = (
   handlers: {
     handleStatusDoing: () => void
     handleStatusPedingToDeliver: () => void
-    handleStatusPedingToCancel: () => void
     handleOpenDetailOrderDrawer: () => void
+    handleOpenCancelModal: () => void
   },
 ) => {
   const actions = [
@@ -202,7 +203,7 @@ const getAvailableActions = (
       key: 'cancel',
       label: <span className='text-red-500'>Cancelar pedido</span>,
       icon: <Trash className='text-red-500' />,
-      onPress: handlers.handleStatusPedingToCancel,
+      onPress: handlers.handleOpenCancelModal,
       isVisible:
         order?.statusDoing !== StatusDoing.DELIVERED &&
         order?.statusPayment !== StatusPayment.CANCELLED,
@@ -215,6 +216,12 @@ const getAvailableActions = (
 export default function OrderList({ list }: OrderListProps) {
   const router = useRouter()
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
+  const {
+    isOpen: isCancelModalOpen,
+    onOpen: onOpenCancelModal,
+    onOpenChange: onOpenChangeCancelModal,
+  } = useDisclosure()
+
   const {
     isOpen: isOpenDetailOrderDrawer,
     onOpen: onOpenDetailOrderDrawer,
@@ -300,11 +307,11 @@ export default function OrderList({ list }: OrderListProps) {
     }
   }
 
-  const handleStatusPedingToCancel = async () => {
+  const handleStatusPedingToCancel = async (reason: CancellationReason) => {
     showLoading()
     onOpenChange()
     try {
-      const response = await setOrderStatusToCancel(selectedOrder!.id)
+      const response = await setOrderStatusToCancel(selectedOrder!.id, reason)
 
       if (response?.errors) {
         return toast.error('Ocurrió un error al procesar la solicitud.')
@@ -321,7 +328,12 @@ export default function OrderList({ list }: OrderListProps) {
       )
     } finally {
       hideLoading()
+      onOpenChangeCancelModal()
     }
+  }
+
+  const handleOpenCancelModal = () => {
+    onOpenCancelModal()
   }
 
   if (!list || list.length === 0)
@@ -363,7 +375,7 @@ export default function OrderList({ list }: OrderListProps) {
                         <span className='text-xs text-gray-500'>
                           {timeAgo(order?.createdAt)}
                         </span>
-                        {order.sale ? (
+                        {order.sale && order.sale.discount > 0 ? (
                           <div className='flex flex-col items-end'>
                             <span className='text-xs text-gray-400 line-through'>
                               {convertToArgentinePeso(order.total)}
@@ -447,8 +459,8 @@ export default function OrderList({ list }: OrderListProps) {
                     {getAvailableActions(selectedOrder!, router, {
                       handleStatusDoing,
                       handleStatusPedingToDeliver,
-                      handleStatusPedingToCancel,
                       handleOpenDetailOrderDrawer,
+                      handleOpenCancelModal,
                     }).map(action => (
                       <ListboxItem
                         key={action.key}
@@ -474,6 +486,14 @@ export default function OrderList({ list }: OrderListProps) {
             selectedOrder.sale ? selectedOrder.sale.total : selectedOrder.total
           }
           discount={selectedOrder.sale?.discount}
+        />
+      )}
+      {selectedOrder && (
+        <CancellationModal
+          isOpen={isCancelModalOpen}
+          onClose={onOpenChangeCancelModal}
+          onConfirm={handleStatusPedingToCancel}
+          orderId={selectedOrder?.id}
         />
       )}
     </>

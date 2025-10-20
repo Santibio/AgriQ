@@ -1,3 +1,5 @@
+'use client'
+
 import { Product, Batch } from '@prisma/client'
 import { CardBody, Image } from '@heroui/react'
 import { capitalize } from '@/lib/helpers/text'
@@ -6,6 +8,7 @@ import Link from 'next/link'
 import paths from '@/lib/paths'
 import { timeAgo } from '@/lib/helpers/date'
 import CardWithShadow from '@/components/card-with-shadow'
+import { useState } from 'react'
 
 interface ProductionsListProps {
   productions: ProductionWithRelations[]
@@ -16,11 +19,15 @@ type ProductionWithRelations = Batch & {
 }
 
 export default function ProductionsList({ productions }: ProductionsListProps) {
+  const [filteredProductions, setFilteredProductions] = useState(productions)
+  const [searchTerm, setSearchTerm] = useState('')
+
   if (!productions.length)
     return <EmptyListMsg text='No hay lotes disponibles.' />
+
   return (
     <ul className='flex gap-2 flex-col'>
-      {productions.map(production => (
+      {filteredProductions.map(production => (
         <li key={production.id}>
           <Link
             href={paths.productionEdit(production.id.toString())}

@@ -33,7 +33,7 @@ const settings = [
 
 export default function SettingList() {
   return (
-    <div className='max-w-md w-full mx-auto mt-2'>
+    <div className='w-full mx-auto mt-2'>
       {/* Grupo estilo iOS */}
       <CardWithShadow className='h-full'>
         <CardBody className='p-0 divide-y divide-gray-200'>
