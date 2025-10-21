@@ -2,7 +2,6 @@
 import { Button, CardBody, Chip, Link } from '@heroui/react'
 import {
   AlertTriangle,
-  ArrowDownWideNarrow,
   ArrowUpLeft,
   CheckCircle2,
   ChevronRight,

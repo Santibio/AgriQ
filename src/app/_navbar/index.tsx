@@ -1,6 +1,5 @@
 'use client'
-import config from '@/config'
-import { Button, Tab, Tabs } from '@heroui/react'
+import { Button } from '@heroui/react'
 import React from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'

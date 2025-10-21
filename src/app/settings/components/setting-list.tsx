@@ -1,6 +1,6 @@
 import { CardBody } from '@heroui/react'
 import Link from 'next/link'
-import { DollarSign, Users, User, ChevronRight, Apple } from 'lucide-react'
+import { DollarSign, Users, ChevronRight, Apple } from 'lucide-react'
 import paths from '@/lib/paths'
 import CardWithShadow from '@/components/card-with-shadow'
 
