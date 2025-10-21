@@ -22,7 +22,7 @@ const prisma = new PrismaClient()
 const NUM_ORDERS_PER_MONTH = 50
 const NUM_CANCELLED_ORDERS = 15
 // Usamos una fecha fija para que el seed sea repetible
-const SIM_TODAY = new Date('2025-10-21T18:00:00.000Z')
+const SIM_TODAY = new Date()
 
 // --- DATOS INICIALES (Usuarios, Clientes, Productos) ---
 // (Pega aquí tus arrays 'initialUsers', 'initialProducts', e 'initialCustomers')
