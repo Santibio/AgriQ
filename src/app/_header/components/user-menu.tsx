@@ -7,23 +7,23 @@ import {
   Button,
 } from "@heroui/react";
 import { useTheme } from "next-themes";
-import { LogOut, Moon, Sun } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import { logout } from "@/app/login/actions";
 import { User } from "@prisma/client";
 import CustomAvatar from "@/components/custom-avatar";
+import Link from "next/link";
+import paths from "@/lib/paths";
 
 interface UserMenuProps {
   user: User;
 }
 
 export default function UserMenu({ user }: UserMenuProps) {
-  const { theme, setTheme } = useTheme();
 
   const logoutHandler = async () => {
     await logout();
   };
-  const handleSwitchTheme = () =>
-    setTheme(theme === "light" ? "dark" : "light");
+
 
   return (
     <Dropdown placement="bottom-end">
@@ -42,18 +42,15 @@ export default function UserMenu({ user }: UserMenuProps) {
           <p className="font-semibold text-primary">{user.username}</p>
         </DropdownItem>
         <DropdownItem
-          key="theme_switcher"
+          key="setting"
           color="primary"
-          onClick={handleSwitchTheme}
+          as={Link}
+          href={paths.settings()}
           startContent={
-            theme === "light" ? (
-              <Moon className="size-4" />
-            ) : (
-              <Sun className="size-4" />
-            )
+            <Settings className="size-4" />
           }
         >
-          {` Cambiar a tema ${theme === "light" ? "oscuro" : "claro"}`}
+          Ajustes
         </DropdownItem>
         <DropdownItem
           key="logout"

@@ -14,6 +14,7 @@ import { timeAgo } from '@/lib/helpers/date'
 import { JSX, useState } from 'react'
 import { convertToArgentinePeso } from '@/lib/helpers/number'
 import SaleDetail from './sale-detail'
+import { Search } from '@/components/search'
 
 export type SaleWithRelations = Sale & {
   order: Order & {
@@ -102,21 +103,51 @@ export default function SalesList({ sales }: SalesListProps) {
     null,
   )
 
+  const [filteredList, setFilteredList] = useState(sales)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const handleSearchChange = (searchTermValue: string) => {
+    setSearchTerm(searchTermValue)
+    const lowercasedFilter = searchTermValue.toLowerCase()
+    const filtered = sales.filter(sale => {
+      const userName = sale.order.customer.name.toLowerCase()
+      const lastName = sale.order.customer.lastName.toLowerCase()
+
+      return (
+        userName.includes(lowercasedFilter) ||
+        lastName.includes(lowercasedFilter)
+      )
+    })
+    setFilteredList(filtered)
+  }
+
   const handleSelectSale = (sale: SaleWithRelations) => {
     setSelectedSale(sale)
     onOpenChange()
   }
 
-  if (sales.length === 0) {
-    return <EmptyListMsg text='No hay ventas registradas' />
-  }
-
   return (
     <>
-      <div className='space-y-3'>
-        {sales.map(sale => (
-          <SaleCard key={sale.id} sale={sale} onSelectSale={handleSelectSale} />
-        ))}
+      <div className='flex flex-col gap-2'>
+        <Search
+          placeholder='Buscar por nombre o apellido'
+          searchTerm={searchTerm}
+          handleSearchChange={handleSearchChange}
+          className='flex-1'
+        />
+        <div className='space-y-3'>
+          {filteredList.length > 0 ? (
+            filteredList.map(sale => (
+              <SaleCard
+                key={sale.id}
+                sale={sale}
+                onSelectSale={handleSelectSale}
+              />
+            ))
+          ) : (
+            <EmptyListMsg text='No hay ventas disponibles.' />
+          )}
+        </div>
       </div>
       <SaleDetail
         sale={selectedSale}

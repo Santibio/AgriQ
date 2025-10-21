@@ -1,6 +1,8 @@
+'use client'
 import { Button, CardBody, Chip, Link } from '@heroui/react'
 import {
   AlertTriangle,
+  ArrowDownWideNarrow,
   ArrowUpLeft,
   CheckCircle2,
   ChevronRight,
@@ -17,12 +19,13 @@ import {
   Location,
 } from '@prisma/client'
 import paths from '@/lib/paths'
-import { JSX } from 'react'
+import { JSX, useState } from 'react'
 import { capitalize } from '@/lib/utils'
 import EmptyListMsg from '@/components/empty-list'
 import { timeAgo } from '@/lib/helpers/date'
 import CardWithShadow from '@/components/card-with-shadow'
 import { Color } from '@/lib/schemas/general'
+import { Search } from '@/components/search'
 
 // --- Tipos y Mapeos (Mejorados para más claridad) ---
 
@@ -103,129 +106,155 @@ const destinationMap: Record<Location, string> = {
 // --- Componente Principal ---
 
 export default function ShipmentsList({ list }: ShipmentsListProps) {
+  const [filteredList, setFilteredList] = useState(list)
+  const [searchTerm, setSearchTerm] = useState('')
+
   // Límite de productos a mostrar antes de agrupar
   const MAX_PRODUCTS_VISIBLE = 3
 
-  if (!list || list.length === 0) {
-    return <EmptyListMsg text='No hay envíos para mostrar' />
+  const handleSearchChange = (searchTermValue: string) => {
+    setSearchTerm(searchTermValue)
+    const lowercasedFilter = searchTermValue.toLowerCase()
+    const filtered = list.filter(shipment => {
+      const lotNumber = shipment.id.toString()
+
+      return lotNumber.includes(lowercasedFilter)
+    })
+    setFilteredList(filtered)
   }
 
   return (
     <div className='flex flex-col gap-2'>
-      <Button
-        as={Link}
-        color='primary'
-        size='sm'
-        endContent={<ChevronRight className='h-4 w-4' />}
-        variant='flat'
-        href={paths.shipmentReception()}
-        className='mt-[-12px]'
-      >
-        Recepcionar envíos
-      </Button>
+      <div className='flex flex-col gap-2'>
+        <div className='flex gap-2'>
+          <Search
+            placeholder='Buscar por número de envío'
+            searchTerm={searchTerm}
+            handleSearchChange={handleSearchChange}
+            className='flex-1'
+          />
+          {/* <Button isIconOnly color='primary' size='md' variant='flat' disabled>
+            <ArrowDownWideNarrow className='h-5 w-4 ' color='blue' />
+          </Button> */}
+        </div>
+        <Button
+          as={Link}
+          color='primary'
+          size='sm'
+          endContent={<ChevronRight className='h-4 w-4' />}
+          variant='flat'
+          href={paths.shipmentReception()}
+        >
+          Recepcionar envíos
+        </Button>
+      </div>
 
       <ul className='flex flex-col gap-4'>
-        {list.map(shipment => {
-          const statusInfo = STATUS_MAP[shipment.status]
-          const products = shipment.movement.movementDetail
-          const visibleProducts = products.slice(0, MAX_PRODUCTS_VISIBLE)
-          const hiddenProductsCount = products.length - visibleProducts.length
+        {filteredList.length ? (
+          filteredList.map(shipment => {
+            const statusInfo = STATUS_MAP[shipment.status]
+            const products = shipment.movement.movementDetail
+            const visibleProducts = products.slice(0, MAX_PRODUCTS_VISIBLE)
+            const hiddenProductsCount = products.length - visibleProducts.length
 
-          return (
-            <li key={shipment.id}>
-              <Link
-                href={paths.shipmentEdit(shipment.id.toString())}
-                className='w-full'
-              >
-                <CardWithShadow isPressable>
-                  {/* Usamos flex-col para estructurar la tarjeta en secciones verticales */}
-                  <CardBody className='flex flex-col gap-4 p-4'>
-                    {/* === SECCIÓN 1: ENCABEZADO (ID y ESTADO) === */}
-                    <div className='flex items-start justify-between'>
+            return (
+              <li key={shipment.id}>
+                <Link
+                  href={paths.shipmentEdit(shipment.id.toString())}
+                  className='w-full'
+                >
+                  <CardWithShadow isPressable>
+                    {/* Usamos flex-col para estructurar la tarjeta en secciones verticales */}
+                    <CardBody className='flex flex-col gap-4 p-4'>
+                      {/* === SECCIÓN 1: ENCABEZADO (ID y ESTADO) === */}
+                      <div className='flex items-start justify-between'>
+                        <div>
+                          <h3 className='text-lg font-bold text-slate-800'>{`Envío #${shipment.id}`}</h3>
+                          <p className='text-xs text-slate-500'>
+                            {timeAgo(shipment?.createdAt)}
+                          </p>
+                        </div>
+                        <Chip
+                          color={statusInfo.color}
+                          variant='solid'
+                          size='sm'
+                          startContent={statusInfo.icon}
+                        >
+                          {statusInfo.label}
+                        </Chip>
+                      </div>
+
+                      {/* === SECCIÓN 2: RUTA (ORIGEN Y DESTINO) - LAYOUT HORIZONTAL === */}
+                      <div className='flex w-full items-center justify-between gap-2 rounded-lg bg-slate-50 p-3 sm:gap-4'>
+                        {/* --- Origen --- */}
+                        <div className='flex-1'>
+                          <p className='truncate text-xs text-slate-500'>
+                            Origen
+                          </p>
+                          <p className='truncate font-medium text-slate-700'>
+                            {destinationMap[shipment.origin]}
+                          </p>
+                        </div>
+
+                        {/* --- Conector Visual --- */}
+                        <div className='flex-shrink-0 rounded-full bg-white p-2 shadow-sm'>
+                          <MoveRight className='h-5 w-5 text-slate-500' />
+                        </div>
+
+                        {/* --- Destino --- */}
+                        <div className='flex-1 text-right'>
+                          <p className='truncate text-xs text-slate-500'>
+                            Destino
+                          </p>
+                          <p className='truncate font-medium text-slate-700'>
+                            {destinationMap[shipment.destination]}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* === SECCIÓN 3: PRODUCTOS (LISTA INTELIGENTE) === */}
                       <div>
-                        <h3 className='text-lg font-bold text-slate-800'>{`Envío #${shipment.id}`}</h3>
-                        <p className='text-xs text-slate-500'>
-                          {timeAgo(shipment?.createdAt)}
-                        </p>
-                      </div>
-                      <Chip
-                        color={statusInfo.color}
-                        variant='solid'
-                        size='sm'
-                        startContent={statusInfo.icon}
-                      >
-                        {statusInfo.label}
-                      </Chip>
-                    </div>
-
-                    {/* === SECCIÓN 2: RUTA (ORIGEN Y DESTINO) - LAYOUT HORIZONTAL === */}
-                    <div className='flex w-full items-center justify-between gap-2 rounded-lg bg-slate-50 p-3 sm:gap-4'>
-                      {/* --- Origen --- */}
-                      <div className='flex-1'>
-                        <p className='truncate text-xs text-slate-500'>
-                          Origen
-                        </p>
-                        <p className='truncate font-medium text-slate-700'>
-                          {destinationMap[shipment.origin]}
-                        </p>
-                      </div>
-
-                      {/* --- Conector Visual --- */}
-                      <div className='flex-shrink-0 rounded-full bg-white p-2 shadow-sm'>
-                        <MoveRight className='h-5 w-5 text-slate-500' />
-                      </div>
-
-                      {/* --- Destino --- */}
-                      <div className='flex-1 text-right'>
-                        <p className='truncate text-xs text-slate-500'>
-                          Destino
-                        </p>
-                        <p className='truncate font-medium text-slate-700'>
-                          {destinationMap[shipment.destination]}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* === SECCIÓN 3: PRODUCTOS (LISTA INTELIGENTE) === */}
-                    <div>
-                      <div className='mb-2 flex items-center gap-2'>
-                        <Package className='h-4 w-4 text-slate-500' />
-                        <h4 className='text-sm font-semibold text-slate-600'>
-                          Productos
-                        </h4>
-                      </div>
-                      <div className='flex flex-wrap gap-2'>
-                        {visibleProducts.map(detail => {
-                          const product = detail.batch.product
-                          // Asigna color por tipo o un color por defecto si no se encuentra
-                          const chipStyle =
-                            typeColors[product.type] || defaultTypeColor
-                          return (
-                            <Chip
-                              key={detail.id}
-                              color={chipStyle.color}
-                              variant={chipStyle.variant}
-                              size={chipStyle.size}
-                            >
-                              {`${capitalize(product.name)} x${
-                                detail.quantity
-                              }`}
+                        <div className='mb-2 flex items-center gap-2'>
+                          <Package className='h-4 w-4 text-slate-500' />
+                          <h4 className='text-sm font-semibold text-slate-600'>
+                            Productos
+                          </h4>
+                        </div>
+                        <div className='flex flex-wrap gap-2'>
+                          {visibleProducts.map(detail => {
+                            const product = detail.batch.product
+                            // Asigna color por tipo o un color por defecto si no se encuentra
+                            const chipStyle =
+                              typeColors[product.type] || defaultTypeColor
+                            return (
+                              <Chip
+                                key={detail.id}
+                                color={chipStyle.color}
+                                variant={chipStyle.variant}
+                                size={chipStyle.size}
+                              >
+                                {`${capitalize(product.name)} x${
+                                  detail.quantity
+                                }`}
+                              </Chip>
+                            )
+                          })}
+                          {hiddenProductsCount > 0 && (
+                            <Chip size='sm' color='default' variant='flat'>
+                              +{hiddenProductsCount} más...
                             </Chip>
-                          )
-                        })}
-                        {hiddenProductsCount > 0 && (
-                          <Chip size='sm' color='default' variant='flat'>
-                            +{hiddenProductsCount} más...
-                          </Chip>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </CardBody>
-                </CardWithShadow>
-              </Link>
-            </li>
-          )
-        })}
+                    </CardBody>
+                  </CardWithShadow>
+                </Link>
+              </li>
+            )
+          })
+        ) : (
+          <EmptyListMsg text='No hay envíos para mostrar' />
+        )}
       </ul>
     </div>
   )

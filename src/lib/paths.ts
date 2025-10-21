@@ -89,6 +89,12 @@ const paths = {
   profile() {
     return `settings/profile`
   },
+  settings() {
+    return `settings`
+  },
+  reports() {
+    return `reports`
+  },
 }
 
 export default paths

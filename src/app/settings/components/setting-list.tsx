@@ -22,13 +22,7 @@ const settings = [
     href: paths.users(),
     icon: Users,
     color: 'text-blue-500',
-  },
-  {
-    label: 'Perfil',
-    href: paths.profile(),
-    icon: User,
-    color: 'text-purple-500',
-  },
+  }
 ]
 
 export default function SettingList() {

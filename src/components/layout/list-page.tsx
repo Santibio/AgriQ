@@ -1,17 +1,7 @@
 'use client'
 import { ReactNode } from 'react'
 import PageTitle from '../page-title'
-import {
-  Button,
-  Drawer,
-  DrawerBody,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  ScrollShadow,
-  useDisclosure,
-} from '@heroui/react'
-import { ArrowDownWideNarrow } from 'lucide-react'
+import { ScrollShadow } from '@heroui/react'
 
 interface ListPageProps {
   children: ReactNode
@@ -20,64 +10,16 @@ interface ListPageProps {
   hasFilter?: boolean
 }
 
-export default function ListPage({
-  title,
-  actions,
-  children,
-  hasFilter = false,
-}: ListPageProps) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure()
-
+export default function ListPage({ title, actions, children }: ListPageProps) {
   return (
-    <>
-      <section className='flex flex-col h-[calc(100vh-150px)]  relative gap-2'>
-        <div className='flex items-center justify-between px-4'>
-          <PageTitle>{title}</PageTitle>
-          {hasFilter && (
-            <Button
-              isIconOnly
-              color='primary'
-              size='sm'
-              variant='flat'
-              onPress={onOpen}
-              disabled
-            >
-              <ArrowDownWideNarrow className='h-4 w-4 ' color='blue' />
-            </Button>
-          )}
-        </div>
-        <ScrollShadow className='p-4 flex-1' hideScrollBar>
-          {children}
-        </ScrollShadow>
-        <div className='px-4'>{actions}</div>
-      </section>
-      <Drawer
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        backdrop='blur'
-        placement='bottom'
-      >
-        <DrawerContent>
-          {onClose => (
-            <>
-              <DrawerHeader className='flex flex-col gap-1'>
-                Filtros y ordernamiento
-              </DrawerHeader>
-              <DrawerBody>
-                <p>En trabajo...</p>
-              </DrawerBody>
-              <DrawerFooter>
-                <Button color='danger' variant='light' onPress={onClose}>
-                  Close
-                </Button>
-                <Button color='primary' onPress={onClose}>
-                  Action
-                </Button>
-              </DrawerFooter>
-            </>
-          )}
-        </DrawerContent>
-      </Drawer>
-    </>
+    <section className='flex flex-col   relative gap-2'>
+      <div className='flex items-center justify-between px-4 '>
+        <PageTitle>{title}</PageTitle>
+        <div>{actions}</div>
+      </div>
+      <ScrollShadow className='p-4 flex-1 pb-20' hideScrollBar>
+        {children}
+      </ScrollShadow>
+    </section>
   )
 }

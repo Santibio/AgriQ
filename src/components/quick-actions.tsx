@@ -1,5 +1,6 @@
 import { CardBody } from '@heroui/react'
 import {
+  BarChart3,
   CircleUser,
   DollarSign,
   Package,
@@ -62,13 +63,21 @@ const quickActions = [
     gradient: 'from-blue-400 to-blue-600',
     link: paths.sales(),
   },
+  {
+    title: 'Reportes',
+    description: 'Gestión de reportes',
+    icon: BarChart3,
+    color: 'bg-pink-500',
+    gradient: 'from-pink-400 to-pink-600',
+    link: paths.reports(),
+  }
 ]
 
 const QuickActions = () => {
   return (
     <div className='space-y-4'>
       <h3 className='text-lg font-semibold text-gray-900'>Acciones Rápidas</h3>
-      <div className='grid grid-cols-2 gap-4'>
+      <div className="grid grid-cols-2 gap-4 grid-flow-row [&>*:last-child:nth-child(odd)]:col-span-2">
         {quickActions.map((action, index) => (
           <Link href={action.link || '#'} key={index}>
             <CardWithShadow key={index} isPressable>

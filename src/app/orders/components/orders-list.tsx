@@ -52,6 +52,7 @@ import OrderDetail from './order-detail'
 import { useLoading } from '@/providers/loading-provider'
 import { timeAgo } from '@/lib/helpers/date'
 import CancellationModal, { CancellationReason } from './cancel-order-modal'
+import { Search } from '@/components/search'
 
 interface OrderListProps {
   list: OrderWithRelations[]
@@ -244,6 +245,26 @@ export default function OrderList({ list }: OrderListProps) {
     }>
   >([])
 
+  const [filteredList, setFilteredList] = useState(list)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const handleSearchChange = (searchTermValue: string) => {
+    setSearchTerm(searchTermValue)
+    const lowercasedFilter = searchTermValue.toLowerCase()
+    const filtered = list.filter(order => {
+      const lotNumber = order.id.toString()
+      const customerName = order.customer.name.toLowerCase()
+      const customerLastName = order.customer.lastName.toLowerCase()
+
+      return (
+        lotNumber.includes(lowercasedFilter) ||
+        customerName.includes(lowercasedFilter) ||
+        customerLastName.includes(lowercasedFilter)
+      )
+    })
+    setFilteredList(filtered)
+  }
+
   const handleOpenDetailOrderDrawer = () => {
     onOpenDetailOrderDrawer()
     onOpenChange()
@@ -336,108 +357,125 @@ export default function OrderList({ list }: OrderListProps) {
     onOpenCancelModal()
   }
 
-  if (!list || list.length === 0)
-    return <EmptyListMsg text='No hay envíos pendientes' />
-
   return (
     <>
-      <ul className='flex gap-2 flex-col  w-full'>
-        {list.map(order => {
-          const statusDoingKey = order.statusDoing
-          return (
-            <li key={order.id}>
-              <Card
-                isPressable
-                onPress={() => handleSelectOrder(order)}
-                className='w-full p-4 border'
-                shadow='sm'
-              >
-                <div className='flex gap-4 items-start'>
-                  {/* Icono con fondo gradiente */}
-                  <div
-                    className={`w-14 h-14 min-w-[3.5rem] rounded-lg bg-gradient-to-r ${STATUS_MAP?.[statusDoingKey]?.gradient} flex items-center justify-center text-white text-xl shadow-sm`}
-                  >
-                    {STATUS_MAP[statusDoingKey]?.icon}
-                  </div>
+      <div className='flex flex-col gap-2'>
+        <Search
+          placeholder='Buscar por número de envío o nombre cliente'
+          searchTerm={searchTerm}
+          handleSearchChange={handleSearchChange}
+          className='flex-1'
+        />
 
-                  {/* Contenido */}
-                  <div className='flex-1'>
-                    <div className='flex justify-between items-start'>
-                      <div className='flex items-start flex-col'>
-                        <span className='font-semibold text-medium'>
-                          Pedido #{order.id}
-                        </span>
-                        <span className='text-sm text-gray-600'>
-                          {`${order.customer.name} ${order.customer.lastName}`}
-                        </span>
+        <ul className='flex gap-2 flex-col  w-full'>
+          {filteredList.length ? (
+            filteredList.map(order => {
+              const statusDoingKey = order.statusDoing
+              return (
+                <li key={order.id}>
+                  <Card
+                    isPressable
+                    onPress={() => handleSelectOrder(order)}
+                    className='w-full p-4 border'
+                    shadow='sm'
+                  >
+                    <div className='flex gap-4 items-start'>
+                      {/* Icono con fondo gradiente */}
+                      <div
+                        className={`w-14 h-14 min-w-[3.5rem] rounded-lg bg-gradient-to-r ${STATUS_MAP?.[statusDoingKey]?.gradient} flex items-center justify-center text-white text-xl shadow-sm`}
+                      >
+                        {STATUS_MAP[statusDoingKey]?.icon}
                       </div>
-                      <div className='flex items-end flex-col'>
-                        <span className='text-xs text-gray-500'>
-                          {timeAgo(order?.createdAt)}
-                        </span>
-                        {order.sale && order.sale.discount > 0 ? (
-                          <div className='flex flex-col items-end'>
-                            <span className='text-xs text-gray-400 line-through'>
-                              {convertToArgentinePeso(order.total)}
+
+                      {/* Contenido */}
+                      <div className='flex-1'>
+                        <div className='flex justify-between items-start'>
+                          <div className='flex items-start flex-col'>
+                            <span className='font-semibold text-medium'>
+                              Pedido #{order.id}
                             </span>
-                            <span className='text-sm font-semibold text-success'>
-                              {convertToArgentinePeso(order.sale.total)}
+                            <span className='text-sm text-gray-600'>
+                              {`${order.customer.name} ${order.customer.lastName}`}
                             </span>
                           </div>
-                        ) : (
-                          <span className='text-sm font-semibold text-gray-900'>
-                            {convertToArgentinePeso(order.total)}
-                          </span>
-                        )}
+                          <div className='flex items-end flex-col'>
+                            <span className='text-xs text-gray-500'>
+                              {timeAgo(order?.createdAt)}
+                            </span>
+                            {order.sale && order.sale.discount > 0 ? (
+                              <div className='flex flex-col items-end'>
+                                <span className='text-xs text-gray-400 line-through'>
+                                  {convertToArgentinePeso(order.total)}
+                                </span>
+                                <span className='text-sm font-semibold text-success'>
+                                  {convertToArgentinePeso(order.sale.total)}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className='text-sm font-semibold text-gray-900'>
+                                {convertToArgentinePeso(order.total)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className='flex justify-between mt-2 items-end'>
+                          <div className='flex flex-col gap-2'>
+                            <span
+                              className={`${STATUS_MAP?.[statusDoingKey]?.color} text-xs font-semibold text-start`}
+                            >
+                              {STATUS_MAP?.[statusDoingKey]?.label}
+                            </span>
+                            <Chip
+                              size='sm'
+                              radius='sm'
+                              variant='flat'
+                              startContent={
+                                STATUS_PAYMENT_MAP?.[order?.statusPayment]?.icon
+                              }
+                              className={
+                                STATUS_PAYMENT_MAP?.[order?.statusPayment]
+                                  ?.className
+                              }
+                            >
+                              {
+                                STATUS_PAYMENT_MAP?.[order?.statusPayment]
+                                  ?.label
+                              }
+                            </Chip>
+                          </div>
+                          <div className='text-right'>
+                            <p className='text-xs text-gray-500'>
+                              {order.totalProducts}{' '}
+                              {order.totalProducts === 1
+                                ? 'producto'
+                                : 'productos'}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className='flex justify-between mt-2 items-end'>
-                      <div className='flex flex-col gap-2'>
-                        <span
-                          className={`${STATUS_MAP?.[statusDoingKey]?.color} text-xs font-semibold text-start`}
-                        >
-                          {STATUS_MAP?.[statusDoingKey]?.label}
-                        </span>
-                        <Chip
-                          size='sm'
-                          radius='sm'
-                          variant='flat'
-                          startContent={
-                            STATUS_PAYMENT_MAP?.[order?.statusPayment]?.icon
-                          }
-                          className={
-                            STATUS_PAYMENT_MAP?.[order?.statusPayment]
-                              ?.className
-                          }
-                        >
-                          {STATUS_PAYMENT_MAP?.[order?.statusPayment]?.label}
-                        </Chip>
-                      </div>
-                      <div className='text-right'>
-                        <p className='text-xs text-gray-500'>
-                          {order.totalProducts}{' '}
-                          {order.totalProducts === 1 ? 'producto' : 'productos'}
-                        </p>
+                    {/* Progress Indicator */}
+                    <div className='py-2 mt-4'>
+                      <div className='w-full bg-gray-200 rounded-full h-1.5'>
+                        <div
+                          className={`h-1.5 rounded-full bg-gradient-to-r ${STATUS_MAP?.[statusDoingKey]?.gradient} transition-all duration-500`}
+                          style={{
+                            width:
+                              STATUS_MAP?.[statusDoingKey]?.progress || '0%',
+                          }}
+                        />
                       </div>
                     </div>
-                  </div>
-                </div>
-                {/* Progress Indicator */}
-                <div className='py-2 mt-4'>
-                  <div className='w-full bg-gray-200 rounded-full h-1.5'>
-                    <div
-                      className={`h-1.5 rounded-full bg-gradient-to-r ${STATUS_MAP?.[statusDoingKey]?.gradient} transition-all duration-500`}
-                      style={{
-                        width: STATUS_MAP?.[statusDoingKey]?.progress || '0%',
-                      }}
-                    />
-                  </div>
-                </div>
-              </Card>
-            </li>
-          )
-        })}
-      </ul>
+                  </Card>
+                </li>
+              )
+            })
+          ) : (
+            <EmptyListMsg text='No hay envíos pendientes' />
+          )}
+        </ul>
+      </div>
+
       <Drawer
         isOpen={isOpen}
         onOpenChange={onOpenChange}

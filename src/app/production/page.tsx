@@ -12,6 +12,7 @@ export default async function ProductionPage() {
     orderBy: {
       createdAt: "desc",
     },
+    take: 100,
   });
   return (
     <ListPage

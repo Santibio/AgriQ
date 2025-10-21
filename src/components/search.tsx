@@ -3,26 +3,27 @@ import { SearchIcon } from 'lucide-react'
 
 interface SearchProps {
   searchTerm: string
-  setSearchTerm: (searchTerm: string) => void
+  handleSearchChange: (searchTerm: string) => void
   placeholder?: string
   label?: string
+  className?: string
 }
 
 export function Search({
   searchTerm,
-  setSearchTerm,
   placeholder,
   label,
+  handleSearchChange,
+  className,
 }: SearchProps) {
   return (
-    <div>
-      <Input
-        label={label}
-        placeholder={placeholder}
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
-        startContent={<SearchIcon size={18} />}
-      />
-    </div>
+    <Input
+      label={label}
+      placeholder={placeholder}
+      value={searchTerm}
+      onChange={e => handleSearchChange(e.target.value)}
+      startContent={<SearchIcon size={18} />}
+      className={className}
+    />
   )
 }
