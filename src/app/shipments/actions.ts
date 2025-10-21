@@ -35,64 +35,69 @@ export async function createShipment(
       }
     }
 
-    await db.$transaction(async tx => {
-      // 1. Crear el movimiento de tipo SENT
-      const movement = await tx.movement.create({
-        data: {
-          type: isOriginDeposit ? MovementType.SENT : MovementType.RETURNED,
-          userId: user.id,
-        },
-      })
-
-      await tx.shipment.create({
-        data: {
-          movementId: movement.id,
-          status: isOriginDeposit
-            ? ShipmentStatus.PENDING
-            : ShipmentStatus.RETURNED,
-          origin: isOriginDeposit ? Location.DEPOSIT : Location.MARKET,
-          destination: isOriginDeposit ? Location.MARKET : Location.DEPOSIT,
-        },
-      })
-
-      // 2. Crear los detalles y actualizar los lotes
-      for (const item of formData) {
-        const { batchId, quantity, discrepancyQuantity } = item
-        await tx.movementDetail.create({
+    await db.$transaction(
+      async tx => {
+        // 1. Crear el movimiento de tipo SENT
+        const movement = await tx.movement.create({
           data: {
-            movementId: movement.id,
-            batchId,
-            quantity,
+            type: isOriginDeposit ? MovementType.SENT : MovementType.RETURNED,
+            userId: user.id,
           },
         })
-        if (isOriginDeposit) {
-          await tx.batch.update({
-            where: { id: batchId },
+
+        await tx.shipment.create({
+          data: {
+            movementId: movement.id,
+            status: isOriginDeposit
+              ? ShipmentStatus.PENDING
+              : ShipmentStatus.RETURNED,
+            origin: isOriginDeposit ? Location.DEPOSIT : Location.MARKET,
+            destination: isOriginDeposit ? Location.MARKET : Location.DEPOSIT,
+          },
+        })
+
+        // 2. Crear los detalles y actualizar los lotes
+        for (const item of formData) {
+          const { batchId, quantity, discrepancyQuantity } = item
+          await tx.movementDetail.create({
             data: {
-              depositQuantity: {
-                decrement: quantity,
-              },
-              sentQuantity: {
-                increment: quantity,
-              },
+              movementId: movement.id,
+              batchId,
+              quantity,
             },
           })
-        } else {
-          await tx.batch.update({
-            where: { id: batchId },
-            data: {
-              marketQuantity: 0,
-              depositQuantity: {
-                increment: quantity,
+          if (isOriginDeposit) {
+            await tx.batch.update({
+              where: { id: batchId },
+              data: {
+                depositQuantity: {
+                  decrement: quantity,
+                },
+                sentQuantity: {
+                  increment: quantity,
+                },
               },
-              discrepancyQuantity: {
-                increment: discrepancyQuantity,
+            })
+          } else {
+            await tx.batch.update({
+              where: { id: batchId },
+              data: {
+                marketQuantity: 0,
+                depositQuantity: {
+                  increment: quantity,
+                },
+                discrepancyQuantity: {
+                  increment: discrepancyQuantity,
+                },
               },
-            },
-          })
+            })
+          }
         }
-      }
-    })
+      },
+      {
+        timeout: 15000, // 15s
+      },
+    )
 
     revalidatePath(paths.shipments())
     return { errors: false }
@@ -127,52 +132,57 @@ export async function editShipment(
       }
     }
 
-    await db.$transaction(async tx => {
-      // 1. Recupera los detalles previos
-      const prevDetails = await tx.movementDetail.findMany({
-        where: { movementId },
-      })
-      // 2. Restaura el stock de los lotes anteriores
-      for (const detail of prevDetails) {
-        await tx.batch.update({
-          where: { id: detail.batchId },
-          data: {
-            depositQuantity: {
-              increment: detail.quantity,
-            },
-            sentQuantity: {
-              decrement: detail.quantity,
-            },
-          },
+    await db.$transaction(
+      async tx => {
+        // 1. Recupera los detalles previos
+        const prevDetails = await tx.movementDetail.findMany({
+          where: { movementId },
         })
-      }
-      // 3. Elimina los detalles previos
-      await tx.movementDetail.deleteMany({
-        where: { movementId },
-      })
-      // 4. Crea los nuevos detalles y descuenta el stock
-      for (const item of formData) {
-        const { batchId, quantity } = item
-        await tx.movementDetail.create({
-          data: {
-            movementId,
-            batchId,
-            quantity,
-          },
-        })
-        await tx.batch.update({
-          where: { id: batchId },
-          data: {
-            depositQuantity: {
-              decrement: quantity,
+        // 2. Restaura el stock de los lotes anteriores
+        for (const detail of prevDetails) {
+          await tx.batch.update({
+            where: { id: detail.batchId },
+            data: {
+              depositQuantity: {
+                increment: detail.quantity,
+              },
+              sentQuantity: {
+                decrement: detail.quantity,
+              },
             },
-            sentQuantity: {
-              increment: quantity,
-            },
-          },
+          })
+        }
+        // 3. Elimina los detalles previos
+        await tx.movementDetail.deleteMany({
+          where: { movementId },
         })
-      }
-    })
+        // 4. Crea los nuevos detalles y descuenta el stock
+        for (const item of formData) {
+          const { batchId, quantity } = item
+          await tx.movementDetail.create({
+            data: {
+              movementId,
+              batchId,
+              quantity,
+            },
+          })
+          await tx.batch.update({
+            where: { id: batchId },
+            data: {
+              depositQuantity: {
+                decrement: quantity,
+              },
+              sentQuantity: {
+                increment: quantity,
+              },
+            },
+          })
+        }
+      },
+      {
+        timeout: 15000,
+      },
+    )
 
     revalidatePath(paths.shipments())
     return { errors: false }

@@ -60,6 +60,8 @@ export default function ShipmentForm({
   const router = useRouter()
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
+  const [isLoading, setIsLoading] = useState(false)
+
   // Estado para lotes seleccionados y cantidades
   const [selected, setSelected] = useState<{ [batchId: number]: boolean }>(() =>
     Object.fromEntries(batchs.map(b => [b.id, !b.filtered])),
@@ -112,6 +114,7 @@ export default function ShipmentForm({
   }
 
   const handleSave = async () => {
+    setIsLoading(true)
     const selectedBatches = batchs.filter(b => selected[b.id])
     const formData = selectedBatches.map(b => ({
       batchId: b.id,
@@ -135,6 +138,8 @@ export default function ShipmentForm({
     } catch (error) {
       console.error('Error al enviar los lotes:', error)
       toast.error('Ocurrió un error al procesar la solicitud.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -269,6 +274,7 @@ export default function ShipmentForm({
             className='mt-auto w-full'
             color='primary'
             isDisabled={isOriginDeposit ? hasError : false}
+            isLoading={isLoading}
           >
             {isEditing ? 'Editar Envío' : 'Crear Envío'}
           </Button>

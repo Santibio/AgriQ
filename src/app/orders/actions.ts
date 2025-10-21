@@ -43,107 +43,112 @@ export async function createOrder(formData: FormData): Promise<OrderFormState> {
       }
     }
 
-    await db.$transaction(async tx => {
-      // 1. Crear el movimiento de tipo ORDERED
-      const movement = await tx.movement.create({
-        data: {
-          type: MovementType.ORDERED,
-          userId: user.id,
-        },
-      })
-
-      // 2. Calcular el total de la orden
-      let orderTotal = 0
-      const orderDetails: {
-        productName: string
-        quantity: number
-        price: number
-      }[] = []
-
-      // 3. Para cada producto, aplicar FIFO en lotes
-      for (const product of formData.products) {
-        let remainingQty = product.quantity
-
-        // Buscar lotes disponibles del producto ordenados por fecha de ingreso (FIFO)
-        const batches = await tx.batch.findMany({
-          where: {
-            productId: product.productId,
-            marketQuantity: {
-              gt: 0,
-            },
-          },
-          orderBy: {
-            createdAt: 'asc', // FIFO
+    await db.$transaction(
+      async tx => {
+        // 1. Crear el movimiento de tipo ORDERED
+        const movement = await tx.movement.create({
+          data: {
+            type: MovementType.ORDERED,
+            userId: user.id,
           },
         })
 
-        // Verificar stock total disponible
-        const totalAvailable = batches.reduce(
-          (sum, batch) => sum + batch.marketQuantity,
-          0,
-        )
-        if (totalAvailable < product.quantity) {
-          throw new Error(`Stock insuficiente para ${product.productName}`)
-        }
+        // 2. Calcular el total de la orden
+        let orderTotal = 0
+        const orderDetails: {
+          productName: string
+          quantity: number
+          price: number
+        }[] = []
 
-        // Agregar a detalles de orden
-        orderDetails.push({
-          productName: product.productName,
-          quantity: product.quantity,
-          price: product.price,
-        })
-        orderTotal += product.quantity * product.price
+        // 3. Para cada producto, aplicar FIFO en lotes
+        for (const product of formData.products) {
+          let remainingQty = product.quantity
 
-        // Asignar cantidades a los lotes (FIFO)
-        for (const batch of batches) {
-          if (remainingQty <= 0) break
-
-          const qtyToTake = Math.min(batch.marketQuantity, remainingQty)
-
-          // Crear detalle de movimiento para este lote
-          await tx.movementDetail.create({
-            data: {
-              movementId: movement.id,
-              batchId: batch.id,
-              quantity: qtyToTake,
-            },
-          })
-
-          // Actualizar lote
-          await tx.batch.update({
-            where: { id: batch.id },
-            data: {
+          // Buscar lotes disponibles del producto ordenados por fecha de ingreso (FIFO)
+          const batches = await tx.batch.findMany({
+            where: {
+              productId: product.productId,
               marketQuantity: {
-                decrement: qtyToTake,
+                gt: 0,
               },
-              reservedQuantity: {
-                increment: qtyToTake,
-              },
+            },
+            orderBy: {
+              createdAt: 'asc', // FIFO
             },
           })
 
-          remainingQty -= qtyToTake
-        }
-      }
+          // Verificar stock total disponible
+          const totalAvailable = batches.reduce(
+            (sum, batch) => sum + batch.marketQuantity,
+            0,
+          )
+          if (totalAvailable < product.quantity) {
+            throw new Error(`Stock insuficiente para ${product.productName}`)
+          }
 
-      // 4. Crear la orden con sus detalles
-      await tx.order.create({
-        data: {
-          customerId: formData.customerId,
-          statusDoing: StatusDoing.PENDING,
-          statusPayment: StatusPayment.UNPAID,
-          total: orderTotal,
-          movements: {
-            connect: {
-              id: movement.id,
+          // Agregar a detalles de orden
+          orderDetails.push({
+            productName: product.productName,
+            quantity: product.quantity,
+            price: product.price,
+          })
+          orderTotal += product.quantity * product.price
+
+          // Asignar cantidades a los lotes (FIFO)
+          for (const batch of batches) {
+            if (remainingQty <= 0) break
+
+            const qtyToTake = Math.min(batch.marketQuantity, remainingQty)
+
+            // Crear detalle de movimiento para este lote
+            await tx.movementDetail.create({
+              data: {
+                movementId: movement.id,
+                batchId: batch.id,
+                quantity: qtyToTake,
+              },
+            })
+
+            // Actualizar lote
+            await tx.batch.update({
+              where: { id: batch.id },
+              data: {
+                marketQuantity: {
+                  decrement: qtyToTake,
+                },
+                reservedQuantity: {
+                  increment: qtyToTake,
+                },
+              },
+            })
+
+            remainingQty -= qtyToTake
+          }
+        }
+
+        // 4. Crear la orden con sus detalles
+        await tx.order.create({
+          data: {
+            customerId: formData.customerId,
+            statusDoing: StatusDoing.PENDING,
+            statusPayment: StatusPayment.UNPAID,
+            total: orderTotal,
+            movements: {
+              connect: {
+                id: movement.id,
+              },
+            },
+            details: {
+              create: orderDetails,
             },
           },
-          details: {
-            create: orderDetails,
-          },
-        },
-      })
-    })
+        })
+      },
+      {
+        timeout: 15000,
+      },
+    )
 
     revalidatePath(paths.orders())
     return { errors: false }
@@ -179,110 +184,115 @@ export async function editOrder(
       }
     }
 
-    await db.$transaction(async tx => {
-      // 1. Revertir el stock del movimiento anterior
-      const oldMovementDetails = await tx.movementDetail.findMany({
-        where: { movementId: movementId },
-      })
-
-      for (const detail of oldMovementDetails) {
-        await tx.batch.update({
-          where: { id: detail.batchId },
-          data: {
-            marketQuantity: { increment: detail.quantity },
-            reservedQuantity: { decrement: detail.quantity },
-          },
-        })
-      }
-
-      // 2. Eliminar los detalles de movimiento antiguos
-      await tx.movementDetail.deleteMany({
-        where: { movementId: movementId },
-      })
-
-      // 3. Calcular el nuevo total y detalles de la orden
-      let orderTotal = 0
-      const newOrderDetails: {
-        productName: string
-        quantity: number
-        price: number
-      }[] = []
-
-      // 4. Procesar los nuevos productos y crear nuevos detalles de movimiento
-      for (const product of formData.products) {
-        let remainingQty = product.quantity
-
-        const batches = await tx.batch.findMany({
-          where: {
-            productId: product.productId,
-            marketQuantity: { gt: 0 },
-          },
-          orderBy: { createdAt: 'asc' },
+    await db.$transaction(
+      async tx => {
+        // 1. Revertir el stock del movimiento anterior
+        const oldMovementDetails = await tx.movementDetail.findMany({
+          where: { movementId: movementId },
         })
 
-        const totalAvailable = batches.reduce(
-          (sum, batch) => sum + batch.marketQuantity,
-          0,
-        )
-        if (totalAvailable < product.quantity) {
-          throw new Error(`Stock insuficiente para ${product.productName}`)
-        }
-
-        newOrderDetails.push({
-          productName: product.productName,
-          quantity: product.quantity,
-          price: product.price,
-        })
-        orderTotal += product.quantity * product.price
-
-        for (const batch of batches) {
-          if (remainingQty <= 0) break
-
-          const qtyToTake = Math.min(batch.marketQuantity, remainingQty)
-
-          await tx.movementDetail.create({
-            data: {
-              movementId: movementId,
-              batchId: batch.id,
-              quantity: qtyToTake,
-            },
-          })
-
+        for (const detail of oldMovementDetails) {
           await tx.batch.update({
-            where: { id: batch.id },
+            where: { id: detail.batchId },
             data: {
-              marketQuantity: { decrement: qtyToTake },
-              reservedQuantity: { increment: qtyToTake },
+              marketQuantity: { increment: detail.quantity },
+              reservedQuantity: { decrement: detail.quantity },
             },
           })
-
-          remainingQty -= qtyToTake
         }
-      }
 
-      // 5. Actualizar la orden y sus detalles
-      // Eliminar detalles antiguos de la orden
-      await tx.orderDetail.deleteMany({
-        where: { orderId: orderId },
-      })
+        // 2. Eliminar los detalles de movimiento antiguos
+        await tx.movementDetail.deleteMany({
+          where: { movementId: movementId },
+        })
 
-      // Actualizar la orden principal
-      await tx.order.update({
-        where: { id: orderId },
-        data: {
-          customerId: formData.customerId,
-          total: orderTotal,
-          statusDoing: StatusDoing.PENDING,
-          details: {
-            create: newOrderDetails.map(detail => ({
-              productName: detail.productName,
-              quantity: detail.quantity,
-              price: detail.price,
-            })),
+        // 3. Calcular el nuevo total y detalles de la orden
+        let orderTotal = 0
+        const newOrderDetails: {
+          productName: string
+          quantity: number
+          price: number
+        }[] = []
+
+        // 4. Procesar los nuevos productos y crear nuevos detalles de movimiento
+        for (const product of formData.products) {
+          let remainingQty = product.quantity
+
+          const batches = await tx.batch.findMany({
+            where: {
+              productId: product.productId,
+              marketQuantity: { gt: 0 },
+            },
+            orderBy: { createdAt: 'asc' },
+          })
+
+          const totalAvailable = batches.reduce(
+            (sum, batch) => sum + batch.marketQuantity,
+            0,
+          )
+          if (totalAvailable < product.quantity) {
+            throw new Error(`Stock insuficiente para ${product.productName}`)
+          }
+
+          newOrderDetails.push({
+            productName: product.productName,
+            quantity: product.quantity,
+            price: product.price,
+          })
+          orderTotal += product.quantity * product.price
+
+          for (const batch of batches) {
+            if (remainingQty <= 0) break
+
+            const qtyToTake = Math.min(batch.marketQuantity, remainingQty)
+
+            await tx.movementDetail.create({
+              data: {
+                movementId: movementId,
+                batchId: batch.id,
+                quantity: qtyToTake,
+              },
+            })
+
+            await tx.batch.update({
+              where: { id: batch.id },
+              data: {
+                marketQuantity: { decrement: qtyToTake },
+                reservedQuantity: { increment: qtyToTake },
+              },
+            })
+
+            remainingQty -= qtyToTake
+          }
+        }
+
+        // 5. Actualizar la orden y sus detalles
+        // Eliminar detalles antiguos de la orden
+        await tx.orderDetail.deleteMany({
+          where: { orderId: orderId },
+        })
+
+        // Actualizar la orden principal
+        await tx.order.update({
+          where: { id: orderId },
+          data: {
+            customerId: formData.customerId,
+            total: orderTotal,
+            statusDoing: StatusDoing.PENDING,
+            details: {
+              create: newOrderDetails.map(detail => ({
+                productName: detail.productName,
+                quantity: detail.quantity,
+                price: detail.price,
+              })),
+            },
           },
-        },
-      })
-    })
+        })
+      },
+      {
+        timeout: 15000,
+      },
+    )
 
     revalidatePath(paths.orders())
     return { errors: false }
@@ -339,55 +349,60 @@ export async function confirmOrder(
       throw new Error('Orden no encontrada')
     }
     let movementId = 0
-    await db.$transaction(async tx => {
-      // 2. Crear el movimiento de tipo SOLD
-      const movement = await tx.movement.create({
-        data: {
-          type: MovementType.SOLD,
-          userId: user.id,
-          orderId: orderId,
-        },
-      })
-
-      // 3. Actualizar la orden
-      await tx.order.update({
-        where: { id: orderId },
-        data: {
-          statusPayment: StatusPayment.PAID,
-          movements: {
-            connect: {
-              id: movement.id,
-            },
-          },
-        },
-      })
-
-      // 4. Crear detalles de movimiento y actualizar lotes
-      for (const detail of order.movements[0].movementDetail) {
-        // Crear nuevo detalle de movimiento para la venta
-        await tx.movementDetail.create({
+    await db.$transaction(
+      async tx => {
+        // 2. Crear el movimiento de tipo SOLD
+        const movement = await tx.movement.create({
           data: {
-            movementId: movement.id,
-            batchId: detail.batchId,
-            quantity: detail.quantity,
+            type: MovementType.SOLD,
+            userId: user.id,
+            orderId: orderId,
           },
         })
 
-        // Actualizar el lote: mover de reservado a vendido
-        await tx.batch.update({
-          where: { id: detail.batchId },
+        // 3. Actualizar la orden
+        await tx.order.update({
+          where: { id: orderId },
           data: {
-            reservedQuantity: {
-              decrement: detail.quantity,
-            },
-            soltQuantity: {
-              increment: detail.quantity,
+            statusPayment: StatusPayment.PAID,
+            movements: {
+              connect: {
+                id: movement.id,
+              },
             },
           },
         })
-        movementId = movement.id
-      }
-    })
+
+        // 4. Crear detalles de movimiento y actualizar lotes
+        for (const detail of order.movements[0].movementDetail) {
+          // Crear nuevo detalle de movimiento para la venta
+          await tx.movementDetail.create({
+            data: {
+              movementId: movement.id,
+              batchId: detail.batchId,
+              quantity: detail.quantity,
+            },
+          })
+
+          // Actualizar el lote: mover de reservado a vendido
+          await tx.batch.update({
+            where: { id: detail.batchId },
+            data: {
+              reservedQuantity: {
+                decrement: detail.quantity,
+              },
+              soltQuantity: {
+                increment: detail.quantity,
+              },
+            },
+          })
+          movementId = movement.id
+        }
+      },
+      {
+        timeout: 15000,
+      },
+    )
 
     let paymentReceipt = ''
     if (paymentProof) {
@@ -442,60 +457,65 @@ export async function setOrderStatusToReady(
       }
     }
 
-    await db.$transaction(async tx => {
-      // 1. Obtener la orden y sus detalles
-      const order = await tx.order.findUnique({
-        where: { id: orderId },
-        include: {
-          movements: {
-            include: {
-              movementDetail: {
-                include: {
-                  batch: true,
+    await db.$transaction(
+      async tx => {
+        // 1. Obtener la orden y sus detalles
+        const order = await tx.order.findUnique({
+          where: { id: orderId },
+          include: {
+            movements: {
+              include: {
+                movementDetail: {
+                  include: {
+                    batch: true,
+                  },
                 },
               },
             },
           },
-        },
-      })
+        })
 
-      if (!order) {
-        throw new Error('Orden no encontrada')
-      }
+        if (!order) {
+          throw new Error('Orden no encontrada')
+        }
 
-      // 2. Crear el movimiento de tipo SOLD
-      const movement = await tx.movement.create({
-        data: {
-          type: MovementType.READY_TO_DELIVER,
-          userId: user.id,
-        },
-      })
-
-      // 4. Crear detalles de movimiento y actualizar lotes
-      for (const detail of order.movements[0].movementDetail) {
-        // Crear nuevo detalle de movimiento para la venta
-        await tx.movementDetail.create({
+        // 2. Crear el movimiento de tipo SOLD
+        const movement = await tx.movement.create({
           data: {
-            movementId: movement.id,
-            batchId: detail.batchId,
-            quantity: detail.quantity,
+            type: MovementType.READY_TO_DELIVER,
+            userId: user.id,
           },
         })
-      }
 
-      // 1. Actualizar la orden
-      await tx.order.update({
-        where: { id: orderId },
-        data: {
-          statusDoing: StatusDoing.READY_TO_DELIVER,
-          movements: {
-            connect: {
-              id: movement.id,
+        // 4. Crear detalles de movimiento y actualizar lotes
+        for (const detail of order.movements[0].movementDetail) {
+          // Crear nuevo detalle de movimiento para la venta
+          await tx.movementDetail.create({
+            data: {
+              movementId: movement.id,
+              batchId: detail.batchId,
+              quantity: detail.quantity,
+            },
+          })
+        }
+
+        // 1. Actualizar la orden
+        await tx.order.update({
+          where: { id: orderId },
+          data: {
+            statusDoing: StatusDoing.READY_TO_DELIVER,
+            movements: {
+              connect: {
+                id: movement.id,
+              },
             },
           },
-        },
-      })
-    })
+        })
+      },
+      {
+        timeout: 15000,
+      },
+    )
 
     revalidatePath(paths.orders())
     return { errors: false }
@@ -530,60 +550,65 @@ export async function setOrderStatusToDelivered(
       }
     }
 
-    await db.$transaction(async tx => {
-      // 1. Obtener la orden y sus detalles
-      const order = await tx.order.findUnique({
-        where: { id: orderId },
-        include: {
-          movements: {
-            include: {
-              movementDetail: {
-                include: {
-                  batch: true,
+    await db.$transaction(
+      async tx => {
+        // 1. Obtener la orden y sus detalles
+        const order = await tx.order.findUnique({
+          where: { id: orderId },
+          include: {
+            movements: {
+              include: {
+                movementDetail: {
+                  include: {
+                    batch: true,
+                  },
                 },
               },
             },
           },
-        },
-      })
+        })
 
-      if (!order) {
-        throw new Error('Orden no encontrada')
-      }
+        if (!order) {
+          throw new Error('Orden no encontrada')
+        }
 
-      // 2. Crear el movimiento de tipo SOLD
-      const movement = await tx.movement.create({
-        data: {
-          type: MovementType.DELIVERED,
-          userId: user.id,
-        },
-      })
-
-      // 4. Crear detalles de movimiento y actualizar lotes
-      for (const detail of order.movements[0].movementDetail) {
-        // Crear nuevo detalle de movimiento para la venta
-        await tx.movementDetail.create({
+        // 2. Crear el movimiento de tipo SOLD
+        const movement = await tx.movement.create({
           data: {
-            movementId: movement.id,
-            batchId: detail.batchId,
-            quantity: detail.quantity,
+            type: MovementType.DELIVERED,
+            userId: user.id,
           },
         })
-      }
 
-      // 1. Actualizar la orden
-      await tx.order.update({
-        where: { id: orderId },
-        data: {
-          statusDoing: StatusDoing.DELIVERED,
-          movements: {
-            connect: {
-              id: movement.id,
+        // 4. Crear detalles de movimiento y actualizar lotes
+        for (const detail of order.movements[0].movementDetail) {
+          // Crear nuevo detalle de movimiento para la venta
+          await tx.movementDetail.create({
+            data: {
+              movementId: movement.id,
+              batchId: detail.batchId,
+              quantity: detail.quantity,
+            },
+          })
+        }
+
+        // 1. Actualizar la orden
+        await tx.order.update({
+          where: { id: orderId },
+          data: {
+            statusDoing: StatusDoing.DELIVERED,
+            movements: {
+              connect: {
+                id: movement.id,
+              },
             },
           },
-        },
-      })
-    })
+        })
+      },
+      {
+        timeout: 15000,
+      },
+    )
 
     revalidatePath(paths.orders())
     return { errors: false }
@@ -619,92 +644,97 @@ export async function setOrderStatusToCancel(
       }
     }
 
-    await db.$transaction(async tx => {
-      // 1. Obtener la orden y sus detalles
-      const order = await tx.order.findUnique({
-        where: { id: orderId },
-        include: {
-          movements: {
-            include: {
-              movementDetail: {
-                include: {
-                  batch: true,
+    await db.$transaction(
+      async tx => {
+        // 1. Obtener la orden y sus detalles
+        const order = await tx.order.findUnique({
+          where: { id: orderId },
+          include: {
+            movements: {
+              include: {
+                movementDetail: {
+                  include: {
+                    batch: true,
+                  },
                 },
               },
             },
           },
-        },
-      })
+        })
 
-      if (!order) {
-        throw new Error('Orden no encontrada')
-      }
+        if (!order) {
+          throw new Error('Orden no encontrada')
+        }
 
-      // 2. Crear el movimiento de tipo SOLD
-      const movement = await tx.movement.create({
-        data: {
-          type: MovementType.CANCELLED,
-          userId: user.id,
-        },
-      })
-
-      // 4. Crear detalles de movimiento y actualizar lotes
-      for (const detail of order.movements[0].movementDetail) {
-        // Crear nuevo detalle de movimiento para la venta
-        await tx.movementDetail.create({
+        // 2. Crear el movimiento de tipo SOLD
+        const movement = await tx.movement.create({
           data: {
-            movementId: movement.id,
-            batchId: detail.batchId,
-            quantity: detail.quantity,
+            type: MovementType.CANCELLED,
+            userId: user.id,
           },
         })
 
-        if (order.statusPayment === StatusPayment.PAID) {
-          // Actualizar el lote: mover de reservado a vendido
-          await tx.batch.update({
-            where: { id: detail.batchId },
+        // 4. Crear detalles de movimiento y actualizar lotes
+        for (const detail of order.movements[0].movementDetail) {
+          // Crear nuevo detalle de movimiento para la venta
+          await tx.movementDetail.create({
             data: {
-              marketQuantity: {
-                increment: detail.quantity,
-              },
-              soltQuantity: {
-                decrement: detail.quantity,
-              },
+              movementId: movement.id,
+              batchId: detail.batchId,
+              quantity: detail.quantity,
             },
           })
-          await tx.sale.delete({
-            where: { orderId: orderId },
-          })
-        } else {
-          await tx.batch.update({
-            where: { id: detail.batchId },
-            data: {
-              marketQuantity: {
-                increment: detail.quantity,
-              },
-              reservedQuantity: {
-                decrement: detail.quantity,
-              },
-            },
-          })
-        }
-      }
 
-      // 1. Actualizar la orden
-      await tx.order.update({
-        where: { id: orderId },
-        data: {
-          statusPayment: StatusPayment.CANCELLED,
-          statusDoing: StatusDoing.CANCELLED,
-          cancelReason: reason,
-          movements: {
-            connect: {
-              id: movement.id,
+          if (order.statusPayment === StatusPayment.PAID) {
+            // Actualizar el lote: mover de reservado a vendido
+            await tx.batch.update({
+              where: { id: detail.batchId },
+              data: {
+                marketQuantity: {
+                  increment: detail.quantity,
+                },
+                soltQuantity: {
+                  decrement: detail.quantity,
+                },
+              },
+            })
+            await tx.sale.delete({
+              where: { orderId: orderId },
+            })
+          } else {
+            await tx.batch.update({
+              where: { id: detail.batchId },
+              data: {
+                marketQuantity: {
+                  increment: detail.quantity,
+                },
+                reservedQuantity: {
+                  decrement: detail.quantity,
+                },
+              },
+            })
+          }
+        }
+
+        // 1. Actualizar la orden
+        await tx.order.update({
+          where: { id: orderId },
+          data: {
+            statusPayment: StatusPayment.CANCELLED,
+            statusDoing: StatusDoing.CANCELLED,
+            cancelReason: reason,
+            movements: {
+              connect: {
+                id: movement.id,
+              },
             },
           },
-        },
-      })
-    })
+        })
+      },
+      {
+        timeout: 15000,
+      },
+    )
 
     revalidatePath(paths.orders())
     return { errors: false }
