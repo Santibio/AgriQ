@@ -335,7 +335,8 @@ export default function OrderList({ list }: OrderListProps) {
       const response = await setOrderStatusToCancel(selectedOrder!.id, reason)
 
       if (response?.errors) {
-        return toast.error('Ocurrió un error al procesar la solicitud.')
+        toast.error('Ocurrió un error al procesar la solicitud.')
+        return
       }
       const message =
         selectedOrder?.statusDoing === 'PENDING'
