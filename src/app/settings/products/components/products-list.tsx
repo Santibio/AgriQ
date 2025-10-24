@@ -1,6 +1,19 @@
 'use client'
 import { Product } from '@prisma/client'
-import { CardBody, Image, Chip } from '@heroui/react'
+import {
+  CardBody,
+  Image,
+  Chip,
+  Button,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  RadioGroup,
+  Radio,
+  useDisclosure,
+} from '@heroui/react'
 import Link from 'next/link'
 import paths from '@/lib/paths'
 import EmptyListMsg from '@/components/empty-list'
@@ -8,11 +21,17 @@ import { convertToArgentinePeso } from '@/lib/helpers/number'
 import { Color } from '@/lib/schemas/general'
 import CardWithShadow from '@/components/card-with-shadow'
 import { Search } from '@/components/search'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { ListFilter } from 'lucide-react'
 
 interface ProductsListProps {
   products: Product[]
 }
+
+type SortByType = 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'
+type StatusFilterType = 'all' | 'active' | 'inactive'
+type CategoryFilterType = 'all' | Product['category']
+type TypeFilterType = 'all' | Product['type']
 
 // Interfaz para las propiedades del Chip, para mayor claridad
 interface ChipProps {
@@ -58,30 +77,140 @@ const typeColors: Record<string, ChipProps> = {
 }
 
 export default function ProductsList({ products }: ProductsListProps) {
-  const [filteredList, setFilteredList] = useState(products)
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const [searchTerm, setSearchTerm] = useState('')
+
+  const [activeSortBy, setActiveSortBy] = useState<SortByType>('name-asc')
+  const [activeStatusFilter, setActiveStatusFilter] =
+    useState<StatusFilterType>('all')
+  const [activeCategoryFilter, setActiveCategoryFilter] =
+    useState<CategoryFilterType>('all')
+  const [activeTypeFilter, setActiveTypeFilter] = useState<TypeFilterType>('all')
+
+  const [selectedSortBy, setSelectedSortBy] = useState<SortByType>(activeSortBy)
+  const [selectedStatusFilter, setSelectedStatusFilter] =
+    useState<StatusFilterType>(activeStatusFilter)
+  const [selectedCategoryFilter, setSelectedCategoryFilter] =
+    useState<CategoryFilterType>(activeCategoryFilter)
+  const [selectedTypeFilter, setSelectedTypeFilter] =
+    useState<TypeFilterType>(activeTypeFilter)
+
+  const filteredAndSortedProducts = useMemo(() => {
+    let filtered = [...products]
+
+    if (searchTerm) {
+      const lowercasedFilter = searchTerm.toLowerCase()
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(lowercasedFilter),
+      )
+    }
+
+    if (activeStatusFilter !== 'all') {
+      filtered = filtered.filter(
+        product =>
+          (activeStatusFilter === 'active' && product.active) ||
+          (activeStatusFilter === 'inactive' && !product.active),
+      )
+    }
+
+    if (activeCategoryFilter !== 'all') {
+      filtered = filtered.filter(
+        product => product.category === activeCategoryFilter,
+      )
+    }
+
+    if (activeTypeFilter !== 'all') {
+      filtered = filtered.filter(product => product.type === activeTypeFilter)
+    }
+
+    switch (activeSortBy) {
+      case 'name-asc':
+        filtered.sort((a, b) => a.name.localeCompare(b.name))
+        break
+      case 'name-desc':
+        filtered.sort((a, b) => b.name.localeCompare(a.name))
+        break
+      case 'price-asc':
+        filtered.sort((a, b) => a.price - b.price)
+        break
+      case 'price-desc':
+        filtered.sort((a, b) => b.price - a.price)
+        break
+      default:
+        break
+    }
+
+    return filtered
+  }, [
+    products,
+    searchTerm,
+    activeSortBy,
+    activeStatusFilter,
+    activeCategoryFilter,
+    activeTypeFilter,
+  ])
 
   const handleSearchChange = (searchTermValue: string) => {
     setSearchTerm(searchTermValue)
-    const lowercasedFilter = searchTermValue.toLowerCase()
-    const filtered = products.filter(product => {
-      const productName = product.name.toLowerCase()
-
-      return productName.includes(lowercasedFilter)
-    })
-    setFilteredList(filtered)
   }
+
+  const handleOpenDrawer = () => {
+    setSelectedSortBy(activeSortBy)
+    setSelectedStatusFilter(activeStatusFilter)
+    setSelectedCategoryFilter(activeCategoryFilter)
+    setSelectedTypeFilter(activeTypeFilter)
+    onOpen()
+  }
+
+  const handleApplyFilters = () => {
+    setActiveSortBy(selectedSortBy)
+    setActiveStatusFilter(selectedStatusFilter)
+    setActiveCategoryFilter(selectedCategoryFilter)
+    setActiveTypeFilter(selectedTypeFilter)
+    onOpenChange()
+  }
+
+  const handleSortByChange = (value: string) => {
+    setSelectedSortBy(value as SortByType)
+  }
+
+  const handleStatusFilterChange = (value: string) => {
+    setSelectedStatusFilter(value as StatusFilterType)
+  }
+
+  const handleCategoryFilterChange = (value: string) => {
+    setSelectedCategoryFilter(value as CategoryFilterType)
+  }
+
+  const handleTypeFilterChange = (value: string) => {
+    setSelectedTypeFilter(value as TypeFilterType)
+  }
+  if (!products.length) {
+    return <EmptyListMsg text='No hay productos para mostrar.' />
+  }
+
   return (
-    <div className='flex flex-col gap-2'>
-      <Search
-        placeholder='Buscar por nombre de producto'
-        searchTerm={searchTerm}
-        handleSearchChange={handleSearchChange}
-        className='flex-1'
-      />
-      <ul className='flex flex-col gap-3'>
-        {filteredList.length > 0 ? (
-          filteredList.map(product => {
+    <>
+      <div className='flex flex-col gap-2'>
+        <div className='flex gap-2'>
+          <Search
+            placeholder='Buscar por nombre de producto'
+            searchTerm={searchTerm}
+            handleSearchChange={handleSearchChange}
+            className='flex-1'
+          />
+          <Button
+            variant='flat'
+            color='primary'
+            isIconOnly
+            onPress={handleOpenDrawer}
+          >
+            <ListFilter className='w-5 h-5' />
+          </Button>
+        </div>
+        <ul className='flex flex-col gap-3'>
+          {filteredAndSortedProducts.length > 0 ? (
+            filteredAndSortedProducts.map(product => {
             // Obtenemos las propiedades de los chips para un código más limpio
             const categoryChipProps =
               categoryColors[product.category as keyof typeof categoryColors]
@@ -154,9 +283,86 @@ export default function ProductsList({ products }: ProductsListProps) {
             )
           })
         ) : (
-          <EmptyListMsg text='No hay productos disponibles.' />
+          <EmptyListMsg text='No se encontraron productos con esos filtros.' />
         )}
       </ul>
-    </div>
+      </div>
+      <Drawer
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        backdrop='blur'
+        placement='bottom'
+        size='2xl'
+      >
+        <DrawerContent>
+          {() => (
+            <>
+              <DrawerHeader className='flex flex-col gap-1'>
+                <h2 className='text-xl font-semibold'>Filtros y Ordenamiento</h2>
+              </DrawerHeader>
+              <DrawerBody className='pb-10 pt-2'>
+                <div className='flex flex-col gap-6'>
+                  <RadioGroup
+                    label='Ordenar por'
+                    value={selectedSortBy}
+                    onValueChange={handleSortByChange}
+                  >
+                    <Radio value='name-asc'>Nombre (A-Z)</Radio>
+                    <Radio value='name-desc'>Nombre (Z-A)</Radio>
+                    <Radio value='price-asc'>Menor precio</Radio>
+                    <Radio value='price-desc'>Mayor precio</Radio>
+                  </RadioGroup>
+
+                  <RadioGroup
+                    label='Filtrar por estado'
+                    value={selectedStatusFilter}
+                    onValueChange={handleStatusFilterChange}
+                  >
+                    <Radio value='all'>Todos</Radio>
+                    <Radio value='active'>Activos</Radio>
+                    <Radio value='inactive'>Inactivos</Radio>
+                  </RadioGroup>
+
+                  <RadioGroup
+                    label='Filtrar por categoría'
+                    value={selectedCategoryFilter}
+                    onValueChange={handleCategoryFilterChange}
+                  >
+                    <Radio value='all'>Todas</Radio>
+                    {Object.entries(categoryColors).map(([key, { label }]) => (
+                      <Radio key={key} value={key}>
+                        {label}
+                      </Radio>
+                    ))}
+                  </RadioGroup>
+
+                  <RadioGroup
+                    label='Filtrar por tipo'
+                    value={selectedTypeFilter}
+                    onValueChange={handleTypeFilterChange}
+                  >
+                    <Radio value='all'>Todos</Radio>
+                    {Object.entries(typeColors).map(([key, { label }]) => (
+                      <Radio key={key} value={key}>
+                        {label}
+                      </Radio>
+                    ))}
+                  </RadioGroup>
+                </div>
+              </DrawerBody>
+              <DrawerFooter>
+                <Button
+                  color='primary'
+                  className='w-full'
+                  onPress={handleApplyFilters}
+                >
+                  Aplicar
+                </Button>
+              </DrawerFooter>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
+    </>
   )
 }

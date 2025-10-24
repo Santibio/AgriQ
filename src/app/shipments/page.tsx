@@ -19,7 +19,7 @@ export default async function Shipments() {
 
   return (
     <ListPage title='Envíos' actions={<ShipmentAction />}>
-      <ShipmentsList list={shipments} />
+      <ShipmentsList shipments={shipments} />
     </ListPage>
   )
 }

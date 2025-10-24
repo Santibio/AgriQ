@@ -1,6 +1,18 @@
 'use client'
 
-import { Card, CardBody, useDisclosure } from '@heroui/react'
+import {
+  Card,
+  CardBody,
+  useDisclosure,
+  Button,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  RadioGroup,
+  Radio,
+} from '@heroui/react'
 import {
   Sale,
   Order,
@@ -8,13 +20,14 @@ import {
   Customer,
   OrderDetail,
 } from '@prisma/client'
-import { Landmark, Wallet } from 'lucide-react'
+import { Landmark, ListFilter, Wallet } from 'lucide-react'
 import EmptyListMsg from '@/components/empty-list'
 import { timeAgo } from '@/lib/helpers/date'
-import { JSX, useState } from 'react'
+import { JSX, useMemo, useState } from 'react'
 import { convertToArgentinePeso } from '@/lib/helpers/number'
 import SaleDetail from './sale-detail'
 import { Search } from '@/components/search'
+import moment from 'moment'
 
 export type SaleWithRelations = Sale & {
   order: Order & {
@@ -27,6 +40,10 @@ export type SaleWithRelations = Sale & {
 interface SalesListProps {
   sales: SaleWithRelations[]
 }
+
+type SortByType = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
+type DateFilterType = 'all' | '7days' | '30days'
+type PaymentMethodFilterType = 'all' | PaymentMethod
 
 interface SaleCardProps {
   sale: SaleWithRelations
@@ -97,28 +114,88 @@ function SaleCard({ sale, onSelectSale }: SaleCardProps) {
 }
 
 export default function SalesList({ sales }: SalesListProps) {
-  const { isOpen, onOpenChange } = useDisclosure()
-
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const [selectedSale, setSelectedSale] = useState<SaleWithRelations | null>(
     null,
   )
-
-  const [filteredList, setFilteredList] = useState(sales)
   const [searchTerm, setSearchTerm] = useState('')
+
+  const [activeSortBy, setActiveSortBy] = useState<SortByType>('date-desc')
+  const [activeDateFilter, setActiveDateFilter] =
+    useState<DateFilterType>('all')
+  const [activePaymentMethodFilter, setActivePaymentMethodFilter] =
+    useState<PaymentMethodFilterType>('all')
+
+  const [selectedSortBy, setSelectedSortBy] = useState<SortByType>(activeSortBy)
+  const [selectedDateFilter, setSelectedDateFilter] =
+    useState<DateFilterType>(activeDateFilter)
+  const [selectedPaymentMethodFilter, setSelectedPaymentMethodFilter] =
+    useState<PaymentMethodFilterType>(activePaymentMethodFilter)
+
+  const filteredAndSortedSales = useMemo(() => {
+    let filtered = [...sales]
+
+    if (searchTerm) {
+      const lowercasedFilter = searchTerm.toLowerCase()
+      filtered = filtered.filter(sale => {
+        const customerName = `${sale.order.customer.name} ${sale.order.customer.lastName}`.toLowerCase()
+        return customerName.includes(lowercasedFilter)
+      })
+    }
+
+    if (activeDateFilter !== 'all') {
+      const cutOffDate =
+        activeDateFilter === '7days'
+          ? moment().subtract(7, 'days')
+          : moment().subtract(30, 'days')
+
+      if (cutOffDate) {
+        filtered = filtered.filter(s =>
+          moment(s.createdAt).isSameOrAfter(cutOffDate),
+        )
+      }
+    }
+
+    if (activePaymentMethodFilter !== 'all') {
+      filtered = filtered.filter(
+        s => s.paymentMethod === activePaymentMethodFilter,
+      )
+    }
+
+    switch (activeSortBy) {
+      case 'date-desc':
+        filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+        break
+      case 'date-asc':
+        filtered.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        )
+        break
+      case 'amount-desc':
+        filtered.sort((a, b) => b.total - a.total)
+        break
+      case 'amount-asc':
+        filtered.sort((a, b) => a.total - b.total)
+        break
+      default:
+        break
+    }
+
+    return filtered
+  }, [
+    sales,
+    searchTerm,
+    activeSortBy,
+    activeDateFilter,
+    activePaymentMethodFilter,
+  ])
 
   const handleSearchChange = (searchTermValue: string) => {
     setSearchTerm(searchTermValue)
-    const lowercasedFilter = searchTermValue.toLowerCase()
-    const filtered = sales.filter(sale => {
-      const userName = sale.order.customer.name.toLowerCase()
-      const lastName = sale.order.customer.lastName.toLowerCase()
-
-      return (
-        userName.includes(lowercasedFilter) ||
-        lastName.includes(lowercasedFilter)
-      )
-    })
-    setFilteredList(filtered)
   }
 
   const handleSelectSale = (sale: SaleWithRelations) => {
@@ -126,18 +203,58 @@ export default function SalesList({ sales }: SalesListProps) {
     onOpenChange()
   }
 
+  const handleOpenDrawer = () => {
+    setSelectedSortBy(activeSortBy)
+    setSelectedDateFilter(activeDateFilter)
+    setSelectedPaymentMethodFilter(activePaymentMethodFilter)
+    onOpen()
+  }
+
+  const handleApplyFilters = () => {
+    setActiveSortBy(selectedSortBy)
+    setActiveDateFilter(selectedDateFilter)
+    setActivePaymentMethodFilter(selectedPaymentMethodFilter)
+    onOpenChange()
+  }
+
+  const handleSortByChange = (value: string) => {
+    setSelectedSortBy(value as SortByType)
+  }
+
+  const handleDateFilterChange = (value: string) => {
+    setSelectedDateFilter(value as DateFilterType)
+  }
+
+  const handlePaymentMethodFilterChange = (value: string) => {
+    setSelectedPaymentMethodFilter(value as PaymentMethodFilterType)
+  }
+
+  if (!sales.length) {
+    return <EmptyListMsg text='No hay ventas para mostrar.' />
+  }
+
   return (
     <>
       <div className='flex flex-col gap-2'>
-        <Search
-          placeholder='Buscar por nombre o apellido'
-          searchTerm={searchTerm}
-          handleSearchChange={handleSearchChange}
-          className='flex-1'
-        />
+        <div className='flex gap-2'>
+          <Search
+            placeholder='Buscar por nombre o apellido'
+            searchTerm={searchTerm}
+            handleSearchChange={handleSearchChange}
+            className='flex-1'
+          />
+          <Button
+            variant='flat'
+            color='primary'
+            isIconOnly
+            onPress={handleOpenDrawer}
+          >
+            <ListFilter className='w-5 h-5' />
+          </Button>
+        </div>
         <div className='space-y-3'>
-          {filteredList.length > 0 ? (
-            filteredList.map(sale => (
+          {filteredAndSortedSales.length > 0 ? (
+            filteredAndSortedSales.map(sale => (
               <SaleCard
                 key={sale.id}
                 sale={sale}
@@ -145,7 +262,7 @@ export default function SalesList({ sales }: SalesListProps) {
               />
             ))
           ) : (
-            <EmptyListMsg text='No hay ventas disponibles.' />
+            <EmptyListMsg text='No se encontraron ventas con esos filtros.' />
           )}
         </div>
       </div>
@@ -154,6 +271,71 @@ export default function SalesList({ sales }: SalesListProps) {
         isOpen={isOpen}
         onOpenChange={onOpenChange}
       />
+      <Drawer
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        backdrop='blur'
+        placement='bottom'
+        size='2xl'
+      >
+        <DrawerContent>
+          {() => (
+            <>
+              <DrawerHeader className='flex flex-col gap-1'>
+                <h2 className='text-xl font-semibold'>Filtros y Ordenamiento</h2>
+              </DrawerHeader>
+              <DrawerBody className='pb-10 pt-2'>
+                <div className='flex flex-col gap-6'>
+                  <RadioGroup
+                    label='Ordenar por'
+                    value={selectedSortBy}
+                    onValueChange={handleSortByChange}
+                  >
+                    <Radio value='date-desc'>Más recientes</Radio>
+                    <Radio value='date-asc'>Más antiguos</Radio>
+                    <Radio value='amount-desc'>Mayor importe</Radio>
+                    <Radio value='amount-asc'>Menor importe</Radio>
+                  </RadioGroup>
+
+                  <RadioGroup
+                    label='Filtrar por fecha'
+                    value={selectedDateFilter}
+                    onValueChange={handleDateFilterChange}
+                  >
+                    <Radio value='all'>Todos</Radio>
+                    <Radio value='7days'>Últimos 7 días</Radio>
+                    <Radio value='30days'>Últimos 30 días</Radio>
+                  </RadioGroup>
+
+                  <RadioGroup
+                    label='Filtrar por método de pago'
+                    value={selectedPaymentMethodFilter}
+                    onValueChange={handlePaymentMethodFilterChange}
+                  >
+                    <Radio value='all'>Todos</Radio>
+                    {Object.entries(paymentMethodMap).map(
+                      ([key, { label }]) => (
+                        <Radio key={key} value={key}>
+                          {label}
+                        </Radio>
+                      ),
+                    )}
+                  </RadioGroup>
+                </div>
+              </DrawerBody>
+              <DrawerFooter>
+                <Button
+                  color='primary'
+                  className='w-full'
+                  onPress={handleApplyFilters}
+                >
+                  Aplicar
+                </Button>
+              </DrawerFooter>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
     </>
   )
 }

@@ -1,13 +1,13 @@
-import db from "@/lib/db";
-import DiscardList from "./components/discard-list";
-import paths from "@/lib/paths";
-import AddButton from "@/components/buttons/add-button";
-import ListPage from "@/components/layout/list-page";
+import db from '@/lib/db'
+import DiscardList from './components/discard-list'
+import paths from '@/lib/paths'
+import AddButton from '@/components/buttons/add-button'
+import ListPage from '@/components/layout/list-page'
 
 export default async function Shipments() {
   const filteredMovements = await db.movement.findMany({
     where: {
-      type: "DISCARDED",
+      type: 'DISCARDED',
     },
     include: {
       movementDetail: {
@@ -22,16 +22,16 @@ export default async function Shipments() {
       discard: true,
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: 'desc',
     },
-  });
+  })
 
   return (
     <ListPage
-      title="Descartes"
+      title='Descartes'
       actions={<AddButton href={paths.discardAdd()}>Crear descarte</AddButton>}
     >
-      <DiscardList filteredMovements={filteredMovements} />
+      <DiscardList discards={filteredMovements} />
     </ListPage>
-  );
+  )
 }

@@ -1,13 +1,19 @@
 'use client'
 import {
+  Button, // Importado
   Card,
+  Checkbox, // Importado
+  CheckboxGroup, // Importado
   Chip,
   Drawer,
   DrawerBody,
   DrawerContent,
+  DrawerFooter, // Importado
   DrawerHeader,
   Listbox,
   ListboxItem,
+  Radio, // Importado
+  RadioGroup, // Importado
   useDisclosure,
 } from '@heroui/react'
 
@@ -19,6 +25,7 @@ import {
   Edit,
   Eye,
   History,
+  ListFilter, // Importado
   PackageCheck,
   PackageOpen,
   Trash,
@@ -37,7 +44,7 @@ import {
   StatusPayment,
   Sale,
 } from '@prisma/client'
-import { JSX, useState } from 'react'
+import { JSX, useMemo, useState } from 'react' // Importado useMemo
 import EmptyListMsg from '@/components/empty-list'
 import { useRouter } from 'next/navigation'
 import paths from '@/lib/paths'
@@ -72,6 +79,7 @@ type OrderWithRelations = Order & {
   totalProducts?: number
 }
 
+// ... [LOS OBJETOS STATUS_MAP y STATUS_PAYMENT_MAP SIGUEN IGUAL] ...
 const STATUS_MAP: Record<
   Order['statusDoing'],
   {
@@ -106,7 +114,7 @@ const STATUS_MAP: Record<
   CANCELLED: {
     icon: <XCircle className='h-6 w-6 text-white' />,
     gradient: 'from-danger to-danger/50',
-    label: '',
+    label: 'Cancelado', // Label añadido para el filtro
     color: 'text-danger',
     progress: '5%',
   },
@@ -141,7 +149,7 @@ const STATUS_PAYMENT_MAP: Record<
     label: 'Pago parcial',
   },
 }
-
+// ... [LA FUNCION getAvailableActions SIGUE IGUAL] ...
 const getAvailableActions = (
   order: Order,
   router: ReturnType<typeof useRouter>,
@@ -214,23 +222,40 @@ const getAvailableActions = (
   return actions.filter(action => action.isVisible)
 }
 
+// --- Nuevos Tipos para Filtros y Orden ---
+type SortByType =
+  | 'date-desc'
+  | 'date-asc'
+  | 'total-desc'
+  | 'total-asc'
+  | 'name-asc'
+  | 'name-desc'
+
 export default function OrderList({ list }: OrderListProps) {
   const router = useRouter()
+  const { showLoading, hideLoading } = useLoading()
+
+  // Disclosures para drawers/modals existentes
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const {
     isOpen: isCancelModalOpen,
     onOpen: onOpenCancelModal,
     onOpenChange: onOpenChangeCancelModal,
   } = useDisclosure()
-
   const {
     isOpen: isOpenDetailOrderDrawer,
     onOpen: onOpenDetailOrderDrawer,
     onOpenChange: onOpenChangeDetailOrderDrawer,
   } = useDisclosure()
 
-  const { showLoading, hideLoading } = useLoading()
+  // --- Nuevo Disclosure para el Drawer de Filtros ---
+  const {
+    isOpen: isFilterOpen,
+    onOpen: onOpenFilter,
+    onOpenChange: onOpenChangeFilter,
+  } = useDisclosure()
 
+  // Estados para la selección de items
   const [selectedOrder, setSelectedOrder] = useState<OrderWithRelations | null>(
     null,
   )
@@ -245,25 +270,119 @@ export default function OrderList({ list }: OrderListProps) {
     }>
   >([])
 
-  const [filteredList, setFilteredList] = useState(list)
+  // --- Estado para Búsqueda (en vivo) ---
   const [searchTerm, setSearchTerm] = useState('')
 
+  // --- Estado "Activo" (el que filtra la lista) ---
+  const [activeSortBy, setActiveSortBy] = useState<SortByType>('date-desc')
+  const [activeStatusDoing, setActiveStatusDoing] = useState<StatusDoing[]>([])
+  const [activeStatusPayment, setActiveStatusPayment] = useState<
+    StatusPayment[]
+  >([])
+
+  // --- Estado "Seleccionado" (temporal, para el drawer de filtros) ---
+  const [selectedSortBy, setSelectedSortBy] = useState<SortByType>(activeSortBy)
+  const [selectedStatusDoing, setSelectedStatusDoing] =
+    useState<StatusDoing[]>(activeStatusDoing)
+  const [selectedStatusPayment, setSelectedStatusPayment] =
+    useState<StatusPayment[]>(activeStatusPayment)
+
+  // --- Lógica de Filtro y Orden con useMemo ---
+  const filteredAndSortedList = useMemo(() => {
+    let filtered = [...list]
+
+    // 1. Aplicar Filtro de Búsqueda (en vivo)
+    if (searchTerm) {
+      const lowercasedFilter = searchTerm.toLowerCase()
+      filtered = filtered.filter(order => {
+        const lotNumber = order.id.toString()
+        const customerName = order.customer.name.toLowerCase()
+        const customerLastName = order.customer.lastName.toLowerCase()
+
+        return (
+          lotNumber.includes(lowercasedFilter) ||
+          customerName.includes(lowercasedFilter) ||
+          customerLastName.includes(lowercasedFilter)
+        )
+      })
+    }
+
+    // 2. Aplicar Filtro de Estado de Pedido (on apply)
+    if (activeStatusDoing.length > 0) {
+      filtered = filtered.filter(order =>
+        activeStatusDoing.includes(order.statusDoing),
+      )
+    }
+
+    // 3. Aplicar Filtro de Estado de Pago (on apply)
+    if (activeStatusPayment.length > 0) {
+      filtered = filtered.filter(order =>
+        activeStatusPayment.includes(order.statusPayment),
+      )
+    }
+
+    // 4. Aplicar Ordenamiento (on apply)
+    switch (activeSortBy) {
+      case 'date-desc':
+        filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+        break
+      case 'date-asc':
+        filtered.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        )
+        break
+      case 'total-desc':
+        filtered.sort((a, b) => b.total - a.total)
+        break
+      case 'total-asc':
+        filtered.sort((a, b) => a.total - b.total)
+        break
+      case 'name-asc':
+        filtered.sort((a, b) =>
+          `${a.customer.name} ${a.customer.lastName}`.localeCompare(
+            `${b.customer.name} ${b.customer.lastName}`,
+          ),
+        )
+        break
+      case 'name-desc':
+        filtered.sort((a, b) =>
+          `${b.customer.name} ${b.customer.lastName}`.localeCompare(
+            `${a.customer.name} ${a.customer.lastName}`,
+          ),
+        )
+        break
+    }
+
+    return filtered
+  }, [list, searchTerm, activeSortBy, activeStatusDoing, activeStatusPayment])
+  // --- Fin useMemo ---
+
+  // El handle de búsqueda ahora solo actualiza el término
   const handleSearchChange = (searchTermValue: string) => {
     setSearchTerm(searchTermValue)
-    const lowercasedFilter = searchTermValue.toLowerCase()
-    const filtered = list.filter(order => {
-      const lotNumber = order.id.toString()
-      const customerName = order.customer.name.toLowerCase()
-      const customerLastName = order.customer.lastName.toLowerCase()
-
-      return (
-        lotNumber.includes(lowercasedFilter) ||
-        customerName.includes(lowercasedFilter) ||
-        customerLastName.includes(lowercasedFilter)
-      )
-    })
-    setFilteredList(filtered)
   }
+
+  // --- Handlers para el Drawer de Filtros ---
+  const handleOpenFilterDrawer = () => {
+    // Sincroniza el estado "seleccionado" con el "activo"
+    setSelectedSortBy(activeSortBy)
+    setSelectedStatusDoing(activeStatusDoing)
+    setSelectedStatusPayment(activeStatusPayment)
+    onOpenFilter()
+  }
+
+  const handleApplyFilters = () => {
+    // Aplica el estado "seleccionado" al "activo" y cierra
+    setActiveSortBy(selectedSortBy)
+    setActiveStatusDoing(selectedStatusDoing)
+    setActiveStatusPayment(selectedStatusPayment)
+    onOpenChangeFilter()
+  }
+  // --- Fin Handlers Filtros ---
 
   const handleOpenDetailOrderDrawer = () => {
     onOpenDetailOrderDrawer()
@@ -272,8 +391,7 @@ export default function OrderList({ list }: OrderListProps) {
 
   const handleSelectOrder = (order: OrderWithRelations) => {
     setSelectedOrder(order)
-
-    // Transform the data to match the expected type
+    // ... (resto de la lógica de handleSelectOrder)
     const products = order.movements[0].movementDetail.map(detail => ({
       productId: detail.batch.product.id,
       productName: detail.batch.product.name, // Assuming 'name' exists on Product
@@ -286,6 +404,7 @@ export default function OrderList({ list }: OrderListProps) {
     onOpen()
   }
 
+  // ... [HANDLERS: handleStatusDoing, handleStatusPedingToDeliver, handleStatusPedingToCancel, handleOpenCancelModal SIGUEN IGUAL] ...
   const handleStatusDoing = async () => {
     showLoading()
     onOpenChange()
@@ -357,20 +476,32 @@ export default function OrderList({ list }: OrderListProps) {
   const handleOpenCancelModal = () => {
     onOpenCancelModal()
   }
-
   return (
     <>
       <div className='flex flex-col gap-2'>
-        <Search
-          placeholder='Buscar por número de envío o nombre cliente'
-          searchTerm={searchTerm}
-          handleSearchChange={handleSearchChange}
-          className='flex-1'
-        />
+        {/* --- Contenedor para Búsqueda y Filtro --- */}
+        <div className='flex gap-2'>
+          <Search
+            placeholder='Buscar por número de envío o nombre cliente'
+            searchTerm={searchTerm}
+            handleSearchChange={handleSearchChange}
+            className='flex-1'
+          />
+          {/* --- Botón de Filtro --- */}
+          <Button
+            variant='flat'
+            color='primary'
+            isIconOnly
+            onPress={handleOpenFilterDrawer}
+          >
+            <ListFilter className='w-5 h-5' />
+          </Button>
+        </div>
 
         <ul className='flex gap-2 flex-col  w-full'>
-          {filteredList.length ? (
-            filteredList.map(order => {
+          {/* --- Usar la lista memoizada --- */}
+          {filteredAndSortedList.length ? (
+            filteredAndSortedList.map(order => {
               const statusDoingKey = order.statusDoing
               return (
                 <li key={order.id}>
@@ -380,15 +511,14 @@ export default function OrderList({ list }: OrderListProps) {
                     className='w-full p-4 border'
                     shadow='sm'
                   >
+                    {/* ... [CONTENIDO DEL CARD SIGUE IGUAL] ... */}
                     <div className='flex gap-4 items-start'>
-                      {/* Icono con fondo gradiente */}
                       <div
                         className={`w-14 h-14 min-w-[3.5rem] rounded-lg bg-gradient-to-r ${STATUS_MAP?.[statusDoingKey]?.gradient} flex items-center justify-center text-white text-xl shadow-sm`}
                       >
                         {STATUS_MAP[statusDoingKey]?.icon}
                       </div>
 
-                      {/* Contenido */}
                       <div className='flex-1'>
                         <div className='flex justify-between items-start'>
                           <div className='flex items-start flex-col'>
@@ -477,6 +607,7 @@ export default function OrderList({ list }: OrderListProps) {
         </ul>
       </div>
 
+      {/* --- [DRAWER DE ACCIONES (EXISTENTE) SIGUE IGUAL] --- */}
       <Drawer
         isOpen={isOpen}
         onOpenChange={onOpenChange}
@@ -516,6 +647,93 @@ export default function OrderList({ list }: OrderListProps) {
           )}
         </DrawerContent>
       </Drawer>
+
+      {/* --- NUEVO DRAWER DE FILTROS Y ORDENAMIENTO --- */}
+      <Drawer
+        isOpen={isFilterOpen}
+        onOpenChange={onOpenChangeFilter}
+        backdrop='blur'
+        placement='bottom'
+        size='3xl'
+      >
+        <DrawerContent>
+          {() => (
+            <>
+              <DrawerHeader className='flex flex-col gap-1'>
+                <h2 className='text-xl font-semibold'>
+                  Filtros y Ordenamiento
+                </h2>
+              </DrawerHeader>
+              <DrawerBody className='pb-10 pt-2'>
+                <div className='flex flex-col gap-6'>
+                  {/* --- Grupo de Ordenamiento --- */}
+                  <RadioGroup
+                    label='Ordenar por'
+                    value={selectedSortBy}
+                    onValueChange={v => setSelectedSortBy(v as SortByType)}
+                  >
+                    <Radio value='date-desc'>Más recientes</Radio>
+                    <Radio value='date-asc'>Más antiguos</Radio>
+                    <Radio value='total-desc'>Mayor total</Radio>
+                    <Radio value='total-asc'>Menor total</Radio>
+                    <Radio value='name-asc'>Cliente (A-Z)</Radio>
+                    <Radio value='name-desc'>Cliente (Z-A)</Radio>
+                  </RadioGroup>
+
+                  {/* --- Filtro Estado de Pedido --- */}
+                  <CheckboxGroup
+                    label='Filtrar por estado'
+                    value={selectedStatusDoing}
+                    onValueChange={v =>
+                      setSelectedStatusDoing(v as StatusDoing[])
+                    }
+                  >
+                    <Checkbox value={StatusDoing.PENDING}>
+                      Pendiente de preparar
+                    </Checkbox>
+                    <Checkbox value={StatusDoing.READY_TO_DELIVER}>
+                      Preparado
+                    </Checkbox>
+                    <Checkbox value={StatusDoing.DELIVERED}>Entregado</Checkbox>
+                    <Checkbox value={StatusDoing.CANCELLED}>Cancelado</Checkbox>
+                  </CheckboxGroup>
+
+                  {/* --- Filtro Estado de Pago --- */}
+                  <CheckboxGroup
+                    label='Filtrar por pago'
+                    value={selectedStatusPayment}
+                    onChange={v =>
+                      setSelectedStatusPayment(
+                        v.map(item => item as StatusPayment),
+                      )
+                    }
+                  >
+                    <Checkbox value={StatusPayment.UNPAID}>
+                      Pendiente de pago
+                    </Checkbox>
+                    <Checkbox value={StatusPayment.PAID}>Pagado</Checkbox>
+                    <Checkbox value={StatusPayment.CANCELLED}>
+                      Cancelado
+                    </Checkbox>
+                  </CheckboxGroup>
+                </div>
+              </DrawerBody>
+              <DrawerFooter>
+                <Button
+                  color='primary'
+                  className='w-full'
+                  onPress={handleApplyFilters}
+                >
+                  Aplicar
+                </Button>
+              </DrawerFooter>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
+      {/* --- FIN NUEVO DRAWER --- */}
+
+      {/* --- [DRAWER/MODAL EXISTENTES SIGUEN IGUAL] --- */}
       {selectedOrder && (
         <OrderDetail
           productsList={productsList}

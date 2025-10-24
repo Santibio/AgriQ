@@ -1,5 +1,18 @@
 'use client'
-import { Button, CardBody, Chip, Link } from '@heroui/react'
+import {
+  Button,
+  CardBody,
+  Chip,
+  Link,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  RadioGroup,
+  Radio,
+  useDisclosure,
+} from '@heroui/react'
 import {
   AlertTriangle,
   ArrowUpLeft,
@@ -8,6 +21,7 @@ import {
   MoveRight,
   Package,
   PackagePlus,
+  ListFilter,
 } from 'lucide-react'
 import {
   Movement,
@@ -18,19 +32,24 @@ import {
   Location,
 } from '@prisma/client'
 import paths from '@/lib/paths'
-import { JSX, useState } from 'react'
+import { JSX, useMemo, useState } from 'react'
 import { capitalize } from '@/lib/utils'
 import EmptyListMsg from '@/components/empty-list'
 import { timeAgo } from '@/lib/helpers/date'
 import CardWithShadow from '@/components/card-with-shadow'
 import { Color } from '@/lib/schemas/general'
 import { Search } from '@/components/search'
+import moment from 'moment'
 
 // --- Tipos y Mapeos (Mejorados para más claridad) ---
 
 interface ShipmentsListProps {
-  list: ShipmentWithRelations[]
+  shipments: ShipmentWithRelations[]
 }
+
+type SortByType = 'date-desc' | 'date-asc'
+type DateFilterType = 'all' | '7days' | '30days'
+type StatusFilterType = 'all' | Shipment['status']
 
 type ShipmentWithRelations = Shipment & {
   // Asumo que origin y destination están en el modelo Shipment
@@ -104,23 +123,107 @@ const destinationMap: Record<Location, string> = {
 
 // --- Componente Principal ---
 
-export default function ShipmentsList({ list }: ShipmentsListProps) {
-  const [filteredList, setFilteredList] = useState(list)
+export default function ShipmentsList({ shipments }: ShipmentsListProps) {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Límite de productos a mostrar antes de agrupar
-  const MAX_PRODUCTS_VISIBLE = 3
+  const [activeSortBy, setActiveSortBy] = useState<SortByType>('date-desc')
+  const [activeDateFilter, setActiveDateFilter] =
+    useState<DateFilterType>('all')
+  const [activeStatusFilter, setActiveStatusFilter] =
+    useState<StatusFilterType>('all')
+
+  const [selectedSortBy, setSelectedSortBy] = useState<SortByType>(activeSortBy)
+  const [selectedDateFilter, setSelectedDateFilter] =
+    useState<DateFilterType>(activeDateFilter)
+  const [selectedStatusFilter, setSelectedStatusFilter] =
+    useState<StatusFilterType>(activeStatusFilter)
+
+  const filteredAndSortedShipments = useMemo(() => {
+    let filtered = [...shipments]
+
+    if (searchTerm) {
+      const lowercasedFilter = searchTerm.toLowerCase()
+      filtered = filtered.filter(shipment =>
+        shipment.id.toString().includes(lowercasedFilter),
+      )
+    }
+
+    if (activeDateFilter !== 'all') {
+      const cutOffDate =
+        activeDateFilter === '7days'
+          ? moment().subtract(7, 'days')
+          : moment().subtract(30, 'days')
+
+      if (cutOffDate) {
+        filtered = filtered.filter(s =>
+          moment(s.createdAt).isSameOrAfter(cutOffDate),
+        )
+      }
+    }
+
+    if (activeStatusFilter !== 'all') {
+      filtered = filtered.filter(s => s.status === activeStatusFilter)
+    }
+
+    switch (activeSortBy) {
+      case 'date-desc':
+        filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+        break
+      case 'date-asc':
+        filtered.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        )
+        break
+      default:
+        break
+    }
+
+    return filtered
+  }, [
+    shipments,
+    searchTerm,
+    activeSortBy,
+    activeDateFilter,
+    activeStatusFilter,
+  ])
 
   const handleSearchChange = (searchTermValue: string) => {
     setSearchTerm(searchTermValue)
-    const lowercasedFilter = searchTermValue.toLowerCase()
-    const filtered = list.filter(shipment => {
-      const lotNumber = shipment.id.toString()
-
-      return lotNumber.includes(lowercasedFilter)
-    })
-    setFilteredList(filtered)
   }
+
+  const handleOpenDrawer = () => {
+    setSelectedSortBy(activeSortBy)
+    setSelectedDateFilter(activeDateFilter)
+    setSelectedStatusFilter(activeStatusFilter)
+    onOpen()
+  }
+
+  const handleApplyFilters = () => {
+    setActiveSortBy(selectedSortBy)
+    setActiveDateFilter(selectedDateFilter)
+    setActiveStatusFilter(selectedStatusFilter)
+    onOpenChange()
+  }
+
+  const handleSortByChange = (value: string) => {
+    setSelectedSortBy(value as SortByType)
+  }
+
+  const handleDateFilterChange = (value: string) => {
+    setSelectedDateFilter(value as DateFilterType)
+  }
+
+  const handleStatusFilterChange = (value: string) => {
+    setSelectedStatusFilter(value as StatusFilterType)
+  }
+
+  // Límite de productos a mostrar antes de agrupar
+  const MAX_PRODUCTS_VISIBLE = 3
 
   return (
     <div className='flex flex-col gap-2'>
@@ -132,9 +235,14 @@ export default function ShipmentsList({ list }: ShipmentsListProps) {
             handleSearchChange={handleSearchChange}
             className='flex-1'
           />
-          {/* <Button isIconOnly color='primary' size='md' variant='flat' disabled>
-            <ArrowDownWideNarrow className='h-5 w-4 ' color='blue' />
-          </Button> */}
+          <Button
+            variant='flat'
+            color='primary'
+            isIconOnly
+            onPress={handleOpenDrawer}
+          >
+            <ListFilter className='w-5 h-5' />
+          </Button>
         </div>
         <Button
           as={Link}
@@ -147,10 +255,9 @@ export default function ShipmentsList({ list }: ShipmentsListProps) {
           Recepcionar envíos
         </Button>
       </div>
-
       <ul className='flex flex-col gap-4'>
-        {filteredList.length ? (
-          filteredList.map(shipment => {
+        {filteredAndSortedShipments.length ? (
+          filteredAndSortedShipments.map(shipment => {
             const statusInfo = STATUS_MAP[shipment.status]
             const products = shipment.movement.movementDetail
             const visibleProducts = products.slice(0, MAX_PRODUCTS_VISIBLE)
@@ -252,9 +359,72 @@ export default function ShipmentsList({ list }: ShipmentsListProps) {
             )
           })
         ) : (
-          <EmptyListMsg text='No hay envíos para mostrar' />
+          <EmptyListMsg text='No se encontraron envíos con esos filtros.' />
         )}
       </ul>
+      <Drawer
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        backdrop='blur'
+        placement='bottom'
+        size='2xl'
+      >
+        <DrawerContent>
+          {() => (
+            <>
+              <DrawerHeader className='flex flex-col gap-1'>
+                <h2 className='text-xl font-semibold'>
+                  Filtros y Ordenamiento
+                </h2>
+              </DrawerHeader>
+              <DrawerBody className='pb-10 pt-2'>
+                <div className='flex flex-col gap-6'>
+                  <RadioGroup
+                    label='Ordenar por'
+                    value={selectedSortBy}
+                    onValueChange={handleSortByChange}
+                  >
+                    <Radio value='date-desc'>Más recientes</Radio>
+                    <Radio value='date-asc'>Más antiguos</Radio>
+                  </RadioGroup>
+
+                  <RadioGroup
+                    label='Filtrar por fecha'
+                    value={selectedDateFilter}
+                    onValueChange={handleDateFilterChange}
+                  >
+                    <Radio value='all'>Todos</Radio>
+                    <Radio value='7days'>Últimos 7 días</Radio>
+                    <Radio value='30days'>Últimos 30 días</Radio>
+                  </RadioGroup>
+
+                  <RadioGroup
+                    label='Filtrar por estado'
+                    value={selectedStatusFilter}
+                    onValueChange={handleStatusFilterChange}
+                  >
+                    <Radio value='all'>Todos</Radio>
+                    {Object.entries(STATUS_MAP).map(([key, { label }]) => (
+                      <Radio key={key} value={key}>
+                        {label}
+                      </Radio>
+                    ))}
+                  </RadioGroup>
+                </div>
+              </DrawerBody>
+              <DrawerFooter>
+                <Button
+                  color='primary'
+                  className='w-full'
+                  onPress={handleApplyFilters}
+                >
+                  Aplicar
+                </Button>
+              </DrawerFooter>
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
