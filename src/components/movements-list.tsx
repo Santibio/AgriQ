@@ -245,27 +245,13 @@ const movementTypeMap: MovementTypeMap = {
       )
     },
   },
-  AVAILABLE: {
-    title: 'Disponible',
-    icon: Package,
-    color: 'text-green-600',
-    status: movementStatusMap.completed,
-    bgColor: 'bg-green-100',
-  },
   RETURNED: {
     title: 'Devolución',
     icon: RotateCcw,
     color: 'text-orange-600',
     status: movementStatusMap.warning,
     bgColor: 'bg-orange-100',
-  },
-  NOT_DELIVERED: {
-    title: 'No Entregado',
-    icon: AlertCircle,
-    color: 'text-red-600',
-    status: movementStatusMap.warning,
-    bgColor: 'bg-red-100',
-  },
+  }
 }
 
 const parseRecentMovements = (
