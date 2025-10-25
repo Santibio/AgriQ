@@ -60,6 +60,7 @@ import { useLoading } from '@/providers/loading-provider'
 import { timeAgo } from '@/lib/helpers/date'
 import CancellationModal, { CancellationReason } from './cancel-order-modal'
 import { Search } from '@/components/search'
+import { removeAccents } from '@/lib/helpers/text'
 
 interface OrderListProps {
   list: OrderWithRelations[]
@@ -293,16 +294,18 @@ export default function OrderList({ list }: OrderListProps) {
 
     // 1. Aplicar Filtro de Búsqueda (en vivo)
     if (searchTerm) {
-      const lowercasedFilter = searchTerm.toLowerCase()
+      const lowercasedFilter = removeAccents(searchTerm).toLowerCase()
       filtered = filtered.filter(order => {
         const lotNumber = order.id.toString()
-        const customerName = order.customer.name.toLowerCase()
-        const customerLastName = order.customer.lastName.toLowerCase()
+        const customerName = removeAccents(order.customer.name).toLowerCase()
+        const customerLastName = removeAccents(order.customer.lastName).toLowerCase()
+        const fullName = `${customerName} ${customerLastName}`
 
         return (
           lotNumber.includes(lowercasedFilter) ||
           customerName.includes(lowercasedFilter) ||
-          customerLastName.includes(lowercasedFilter)
+          customerLastName.includes(lowercasedFilter) ||
+          fullName.includes(lowercasedFilter)
         )
       })
     }
@@ -482,7 +485,7 @@ export default function OrderList({ list }: OrderListProps) {
         {/* --- Contenedor para Búsqueda y Filtro --- */}
         <div className='flex gap-2'>
           <Search
-            placeholder='Buscar por número de envío o nombre cliente'
+            placeholder='Buscar por número de pedido o nombre cliente'
             searchTerm={searchTerm}
             handleSearchChange={handleSearchChange}
             className='flex-1'

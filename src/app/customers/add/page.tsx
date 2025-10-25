@@ -4,7 +4,7 @@ import React from "react";
 
 export default function CustomerAddPage() {
   return (
-    <FormPage title="Agregar Cliente">
+    <FormPage title="Crear Cliente">
       <CustomerForm />
     </FormPage>
   );

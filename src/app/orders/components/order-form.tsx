@@ -303,7 +303,7 @@ export default function OrderForm({
         return toast.error('Ocurrió un error al procesar la solicitud.')
       }
 
-      toast.success('Orden creada correctamente')
+      toast.success(`Pedido ${isEditing ? 'editado' : 'creado'} correctamente`)
       router.push(paths.orders())
     } catch (error) {
       toast.error('Ocurrió un error al procesar la solicitud.')
@@ -349,6 +349,9 @@ export default function OrderForm({
                 orderFormData.customerId ? String(orderFormData.customerId) : ''
               }
               className='w-full'
+              listboxProps={{
+                emptyContent: 'No se encontro cliente.',
+              }}
             >
               {customers.map(customer => (
                 <AutocompleteItem key={customer.id}>
@@ -362,14 +365,14 @@ export default function OrderForm({
               onPress={onOpenCustomerDrawer}
               variant='flat'
               color='primary'
-              className='h-full'
+              className='min-h-[56px]'
             >
-              Agregar <br /> Cliente
+              Crear <br /> Cliente
             </Button>
           </div>
           <Card shadow='none' className='bg-slate-50 p-2'>
             <CardBody className='flex flex-col gap-4'>
-              <div className='flex gap-4'>
+              <div className='flex gap-4 flex-col'>
                 <Autocomplete
                   label='Producto'
                   placeholder='Buscar'
@@ -384,6 +387,9 @@ export default function OrderForm({
                   }
                   selectedKey={productFormFata.productId}
                   className='w-full'
+                  listboxProps={{
+                    emptyContent: 'No se encontro producto.',
+                  }}
                 >
                   {availableProducts.map(product => (
                     <AutocompleteItem key={product.productId}>
@@ -459,7 +465,7 @@ export default function OrderForm({
               >
                 {editingProductIndex !== null
                   ? 'Editar producto'
-                  : 'Agregar producto'}
+                  : 'Crear producto'}
               </Button>
             </CardBody>
           </Card>
@@ -489,8 +495,7 @@ export default function OrderForm({
             >
               Ver resumen del pedido
             </Button>
-            <div className='items-center justify-between flex w-full'>
-              <span>Cantidad de productos: {productsList.length}</span>
+            <div className='items-center justify-end flex w-full'>
               <span className='text-lg font-semibold'>
                 Total:{' '}
                 {convertToArgentinePeso(

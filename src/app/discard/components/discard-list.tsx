@@ -11,7 +11,7 @@ import {
   RadioGroup,
   useDisclosure,
 } from '@nextui-org/react'
-import { CircleX, FishOff, ListFilter, ShieldAlert } from 'lucide-react'
+import { CircleX, Clock, ListFilter, ShieldAlert } from 'lucide-react'
 import {
   Movement,
   MovementDetail,
@@ -57,10 +57,10 @@ const REASON_MAP: Record<
   }
 > = {
   EXPIRED: {
-    icon: <FishOff className='h-5 w-5' />,
-    background: 'bg-green-50',
-    text: 'text-green-700',
-    border: 'border-green-200',
+    icon: <Clock className='h-5 w-5' />,
+    background: 'bg-yellow-50',
+    text: 'text-yellow-700',
+    border: 'border-yellow-200',
     label: 'Vencido',
   },
   DAMAGED: {
@@ -104,7 +104,8 @@ export default function DiscardList({ discards }: DiscardListProps) {
     if (searchTerm) {
       const lowercasedFilter = searchTerm.toLowerCase()
       filtered = filtered.filter(discard => {
-        const productName = discard.movementDetail[0]?.batch.product.name.toLowerCase()
+        const productName =
+          discard.movementDetail[0]?.batch.product.name.toLowerCase()
         return productName.includes(lowercasedFilter)
       })
     }
@@ -123,9 +124,7 @@ export default function DiscardList({ discards }: DiscardListProps) {
     }
 
     if (activeReasonFilter !== 'all') {
-      filtered = filtered.filter(
-        d => d.discard?.reason === activeReasonFilter,
-      )
+      filtered = filtered.filter(d => d.discard?.reason === activeReasonFilter)
     }
 
     switch (activeSortBy) {
@@ -222,52 +221,52 @@ export default function DiscardList({ discards }: DiscardListProps) {
             const productInfo = movement.movementDetail[0]?.batch.product
             const quantity = movement.movementDetail[0]?.quantity
 
-          // Si falta información esencial, no se renderiza el elemento
-          if (!reasonInfo || !productInfo) return null
+            // Si falta información esencial, no se renderiza el elemento
+            if (!reasonInfo || !productInfo) return null
 
-          return (
-            <CardWithShadow key={movement.id}>
-              <div className='flex'>
-                {/* Icono y acento de color a la izquierda */}
-                <div
-                  className={`flex items-center justify-center p-4 ${reasonInfo.background} ${reasonInfo.text}`}
-                >
-                  {reasonInfo.icon}
-                </div>
-
-                {/* Contenido principal */}
-                <div className='flex flex-1 flex-col justify-center p-3'>
-                  <div className='flex items-start justify-between'>
-                    <h3 className='text-base font-semibold text-slate-800'>
-                      {capitalize(productInfo.name)}
-                    </h3>
-                    <p className='flex-shrink-0 text-xs text-slate-500 ml-4 whitespace-nowrap'>
-                      {timeAgo(movement.createdAt)}
-                    </p>
+            return (
+              <CardWithShadow key={`${movement.id} - ${movement.discard?.id}`}>
+                <div className='flex'>
+                  {/* Icono y acento de color a la izquierda */}
+                  <div
+                    className={`flex items-center justify-center p-4 ${reasonInfo.background} ${reasonInfo.text}`}
+                  >
+                    {reasonInfo.icon}
                   </div>
-                  <div className='mt-2 flex items-center justify-between text-sm'>
-                    {/* Badge para el motivo */}
-                    <div
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${reasonInfo.background} ${reasonInfo.text}`}
-                    >
-                      {reasonInfo.label}
+
+                  {/* Contenido principal */}
+                  <div className='flex flex-1 flex-col justify-center p-3'>
+                    <div className='flex items-start justify-between'>
+                      <h3 className='text-base font-semibold text-slate-800'>
+                        {capitalize(productInfo.name)}
+                      </h3>
+                      <p className='flex-shrink-0 text-xs text-slate-500 ml-4 whitespace-nowrap'>
+                        {timeAgo(movement.createdAt)}
+                      </p>
                     </div>
-                    {/* Cantidad */}
-                    <p className='font-bold text-slate-700'>
-                      {quantity}{' '}
-                      <span className='font-normal text-slate-500'>
-                        unidades
-                      </span>
-                    </p>
+                    <div className='mt-2 flex items-center justify-between text-sm'>
+                      {/* Badge para el motivo */}
+                      <div
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${reasonInfo.background} ${reasonInfo.text}`}
+                      >
+                        {reasonInfo.label}
+                      </div>
+                      {/* Cantidad */}
+                      <p className='font-bold text-slate-700'>
+                        {quantity}{' '}
+                        <span className='font-normal text-slate-500'>
+                          unidades
+                        </span>
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardWithShadow>
-          )
-        }))
-       : (
-        <EmptyListMsg text='No se encontraron descartes con esos filtros.' />
-      )}
+              </CardWithShadow>
+            )
+          })
+        ) : (
+          <EmptyListMsg text='No se encontraron descartes con esos filtros.' />
+        )}
       </div>
       <Drawer
         isOpen={isOpen}

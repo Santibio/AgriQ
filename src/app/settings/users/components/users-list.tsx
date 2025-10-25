@@ -15,8 +15,6 @@ import {
   useDisclosure,
 } from '@heroui/react'
 import UserMenu from './user-menu'
-import Link from 'next/link'
-import paths from '@/lib/paths'
 import clsx from 'clsx'
 import config from '@/config'
 import CardWithShadow from '@/components/card-with-shadow'
@@ -25,6 +23,7 @@ import { useMemo, useState } from 'react'
 import { Search } from '@/components/search'
 import EmptyListMsg from '@/components/empty-list'
 import { ListFilter } from 'lucide-react'
+import { removeAccents } from '@/lib/helpers/text'
 
 // --- Mapeo de estilos para los roles de usuario ---
 interface RoleStyle {
@@ -54,7 +53,8 @@ export default function UserList({ users }: UserListProps) {
   const [activeSortBy, setActiveSortBy] = useState<SortByType>('name-asc')
   const [activeStatusFilter, setActiveStatusFilter] =
     useState<StatusFilterType>('all')
-  const [activeRoleFilter, setActiveRoleFilter] = useState<RoleFilterType>('all')
+  const [activeRoleFilter, setActiveRoleFilter] =
+    useState<RoleFilterType>('all')
 
   const [selectedSortBy, setSelectedSortBy] = useState<SortByType>(activeSortBy)
   const [selectedStatusFilter, setSelectedStatusFilter] =
@@ -66,10 +66,21 @@ export default function UserList({ users }: UserListProps) {
     let filtered = [...users]
 
     if (searchTerm) {
-      const lowercasedFilter = searchTerm.toLowerCase()
+      const lowercasedFilter = removeAccents(searchTerm).toLowerCase()
       filtered = filtered.filter(user => {
-        const fullName = `${user.name} ${user.lastName}`.toLowerCase()
-        return fullName.includes(lowercasedFilter)
+        const userName = removeAccents(user.name).toLowerCase()
+        const lastName = removeAccents(user.lastName).toLowerCase()
+
+        // 1. Creamos el nombre completo
+        const fullName = `${userName} ${lastName}`
+        const fullNameRevert = `${lastName} ${userName}`
+
+        return (
+          userName.includes(lowercasedFilter) ||
+          lastName.includes(lowercasedFilter) ||
+          fullName.includes(lowercasedFilter) ||
+          fullNameRevert.includes(lowercasedFilter)
+        )
       })
     }
 
@@ -155,70 +166,63 @@ export default function UserList({ users }: UserListProps) {
         <ul className='flex flex-col gap-3'>
           {filteredAndSortedUsers.length > 0 ? (
             filteredAndSortedUsers.map(user => {
-            const roleConfig = config.roles.find(r => r.id === user.role)
-            const roleStyle = ROLE_STYLES[user.role] || ROLE_STYLES.default
+              const roleConfig = config.roles.find(r => r.id === user.role)
+              const roleStyle = ROLE_STYLES[user.role] || ROLE_STYLES.default
 
-            return (
-              <li key={user.id}>
-                <CardWithShadow
-                  className={clsx(
-                    'transition-opacity',
-                    !user.active && 'opacity-60',
-                  )}
-                >
-                  {/* Usamos un div relativo para posicionar el enlace superpuesto */}
-                  <div className='relative flex items-center justify-between p-3'>
-                    {/* Enlace superpuesto para usuarios activos */}
-                    {user.active && (
-                      <Link
-                        href={paths.userEdit(user.id.toString())}
-                        className='absolute inset-0 z-10'
-                        aria-label={`Editar usuario ${user.name}`}
-                      />
+              return (
+                <li key={user.id}>
+                  <CardWithShadow
+                    className={clsx(
+                      'transition-opacity',
+                      !user.active && 'opacity-60',
                     )}
+                  >
+                    {/* Usamos un div relativo para posicionar el enlace superpuesto */}
+                    <div className='relative flex items-center justify-between p-3'>
+                      {/* Contenido visible (Avatar, Nombre y Rol) */}
+                      <div className='flex items-center gap-4'>
+                        <Avatar
+                          src={user.avatar}
+                          showFallback
+                          className='flex-shrink-0'
+                        />
+                        <div className='flex flex-col'>
+                          <h3 className='font-bold capitalize text-slate-800'>
+                            {`${user.lastName}, ${user.name}`}
+                          </h3>
+                          {roleConfig && (
+                            <Chip
+                              size='sm'
+                              color={roleStyle.color}
+                              variant={roleStyle.variant}
+                              className='mt-1 w-fit' // w-fit para que el chip no ocupe todo el ancho
+                            >
+                              {roleConfig.label}
+                            </Chip>
+                          )}
+                        </div>
+                      </div>
 
-                    {/* Contenido visible (Avatar, Nombre y Rol) */}
-                    <div className='flex items-center gap-4'>
-                      <Avatar
-                        src={user.avatar}
-                        showFallback
-                        className='flex-shrink-0'
-                      />
-                      <div className='flex flex-col'>
-                        <h3 className='font-bold capitalize text-slate-800'>
-                          {`${user.lastName}, ${user.name}`}
-                        </h3>
-                        {roleConfig && (
-                          <Chip
-                            size='sm'
-                            color={roleStyle.color}
-                            variant={roleStyle.variant}
-                            className='mt-1 w-fit' // w-fit para que el chip no ocupe todo el ancho
-                          >
-                            {roleConfig.label}
+                      {/* Acciones y Estado (con z-index mayor para ser clickeable) */}
+                      <div className='relative z-20 flex items-center gap-3'>
+                        {!user.active && (
+                          <Chip size='sm' color='danger' variant='light'>
+                            Inactivo
                           </Chip>
+                        )}
+                        {user.username !== 'admin' && (
+                          <UserMenu userId={user.id} isActive={user.active} />
                         )}
                       </div>
                     </div>
-
-                    {/* Acciones y Estado (con z-index mayor para ser clickeable) */}
-                    <div className='relative z-20 flex items-center gap-3'>
-                      {!user.active && (
-                        <Chip size='sm' color='danger' variant='light'>
-                          Inactivo
-                        </Chip>
-                      )}
-                      <UserMenu userId={user.id} isActive={user.active} />
-                    </div>
-                  </div>
-                </CardWithShadow>
-              </li>
-            )
-          })
-        ) : (
-          <EmptyListMsg text='No se encontraron usuarios con esos filtros.' />
-        )}
-      </ul>
+                  </CardWithShadow>
+                </li>
+              )
+            })
+          ) : (
+            <EmptyListMsg text='No se encontraron usuarios con esos filtros.' />
+          )}
+        </ul>
       </div>
       <Drawer
         isOpen={isOpen}
@@ -231,7 +235,9 @@ export default function UserList({ users }: UserListProps) {
           {() => (
             <>
               <DrawerHeader className='flex flex-col gap-1'>
-                <h2 className='text-xl font-semibold'>Filtros y Ordenamiento</h2>
+                <h2 className='text-xl font-semibold'>
+                  Filtros y Ordenamiento
+                </h2>
               </DrawerHeader>
               <DrawerBody className='pb-10 pt-2'>
                 <div className='flex flex-col gap-6'>

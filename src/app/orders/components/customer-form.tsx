@@ -138,7 +138,7 @@ const CustomerForm = ({ onOpenChange }: CustomerFormProps) => {
         className='w-full mt-10'
         isLoading={isLoading}
       >
-        Agregar Cliente
+        Confirmar
       </Button>
     </form>
   )
@@ -160,7 +160,7 @@ export default function FormWrapper({
         {() => (
           <>
             <DrawerHeader className='flex flex-col gap-1'>
-              <h2 className='text-xl font-semibold'>Agregar cliente</h2>
+              <h2 className='text-xl font-semibold'>Crear Cliente</h2>
             </DrawerHeader>
             <DrawerBody className='pb-10 pt-2'>
               <CustomerForm onOpenChange={onOpenChange} />

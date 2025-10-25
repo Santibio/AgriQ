@@ -33,7 +33,13 @@ type ProductionWithRelations = Batch & {
   product: Product
 }
 
-type SortByType = 'date-desc' | 'date-asc' | 'quantity-desc' | 'quantity-asc'
+type SortByType =
+  | 'date-desc'
+  | 'date-asc'
+  | 'quantity-desc'
+  | 'quantity-asc'
+  | 'name-desc'
+  | 'name-asc'
 type DateFilterType = 'all' | '7days' | '30days'
 
 export default function ProductionsList({ productions }: ProductionsListProps) {
@@ -99,6 +105,12 @@ export default function ProductionsList({ productions }: ProductionsListProps) {
           (a, b) =>
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         )
+        break
+      case 'name-desc':
+        filtered.sort((a, b) => b.product.name.localeCompare(a.product.name))
+        break
+      case 'name-asc':
+        filtered.sort((a, b) => a.product.name.localeCompare(b.product.name))
         break
       case 'quantity-desc':
         filtered.sort((a, b) => b.initialQuantity - a.initialQuantity)

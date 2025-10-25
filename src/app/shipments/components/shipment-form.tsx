@@ -8,7 +8,6 @@ import {
   Card,
   Button,
   Image,
-  ScrollShadow,
   useDisclosure,
 } from '@heroui/react'
 import { createShipment, editShipment } from '../actions'
@@ -191,9 +190,9 @@ export default function ShipmentForm({
     <>
       <form
         onSubmit={handleSubmit}
-        className='flex flex-col justify-between h-[calc(100vh-210px)]'
+        className='flex flex-col justify-between gap-6'
       >
-        <ScrollShadow className='pb-1 flex-1 w-full' size={100}>
+        <div className='pb-1 flex-1 w-full'>
           <div className='flex flex-col gap-6'>
             {batchs.map(batch => (
               <Card
@@ -266,7 +265,7 @@ export default function ShipmentForm({
               </Card>
             ))}
           </div>
-        </ScrollShadow>
+        </div>
         {!isViewing && (
           <Button
             variant='ghost'

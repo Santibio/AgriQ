@@ -30,7 +30,7 @@ const paths = {
     return `/shipments/add?origin=${origin}&destination=${destination}`
   },
   shipmentEdit(shipmentId: string) {
-    return `/shipments/${shipmentId}`
+    return `/shipments/${shipmentId}?origin=DEPOSIT&destination=MARKET`
   },
   production() {
     return `/production`

@@ -23,6 +23,7 @@ import { ListFilter, Mail, Phone } from 'lucide-react'
 import EmptyListMsg from '@/components/empty-list'
 import { useMemo, useState } from 'react'
 import { Search } from '@/components/search'
+import { removeAccents } from '@/lib/helpers/text'
 
 interface CustomerListProps {
   customers: Customer[]
@@ -59,19 +60,25 @@ export default function CustomerList({ customers }: CustomerListProps) {
   const [selectedSortBy, setSelectedSortBy] = useState<SortByType>(activeSortBy)
   const [selectedStatusFilter, setSelectedStatusFilter] =
     useState<StatusFilterType>(activeStatusFilter)
-  const [selectedFiscalConditionFilter, setSelectedFiscalConditionFilter] = useState<FiscalConditionFilterType>(activeFiscalConditionFilter)
+  const [selectedFiscalConditionFilter, setSelectedFiscalConditionFilter] =
+    useState<FiscalConditionFilterType>(activeFiscalConditionFilter)
 
   const filteredAndSortedCustomers = useMemo(() => {
     let filtered = [...customers]
 
     if (searchTerm) {
-      const lowercasedFilter = searchTerm.toLowerCase()
+      const lowercasedFilter = removeAccents(searchTerm).toLowerCase()
       filtered = filtered.filter(customer => {
-        const userName = customer.name.toLowerCase()
-        const lastName = customer.lastName.toLowerCase()
+        const userName = removeAccents(customer.name).toLowerCase()
+        const lastName = removeAccents(customer.lastName).toLowerCase()
+
+        // 1. Creamos el nombre completo
+        const fullName = `${userName} ${lastName}`
+
         return (
           userName.includes(lowercasedFilter) ||
-          lastName.includes(lowercasedFilter)
+          lastName.includes(lowercasedFilter) ||
+          fullName.includes(lowercasedFilter) // Busca "juan perez" en "juan perez"
         )
       })
     }
@@ -114,7 +121,13 @@ export default function CustomerList({ customers }: CustomerListProps) {
     }
 
     return filtered
-  }, [customers, searchTerm, activeSortBy, activeStatusFilter, activeFiscalConditionFilter])
+  }, [
+    customers,
+    searchTerm,
+    activeSortBy,
+    activeStatusFilter,
+    activeFiscalConditionFilter,
+  ])
 
   const handleSearchChange = (searchTermValue: string) => {
     setSearchTerm(searchTermValue)
@@ -190,14 +203,14 @@ export default function CustomerList({ customers }: CustomerListProps) {
                   <div className='flex items-start justify-between'>
                     <div className='flex items-center gap-3'>
                       <Avatar
-                        name={`${customer.lastName} ${customer.name}`}
+                        name={`${customer.name} ${customer.lastName}`}
                         size='md'
                         color={fiscalColor}
                         className='flex-shrink-0'
                       />
                       <div className='flex flex-col'>
                         <h3 className='font-bold text-foreground capitalize'>
-                          {`${customer.lastName}, ${customer.name}`}
+                          {`${customer.name} ${customer.lastName}`}
                         </h3>
                         <p className='text-xs text-foreground-500'>
                           {fiscalLabel}

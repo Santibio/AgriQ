@@ -10,7 +10,6 @@ import {
   Button,
   Chip,
   Input,
-  ScrollShadow,
   useDisclosure,
 } from '@heroui/react'
 import { Search } from 'lucide-react'
@@ -237,85 +236,83 @@ export default function ProductsList({ products }: ProductsListProps) {
         </Card>
 
         {/* Lista de productos */}
-        <div>
+        <div className='w-full'>
           <h3 className='text-md font-semibold mb-2 mt-5'>
             Lista de productos ({filteredProducts.length})
           </h3>
           {filteredProducts.length === 0 ? (
             <EmptyListMsg text='No hay productos disponibles.' />
           ) : (
-            <ScrollShadow className='max-h-[46dvh]'>
-              <ul className='flex flex-col gap-2 mt-2'>
-                {filteredProducts.map(product => {
-                  const id = product.id
-                  const isSelected = selected.has(id)
-                  const isModified = localPrices[id] !== product.price
+            <ul className='flex flex-col gap-2 mt-2'>
+              {filteredProducts.map(product => {
+                const id = product.id
+                const isSelected = selected.has(id)
+                const isModified = localPrices[id] !== product.price
 
-                  return (
-                    <li key={id}>
-                      <Card
-                        shadow='none'
-                        className={`border rounded-xl w-full ${
-                          isSelected
-                            ? 'border-primary bg-primary/5'
-                            : isModified
-                            ? 'border-warning/40 bg-warning/5'
-                            : 'border-gray-200 bg-white'
-                        }`}
-                      >
-                        <CardBody className='flex justify-between gap-3 py-3 px-3 flex-row'>
-                          {/* Izquierda: checkbox + nombre + chip */}
-                          <div className='flex items-center gap-3 flex-1 min-w-0'>
-                            <Checkbox
-                              isSelected={isSelected}
-                              onValueChange={() => toggleSelect(id)}
-                              className='scale-110'
-                            />
-                            <div className='flex gap-1 truncate flex-col transition-all'>
-                              <span className='font-semibold text-sm capitalize truncate text-gray-800'>
-                                {product.name}
-                              </span>
-                              {isModified && (
-                                <Chip
-                                  color='warning'
-                                  variant='flat'
-                                  size='sm'
-                                  className='h-5 text-xs font-medium w-fit'
-                                >
-                                  Precio Editado
-                                </Chip>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Derecha: precio */}
-                          <NumberInput
-                            size='sm'
-                            min={0}
-                            value={localPrices[id]}
-                            onChange={val =>
-                              setLocalPrices(prev => ({
-                                ...prev,
-                                [id]: Number(val),
-                              }))
-                            }
-                            className='w-[100px]'
-                            hideStepper
-                            startContent={
-                              <div className='pointer-events-none flex items-center'>
-                                <span className='text-default-400 text-small'>
-                                  $
-                                </span>
-                              </div>
-                            }
+                return (
+                  <li key={id}>
+                    <Card
+                      shadow='none'
+                      className={`border rounded-xl w-full ${
+                        isSelected
+                          ? 'border-primary bg-primary/5'
+                          : isModified
+                          ? 'border-warning/40 bg-warning/5'
+                          : 'border-gray-200 bg-white'
+                      }`}
+                    >
+                      <CardBody className='flex justify-between gap-3 py-3 px-3 flex-row'>
+                        {/* Izquierda: checkbox + nombre + chip */}
+                        <div className='flex items-center gap-3 flex-1 min-w-0'>
+                          <Checkbox
+                            isSelected={isSelected}
+                            onValueChange={() => toggleSelect(id)}
+                            className='scale-110'
                           />
-                        </CardBody>
-                      </Card>
-                    </li>
-                  )
-                })}
-              </ul>
-            </ScrollShadow>
+                          <div className='flex gap-1 truncate flex-col transition-all'>
+                            <span className='font-semibold text-sm capitalize truncate text-gray-800'>
+                              {product.name}
+                            </span>
+                            {isModified && (
+                              <Chip
+                                color='warning'
+                                variant='flat'
+                                size='sm'
+                                className='h-5 text-xs font-medium w-fit'
+                              >
+                                Precio Editado
+                              </Chip>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Derecha: precio */}
+                        <NumberInput
+                          size='sm'
+                          min={0}
+                          value={localPrices[id]}
+                          onChange={val =>
+                            setLocalPrices(prev => ({
+                              ...prev,
+                              [id]: Number(val),
+                            }))
+                          }
+                          className='w-[100px]'
+                          hideStepper
+                          startContent={
+                            <div className='pointer-events-none flex items-center'>
+                              <span className='text-default-400 text-small'>
+                                $
+                              </span>
+                            </div>
+                          }
+                        />
+                      </CardBody>
+                    </Card>
+                  </li>
+                )
+              })}
+            </ul>
           )}
         </div>
       </FormWrapper>
