@@ -29,29 +29,38 @@ const SIM_TODAY = new Date()
 const initialUsers = [
   {
     username: 'admin',
-    password: '$2a$10$V8/J106/FqipLrC9lAQgweyylLXR3l0iNw4XaFyQ8OMYBPZd/hp06',
+    password: '$2a$10$MEqVIIYuSGvLW6gP.IEB.euAVVd7TzE8zN.4g8c88tw5ugN/FGxdW', // Tesis.2025
     role: Role.ADMIN,
-    name: 'Eve',
-    lastName: 'Perez',
-    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730323872/cszbndvswdehdcllgkje.jpg`,
+    name: 'Sistema',
+    lastName: 'Usuario',
+    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1761426713/mkzx9zyifpb0tkx6o8kb.jpg`,
     active: true,
   },
   {
-    username: 'seller',
-    password: '$2a$10$V8/J106/FqipLrC9lAQgweyylLXR3l0iNw4XaFyQ8OMYBPZd/hp06',
+    username: 'carolina.perez',
+    password: '$2a$10$MEqVIIYuSGvLW6gP.IEB.euAVVd7TzE8zN.4g8c88tw5ugN/FGxdW', // Tesis.2025
     role: Role.SELLER,
-    name: 'Fabri',
+    name: 'Carolina',
     lastName: 'Perez',
-    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730323872/hu4lguwldlcjhqdxr7rv.jpg`,
+    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1761426713/mkzx9zyifpb0tkx6o8kb.jpg`,
     active: true,
   },
   {
-    username: 'deposit',
-    password: '$2a$10$V8/J106/FqipLrC9lAQgweyylLXR3l0iNw4XaFyQ8OMYBPZd/hp06',
+    username: 'yanina.perez',
+    password: '$2a$10$MEqVIIYuSGvLW6gP.IEB.euAVVd7TzE8zN.4g8c88tw5ugN/FGxdW', // Tesis.2025
     role: Role.DEPOSIT,
-    name: 'Santiago',
+    name: 'Yanina',
     lastName: 'Perez',
-    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1730323872/kbhi0ukhcmwuxynf1tau.jpg`,
+    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1761426713/mkzx9zyifpb0tkx6o8kb.jpg`,
+    active: true,
+  },
+  {
+    username: 'juan.perez',
+    password: '$2a$10$MEqVIIYuSGvLW6gP.IEB.euAVVd7TzE8zN.4g8c88tw5ugN/FGxdW', // Tesis.2025
+    role: Role.ADMIN,
+    name: 'Juan',
+    lastName: 'Perez',
+    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1761426713/mkzx9zyifpb0tkx6o8kb.jpg`,
     active: true,
   },
 ]
@@ -161,7 +170,7 @@ const initialProducts = [
     code: '21041',
     name: 'bamia',
     category: 'hortalizas',
-    type: 'deHoja',
+    type: 'varios',
     presentation: 'paquete',
     active: false,
     price: 0,
@@ -269,7 +278,7 @@ const initialProducts = [
   },
   {
     code: '12041',
-    name: 'endeldo',
+    name: 'eneldo',
     category: 'aromaticas',
     type: 'frescas',
     presentation: 'paquete',
