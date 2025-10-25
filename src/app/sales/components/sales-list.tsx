@@ -115,7 +115,7 @@ function SaleCard({ sale, onSelectSale }: SaleCardProps) {
 
 export default function SalesList({ sales }: SalesListProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
-  const { isOpen: isOpenDetailOrderDrawer, onOpen: onOpenDetailOrderDrawer } =
+  const { isOpen: isOpenDetailOrderDrawer, onOpen: onOpenDetailOrderDrawer, onOpenChange: onOpenChangeDetailOrderDrawer } =
     useDisclosure()
   const [selectedSale, setSelectedSale] = useState<SaleWithRelations | null>(
     null,
@@ -272,7 +272,7 @@ export default function SalesList({ sales }: SalesListProps) {
       <SaleDetail
         sale={selectedSale}
         isOpen={isOpenDetailOrderDrawer}
-        onOpenChange={onOpenDetailOrderDrawer}
+        onOpenChange={onOpenChangeDetailOrderDrawer}
       />
       <Drawer
         isOpen={isOpen}

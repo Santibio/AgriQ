@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Drawer,
   DrawerBody,
@@ -18,6 +20,8 @@ import { capitalize } from '@/lib/utils'
 import { convertToArgentinePeso } from '@/lib/helpers/number'
 import { Share2Icon } from 'lucide-react'
 import CardWithShadow from '@/components/card-with-shadow'
+import { PDFDownloadLink } from '@react-pdf/renderer'
+import { SaleReceiptPDF } from './pdf-sale-detail'
 
 const PAYMENT_METHODS = {
   WIRE: 'Transferencia',
@@ -196,14 +200,23 @@ export default function SaleDetail({
 
             {/* Footer */}
             <DrawerFooter className='border-t border-gray-200 p-4'>
-              <Button
-                fullWidth
-                color='primary'
-                onPress={() => window.print()}
-                startContent={<Share2Icon className='h-4 w-4' />}
+              {/* 4. REEMPLAZAR EL BOTÓN */}
+              <PDFDownloadLink
+                document={<SaleReceiptPDF sale={sale} />}
+                fileName={`venta-${sale.id}-comprobante.pdf`}
+                className='w-full'
               >
-                Compartir comprobante
-              </Button>
+                {({ loading }) => (
+                  <Button
+                    fullWidth
+                    color='primary'
+                    isLoading={loading}
+                    startContent={<Share2Icon className='h-4 w-4' />}
+                  >
+                    {loading ? 'Generando PDF...' : 'Compartir Comprobante'}
+                  </Button>
+                )}
+              </PDFDownloadLink>
             </DrawerFooter>
           </div>
         )}

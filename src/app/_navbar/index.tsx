@@ -12,7 +12,7 @@ const NavBar = () => {
   if (pathname === '/login') return null
 
   return (
-    <nav className='fixed bottom-2 right-2'>
+    <nav className='fixed bottom-4 right-4'>
       <Button
         variant='shadow'
         isIconOnly
