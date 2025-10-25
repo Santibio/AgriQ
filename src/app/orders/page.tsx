@@ -12,6 +12,7 @@ import {
   Customer,
   Sale,
 } from '@prisma/client'
+import { getCurrentUser } from '@/lib/session'
 
 type OrderWithRelations = Order & {
   movements: (Movement & {
@@ -101,11 +102,18 @@ export default async function Orders() {
 
   // Procesar las órdenes para calcular totales
   const processedOrders = processOrders(currentOrders)
+  const user = await getCurrentUser()
+
+  const canCreateOrder = user?.role === 'ADMIN' || user?.role === 'SELLER'
 
   return (
     <ListPage
       title='Pedidos'
-      actions={<AddButton href={paths.orderAdd()}>Crear pedido</AddButton>}
+      actions={
+        canCreateOrder ? (
+          <AddButton href={paths.orderAdd()}>Crear pedido</AddButton>
+        ) : null
+      }
     >
       <Orderslist list={processedOrders} />
     </ListPage>

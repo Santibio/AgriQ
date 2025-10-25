@@ -2,6 +2,7 @@ import ListPage from '@/components/layout/list-page'
 import ShipmentsList from './components/shipments-list'
 import { getShipments } from '@/services/shipments.service'
 import ShipmentAction from './components/shipment-action'
+import { getCurrentUser } from '@/lib/session'
 
 export default async function Shipments() {
   const shipments = await getShipments()
@@ -17,9 +18,18 @@ export default async function Shipments() {
     return productAName.localeCompare(productBName)
   })
 
+  const user = await getCurrentUser()
+
+  const userRole = user!.role
+
+  const canReceiveShipment = userRole === 'ADMIN' || userRole === 'SELLER'
+
   return (
-    <ListPage title='Envíos' actions={<ShipmentAction />}>
-      <ShipmentsList shipments={shipments} />
+    <ListPage title='Envíos' actions={<ShipmentAction userRole={userRole} />}>
+      <ShipmentsList
+        shipments={shipments}
+        canReceiveShipment={canReceiveShipment}
+      />
     </ListPage>
   )
 }

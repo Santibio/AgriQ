@@ -45,6 +45,7 @@ import moment from 'moment'
 
 interface ShipmentsListProps {
   shipments: ShipmentWithRelations[]
+  canReceiveShipment: boolean
 }
 
 type SortByType = 'date-desc' | 'date-asc'
@@ -123,7 +124,10 @@ const destinationMap: Record<Location, string> = {
 
 // --- Componente Principal ---
 
-export default function ShipmentsList({ shipments }: ShipmentsListProps) {
+export default function ShipmentsList({
+  shipments,
+  canReceiveShipment,
+}: ShipmentsListProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -244,16 +248,18 @@ export default function ShipmentsList({ shipments }: ShipmentsListProps) {
             <ListFilter className='w-5 h-5' />
           </Button>
         </div>
-        <Button
-          as={Link}
-          color='primary'
-          size='sm'
-          endContent={<ChevronRight className='h-4 w-4' />}
-          variant='flat'
-          href={paths.shipmentReception()}
-        >
-          Recepcionar envíos
-        </Button>
+        {canReceiveShipment && (
+          <Button
+            as={Link}
+            color='primary'
+            size='sm'
+            endContent={<ChevronRight className='h-4 w-4' />}
+            variant='flat'
+            href={paths.shipmentReception()}
+          >
+            Recepcionar envíos
+          </Button>
+        )}
       </div>
       <ul className='flex flex-col gap-4'>
         {filteredAndSortedShipments.length ? (

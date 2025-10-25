@@ -115,6 +115,8 @@ function SaleCard({ sale, onSelectSale }: SaleCardProps) {
 
 export default function SalesList({ sales }: SalesListProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
+  const { isOpen: isOpenDetailOrderDrawer, onOpen: onOpenDetailOrderDrawer } =
+    useDisclosure()
   const [selectedSale, setSelectedSale] = useState<SaleWithRelations | null>(
     null,
   )
@@ -138,7 +140,8 @@ export default function SalesList({ sales }: SalesListProps) {
     if (searchTerm) {
       const lowercasedFilter = searchTerm.toLowerCase()
       filtered = filtered.filter(sale => {
-        const customerName = `${sale.order.customer.name} ${sale.order.customer.lastName}`.toLowerCase()
+        const customerName =
+          `${sale.order.customer.name} ${sale.order.customer.lastName}`.toLowerCase()
         return customerName.includes(lowercasedFilter)
       })
     }
@@ -200,7 +203,7 @@ export default function SalesList({ sales }: SalesListProps) {
 
   const handleSelectSale = (sale: SaleWithRelations) => {
     setSelectedSale(sale)
-    onOpenChange()
+    onOpenDetailOrderDrawer()
   }
 
   const handleOpenDrawer = () => {
@@ -268,8 +271,8 @@ export default function SalesList({ sales }: SalesListProps) {
       </div>
       <SaleDetail
         sale={selectedSale}
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
+        isOpen={isOpenDetailOrderDrawer}
+        onOpenChange={onOpenDetailOrderDrawer}
       />
       <Drawer
         isOpen={isOpen}
@@ -282,7 +285,9 @@ export default function SalesList({ sales }: SalesListProps) {
           {() => (
             <>
               <DrawerHeader className='flex flex-col gap-1'>
-                <h2 className='text-xl font-semibold'>Filtros y Ordenamiento</h2>
+                <h2 className='text-xl font-semibold'>
+                  Filtros y Ordenamiento
+                </h2>
               </DrawerHeader>
               <DrawerBody className='pb-10 pt-2'>
                 <div className='flex flex-col gap-6'>

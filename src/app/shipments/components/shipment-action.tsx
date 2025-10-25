@@ -14,7 +14,7 @@ import {
   Input,
 } from '@heroui/react'
 import { useState } from 'react'
-import { ArrowLeftRight, Truck } from 'lucide-react'
+import { ArrowLeftRight, ArrowRight, Truck } from 'lucide-react'
 import paths from '@/lib/paths'
 
 const LOCATION_MAP = {
@@ -22,16 +22,23 @@ const LOCATION_MAP = {
   MARKET: 'Mercado',
 }
 
-export default function ShipmentAction() {
+export default function ShipmentAction({ userRole }: { userRole: string }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const router = useRouter()
   const [location, setLocation] = useState<{
     origin: Location
     destination: Location
-  }>({
-    origin: Location.DEPOSIT,
-    destination: Location.MARKET,
-  })
+  }>(
+    userRole === 'ADMIN' || userRole === 'DEPOSIT'
+      ? {
+          origin: Location.DEPOSIT,
+          destination: Location.MARKET,
+        }
+      : {
+          origin: Location.MARKET,
+          destination: Location.DEPOSIT,
+        },
+  )
 
   const handleLocationChange = () => {
     setLocation(prev => ({
@@ -72,15 +79,25 @@ export default function ShipmentAction() {
                     disabled
                     labelPlacement='outside'
                   />
-
-                  <Button
-                    isIconOnly
-                    onPress={handleLocationChange}
-                    variant='light'
-                    className='items-end'
-                  >
-                    <ArrowLeftRight className='h-6 w-6 text-slate-500' />
-                  </Button>
+                  {userRole === 'ADMIN' ? (
+                    <Button
+                      isIconOnly
+                      onPress={handleLocationChange}
+                      variant='light'
+                      className='items-end'
+                    >
+                      <ArrowLeftRight className='h-6 w-6 text-slate-500' />
+                    </Button>
+                  ) : (
+                    <Button
+                      isIconOnly
+                      variant='light'
+                      className='items-end'
+                      disabled
+                    >
+                      <ArrowRight className='h-6 w-6 text-slate-500' />
+                    </Button>
+                  )}
                   <Input
                     label='Destino'
                     labelPlacement='outside'
