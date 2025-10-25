@@ -38,15 +38,17 @@ export default function UserMenu({ user }: UserMenuProps) {
           <p className='font-semibold'>Ingreso con</p>
           <p className='font-semibold text-primary'>{user.username}</p>
         </DropdownItem>
-        <DropdownItem
-          key='setting'
-          color='primary'
-          as={Link}
-          href={paths.settings()}
-          startContent={<Settings className='size-4' />}
-        >
-          Ajustes
-        </DropdownItem>
+        {user.role === 'ADMIN' ? (
+          <DropdownItem
+            key='setting'
+            color='primary'
+            as={Link}
+            href={paths.settings()}
+            startContent={<Settings className='size-4' />}
+          >
+            Ajustes
+          </DropdownItem>
+        ) : null}
         <DropdownItem
           key='logout'
           color='danger'
