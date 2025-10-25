@@ -317,7 +317,6 @@ export default function OrderForm({
       <FormWrapper
         onSubmit={handleSubmit}
         buttonLabel='Confirmar'
-        showScrollShadow={false}
         buttonProps={{
           isLoading,
           isDisabled:

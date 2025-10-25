@@ -79,7 +79,6 @@ export default function ProductionForm({
       buttonLabel='Confirmar'
       buttonProps={{ isLoading, isDisabled: isLoading }}
       showButton={canEdit}
-      showScrollShadow={false}
     >
       <div className='flex flex-col gap-4 w-full'>
         <Controller

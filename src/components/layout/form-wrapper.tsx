@@ -7,7 +7,6 @@ interface FormWrapperProps {
   buttonLabel: string
   buttonProps?: React.ComponentProps<typeof Button> // para extender props del botón
   showButton?: boolean
-  showScrollShadow?: boolean
 }
 
 export default function FormWrapper({

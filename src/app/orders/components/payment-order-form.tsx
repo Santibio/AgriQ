@@ -149,7 +149,6 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
     <FormWrapper
       onSubmit={handleSubmit}
       buttonLabel='Confirmar'
-      showScrollShadow={false}
       buttonProps={{ isLoading }}
     >
       <div className='flex flex-col gap-6 w-full h-full pb-10'>
