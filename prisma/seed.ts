@@ -31,8 +31,8 @@ const initialUsers = [
     username: 'admin',
     password: '$2a$10$MEqVIIYuSGvLW6gP.IEB.euAVVd7TzE8zN.4g8c88tw5ugN/FGxdW', // Tesis.2025
     role: Role.ADMIN,
-    name: 'Sistema',
-    lastName: 'Usuario',
+    name: 'Administrador',
+    lastName: 'Del Sistema',
     avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1761426713/mkzx9zyifpb0tkx6o8kb.jpg`,
     active: true,
   },
@@ -42,7 +42,7 @@ const initialUsers = [
     role: Role.SELLER,
     name: 'Carolina',
     lastName: 'Perez',
-    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1761426713/mkzx9zyifpb0tkx6o8kb.jpg`,
+    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1761428728/xnjn8yq9nphlfxdyl3ak.jpg`,
     active: true,
   },
   {
@@ -51,7 +51,7 @@ const initialUsers = [
     role: Role.DEPOSIT,
     name: 'Yanina',
     lastName: 'Perez',
-    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1761426713/mkzx9zyifpb0tkx6o8kb.jpg`,
+    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1761428800/cauhdemrbyvvgptkqly8.jpg`,
     active: true,
   },
   {
@@ -60,7 +60,7 @@ const initialUsers = [
     role: Role.ADMIN,
     name: 'Juan',
     lastName: 'Perez',
-    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1761426713/mkzx9zyifpb0tkx6o8kb.jpg`,
+    avatar: `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v1761428877/cbz8jm4h76qhnel4tqhy.jpg`,
     active: true,
   },
 ]

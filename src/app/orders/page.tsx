@@ -115,7 +115,7 @@ export default async function Orders() {
         ) : null
       }
     >
-      <Orderslist list={processedOrders} />
+      <Orderslist list={processedOrders} canCreateOrder={canCreateOrder}/>
     </ListPage>
   )
 }

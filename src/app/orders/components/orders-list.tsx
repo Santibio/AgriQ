@@ -64,6 +64,7 @@ import { removeAccents } from '@/lib/helpers/text'
 
 interface OrderListProps {
   list: OrderWithRelations[]
+  canCreateOrder: boolean
 }
 
 type OrderWithRelations = Order & {
@@ -160,6 +161,7 @@ const getAvailableActions = (
     handleOpenDetailOrderDrawer: () => void
     handleOpenCancelModal: () => void
   },
+  canCreateOrder: boolean,
 ) => {
   const actions = [
     {
@@ -181,14 +183,16 @@ const getAvailableActions = (
       label: 'Editar pedido',
       icon: <Edit />,
       onPress: () => router.push(paths.orderToEdit(order.id.toString())),
-      isVisible: order?.statusPayment === StatusPayment.UNPAID,
+      isVisible:
+        order?.statusPayment === StatusPayment.UNPAID && canCreateOrder,
     },
     {
       key: 'charge',
       label: 'Cobrar pedido',
       icon: <DollarSign />,
       onPress: () => router.push(paths.orderToCharge(order.id.toString())),
-      isVisible: order?.statusPayment === StatusPayment.UNPAID,
+      isVisible:
+        order?.statusPayment === StatusPayment.UNPAID && canCreateOrder,
     },
     {
       key: 'prepare',
@@ -197,7 +201,8 @@ const getAvailableActions = (
       onPress: handlers.handleStatusDoing,
       isVisible:
         order?.statusDoing === StatusDoing.PENDING &&
-        order.statusPayment !== StatusPayment.CANCELLED,
+        order.statusPayment !== StatusPayment.CANCELLED &&
+        canCreateOrder,
     },
     {
       key: 'deliver',
@@ -206,7 +211,8 @@ const getAvailableActions = (
       onPress: handlers.handleStatusPedingToDeliver,
       isVisible:
         order?.statusDoing === StatusDoing.READY_TO_DELIVER &&
-        order?.statusPayment === StatusPayment.PAID,
+        order?.statusPayment === StatusPayment.PAID &&
+        canCreateOrder,
     },
 
     {
@@ -216,7 +222,8 @@ const getAvailableActions = (
       onPress: handlers.handleOpenCancelModal,
       isVisible:
         order?.statusDoing !== StatusDoing.DELIVERED &&
-        order?.statusPayment !== StatusPayment.CANCELLED,
+        order?.statusPayment !== StatusPayment.CANCELLED &&
+        canCreateOrder,
     },
   ]
 
@@ -232,7 +239,7 @@ type SortByType =
   | 'name-asc'
   | 'name-desc'
 
-export default function OrderList({ list }: OrderListProps) {
+export default function OrderList({ list, canCreateOrder }: OrderListProps) {
   const router = useRouter()
   const { showLoading, hideLoading } = useLoading()
 
@@ -298,7 +305,9 @@ export default function OrderList({ list }: OrderListProps) {
       filtered = filtered.filter(order => {
         const lotNumber = order.id.toString()
         const customerName = removeAccents(order.customer.name).toLowerCase()
-        const customerLastName = removeAccents(order.customer.lastName).toLowerCase()
+        const customerLastName = removeAccents(
+          order.customer.lastName,
+        ).toLowerCase()
         const fullName = `${customerName} ${customerLastName}`
 
         return (
@@ -629,12 +638,17 @@ export default function OrderList({ list }: OrderListProps) {
               <DrawerBody className='pb-10 pt-2'>
                 <div>
                   <Listbox>
-                    {getAvailableActions(selectedOrder!, router, {
-                      handleStatusDoing,
-                      handleStatusPedingToDeliver,
-                      handleOpenDetailOrderDrawer,
-                      handleOpenCancelModal,
-                    }).map(action => (
+                    {getAvailableActions(
+                      selectedOrder!,
+                      router,
+                      {
+                        handleStatusDoing,
+                        handleStatusPedingToDeliver,
+                        handleOpenDetailOrderDrawer,
+                        handleOpenCancelModal,
+                      },
+                      canCreateOrder,
+                    ).map(action => (
                       <ListboxItem
                         key={action.key}
                         startContent={action.icon}
