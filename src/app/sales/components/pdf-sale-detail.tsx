@@ -201,9 +201,6 @@ export function SaleReceiptPDF({ sale }: { sale: SaleWithRelations }) {
                   <Text style={{ fontWeight: 'bold' }}>
                     {capitalize(item.productName)}
                   </Text>
-                  <Text style={{ fontSize: 9, color: '#555' }}>
-                    {item.quantity} x {convertToArgentinePeso(item.price)}
-                  </Text>
                 </View>
                 <Text style={styles.colQty}>{item.quantity}</Text>
                 <Text style={styles.colPrice}>
