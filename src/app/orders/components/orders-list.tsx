@@ -614,7 +614,7 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
               )
             })
           ) : (
-            <EmptyListMsg text='No hay envíos pendientes' />
+            <EmptyListMsg text='No hay pedidos pendientes' />
           )}
         </ul>
       </div>

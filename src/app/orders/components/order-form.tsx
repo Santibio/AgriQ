@@ -465,7 +465,7 @@ export default function OrderForm({
               >
                 {editingProductIndex !== null
                   ? 'Editar producto'
-                  : 'Crear producto'}
+                  : 'Agregar producto'}
               </Button>
             </CardBody>
           </Card>
