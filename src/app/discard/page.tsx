@@ -33,10 +33,10 @@ export default async function Shipments() {
 
   return (
     <ListPage
-      title='Descartes'
+      title='Lista de descartes'
       actions={
         canCreateDiscard ? (
-          <AddButton href={paths.discardAdd()}>Crear descarte</AddButton>
+          <AddButton href={paths.discardAdd()}>Registrar descarte</AddButton>
         ) : null
       }
     >

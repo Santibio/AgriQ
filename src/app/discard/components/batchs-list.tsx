@@ -90,7 +90,7 @@ export default function DiscardList({ batchs }: DiscardListProps) {
 
   return (
     <>
-      <ul className='flex gap-2 flex-col'>
+      <ul className='flex gap-2 flex-col pb-20'>
         {batchs.length ? (
           batchs.map(batch => (
             <Card
@@ -175,6 +175,7 @@ export default function DiscardList({ batchs }: DiscardListProps) {
                       label='Razón del descarte'
                       onChange={handleOnchange}
                       name='reason'
+                      isRequired
                     >
                       {config.conditionsToDiscard.map(condition => (
                         <SelectItem key={condition.id}>
