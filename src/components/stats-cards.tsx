@@ -56,9 +56,9 @@ export default async function StatsCards() {
 
   const statsData: StatCardProps[] = [
     {
-      title: 'Producción de hoy',
-      value: `${stats.productionStats.batchesToday} Lote${
-        stats.productionStats.batchesToday === 1 ? '' : 's'
+      title: 'Producción de la semana',
+      value: `${stats.productionStats.batchesThisWeek} Lote${
+        stats.productionStats.batchesThisWeek === 1 ? '' : 's'
       }`,
       change: `${
         stats.productionStats.productionChange >= 0 ? '+' : ''
@@ -77,7 +77,7 @@ export default async function StatsCards() {
     },
 
     {
-      title: 'Ventas del mes',
+      title: 'Ventas de la semana',
       value: `${convertToArgentinePeso(stats.salesStats.monthlySales)}`,
       change: `${stats.salesStats.salesChange >= 0 ? '+' : ''}${Math.round(
         stats.salesStats.salesChange,
@@ -86,15 +86,6 @@ export default async function StatsCards() {
       icon: DollarSign,
     },
   ]
-  // {
-  //   title: 'Envíos pendientes',
-  //   value: `${stats.shipmentsStats.shipmentsToday}`,
-  //   change: `${
-  //     stats.shipmentsStats.shipmentsChange >= 0 ? '+' : ''
-  //   }${Math.round(stats.shipmentsStats.shipmentsChange)}%`,
-  //   trend: stats.shipmentsStats.shipmentsChange >= 0 ? 'up' : 'down',
-  //   icon: Truck,
-  // },
 
   return (
     <div className='flex flex-col gap-4'>

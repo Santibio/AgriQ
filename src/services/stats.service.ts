@@ -9,8 +9,8 @@ const prisma = new PrismaClient()
 
 interface Stats {
   productionStats: {
-    batchesToday: number
-    batchesYesterday: number
+    batchesThisWeek: number
+    batchesLastWeek: number
     productionChange: number
   }
   salesStats: {

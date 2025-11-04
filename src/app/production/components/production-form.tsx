@@ -33,10 +33,7 @@ export default function ProductionForm({
 
   const isEditing = Boolean(batch)
 
-  type FormInputs = typeof isEditing extends boolean
-    ? AddProductionInputs
-    : AddProductionInputs
-
+  type FormInputs = AddProductionInputs
   const {
     control,
     handleSubmit,
@@ -44,7 +41,7 @@ export default function ProductionForm({
   } = useForm<FormInputs>({
     resolver: zodResolver(CreateProductionFormSchema),
     defaultValues: {
-      product: String(batch?.productId) || '',
+      product: batch?.productId ? String(batch?.productId) : '',
       quantity: batch?.initialQuantity || undefined,
     },
   })
@@ -52,6 +49,7 @@ export default function ProductionForm({
   const [isLoading, setIsloading] = useState<boolean>(false)
 
   const onSubmit = async (data: AddProductionInputs) => {
+    console.log('🚀 ~ onSubmit ~ data:', data)
     try {
       setIsloading(true)
       const response = isEditing
@@ -130,7 +128,9 @@ export default function ProductionForm({
               label='Cantidad'
               placeholder='Ingresar cantidad'
               value={field.value?.toString() ?? ''}
-              onChange={e => field.onChange(Number(e.target.value))}
+              onChange={e => {
+                field.onChange(Number(e.target.value))
+              }}
               isInvalid={!!errors.quantity}
               errorMessage={errors.quantity?.message}
               isDisabled={!canEdit}

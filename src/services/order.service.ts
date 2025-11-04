@@ -8,14 +8,18 @@ export async function getPendingOrdersCount(): Promise<number> {
 
 export async function getOrdersStats() {
   const today = new Date()
-  const startOfWeek = new Date(
-    today.setDate(
-      today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1),
-    ),
-  )
-  const startOfLastWeek = new Date(
-    startOfWeek.getTime() - 7 * 24 * 60 * 60 * 1000,
-  )
+  const startOfWeek = new Date(today)
+  startOfWeek.setDate(today.getDate() - today.getDay())
+  startOfWeek.setHours(0, 0, 0, 0)
+  
+  const lastWeek = new Date()
+  lastWeek.setDate(lastWeek.getDate() - 7)
+  const startOfLastWeek = new Date(lastWeek)
+  startOfLastWeek.setDate(startOfLastWeek.getDate() - startOfLastWeek.getDay())
+  startOfLastWeek.setHours(0, 0, 0, 0)
+  const endOfLastWeek = new Date(startOfLastWeek)
+  endOfLastWeek.setDate(startOfLastWeek.getDate() + 6)
+  endOfLastWeek.setHours(23, 59, 59, 999)
 
   const [ordersThisWeek, ordersLastWeek] = await Promise.all([
     db.order.count({
