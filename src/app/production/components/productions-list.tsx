@@ -228,7 +228,7 @@ export default function ProductionsList({ productions }: ProductionsListProps) {
             <>
               <DrawerHeader className='flex flex-col gap-1'>
                 <h2 className='text-xl font-semibold'>
-                  Filtros y Ordenamiento
+                  Búsqueda y Ordenamiento
                 </h2>
               </DrawerHeader>
               <DrawerBody className='pb-10 pt-2'>
@@ -248,7 +248,7 @@ export default function ProductionsList({ productions }: ProductionsListProps) {
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por fecha'
+                    label='Buscar por fecha'
                     value={selectedDateFilter}
                     onValueChange={handleDateFilterChange}
                   >

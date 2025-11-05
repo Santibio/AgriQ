@@ -2,7 +2,7 @@
 
 import db from '@/lib/db'
 
-// Definimos los tipos para los filtros y la respuesta
+// Definimos los tipos para los Búsqueda y la respuesta
 export type TimeFilter = 'day' | 'week' | 'month'
 export type MetricFilter = 'quantity' | 'price'
 export type SortOrder = 'top' | 'bottom'
@@ -14,7 +14,7 @@ export interface SalesRank {
 }
 
 /**
- * Obtiene el ranking de los 5 productos más o menos vendidos según varios filtros.
+ * Obtiene el ranking de los 5 productos más o menos vendidos según varios Búsqueda.
  * @param timeFilter - El período de tiempo ('day', 'week', 'month').
  * @param metricFilter - La métrica para ordenar ('quantity' o 'price').
  * @param sortOrder - El orden ('top' para más vendidos, 'bottom' para menos).

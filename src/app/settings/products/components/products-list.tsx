@@ -283,7 +283,7 @@ export default function ProductsList({ products }: ProductsListProps) {
             )
           })
         ) : (
-          <EmptyListMsg text='No se encontraron productos con esos filtros.' />
+          <EmptyListMsg text='No se encontraron productos con esos Búsqueda.' />
         )}
       </ul>
       </div>
@@ -298,7 +298,7 @@ export default function ProductsList({ products }: ProductsListProps) {
           {() => (
             <>
               <DrawerHeader className='flex flex-col gap-1'>
-                <h2 className='text-xl font-semibold'>Filtros y Ordenamiento</h2>
+                <h2 className='text-xl font-semibold'>Búsqueda y Ordenamiento</h2>
               </DrawerHeader>
               <DrawerBody className='pb-10 pt-2'>
                 <div className='flex flex-col gap-6'>
@@ -314,7 +314,7 @@ export default function ProductsList({ products }: ProductsListProps) {
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por estado'
+                    label='Buscar por estado'
                     value={selectedStatusFilter}
                     onValueChange={handleStatusFilterChange}
                   >
@@ -324,7 +324,7 @@ export default function ProductsList({ products }: ProductsListProps) {
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por categoría'
+                    label='Buscar por categoría'
                     value={selectedCategoryFilter}
                     onValueChange={handleCategoryFilterChange}
                   >
@@ -337,7 +337,7 @@ export default function ProductsList({ products }: ProductsListProps) {
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por tipo'
+                    label='Buscar por tipo'
                     value={selectedTypeFilter}
                     onValueChange={handleTypeFilterChange}
                   >

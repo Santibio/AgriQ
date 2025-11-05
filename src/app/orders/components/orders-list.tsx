@@ -230,7 +230,7 @@ const getAvailableActions = (
   return actions.filter(action => action.isVisible)
 }
 
-// --- Nuevos Tipos para Filtros y Orden ---
+// --- Nuevos Tipos para Búsqueda y Orden ---
 type SortByType =
   | 'date-desc'
   | 'date-asc'
@@ -256,7 +256,7 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
     onOpenChange: onOpenChangeDetailOrderDrawer,
   } = useDisclosure()
 
-  // --- Nuevo Disclosure para el Drawer de Filtros ---
+  // --- Nuevo Disclosure para el Drawer de Búsqueda ---
   const {
     isOpen: isFilterOpen,
     onOpen: onOpenFilter,
@@ -288,7 +288,7 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
     StatusPayment[]
   >([])
 
-  // --- Estado "Seleccionado" (temporal, para el drawer de filtros) ---
+  // --- Estado "Seleccionado" (temporal, para el drawer de Búsqueda) ---
   const [selectedSortBy, setSelectedSortBy] = useState<SortByType>(activeSortBy)
   const [selectedStatusDoing, setSelectedStatusDoing] =
     useState<StatusDoing[]>(activeStatusDoing)
@@ -378,7 +378,7 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
     setSearchTerm(searchTermValue)
   }
 
-  // --- Handlers para el Drawer de Filtros ---
+  // --- Handlers para el Drawer de Búsqueda ---
   const handleOpenFilterDrawer = () => {
     // Sincroniza el estado "seleccionado" con el "activo"
     setSelectedSortBy(activeSortBy)
@@ -394,7 +394,7 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
     setActiveStatusPayment(selectedStatusPayment)
     onOpenChangeFilter()
   }
-  // --- Fin Handlers Filtros ---
+  // --- Fin Handlers Búsqueda ---
 
   const handleOpenDetailOrderDrawer = () => {
     onOpenDetailOrderDrawer()
@@ -665,7 +665,7 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
         </DrawerContent>
       </Drawer>
 
-      {/* --- NUEVO DRAWER DE FILTROS Y ORDENAMIENTO --- */}
+      {/* --- NUEVO DRAWER DE Búsqueda Y ORDENAMIENTO --- */}
       <Drawer
         isOpen={isFilterOpen}
         onOpenChange={onOpenChangeFilter}
@@ -678,7 +678,7 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
             <>
               <DrawerHeader className='flex flex-col gap-1'>
                 <h2 className='text-xl font-semibold'>
-                  Filtros y Ordenamiento
+                  Búsqueda y Ordenamiento
                 </h2>
               </DrawerHeader>
               <DrawerBody className='pb-10 pt-2'>
@@ -699,7 +699,7 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
 
                   {/* --- Filtro Estado de Pedido --- */}
                   <CheckboxGroup
-                    label='Filtrar por estado'
+                    label='Buscar por estado'
                     value={selectedStatusDoing}
                     onValueChange={v =>
                       setSelectedStatusDoing(v as StatusDoing[])
@@ -717,7 +717,7 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
 
                   {/* --- Filtro Estado de Pago --- */}
                   <CheckboxGroup
-                    label='Filtrar por pago'
+                    label='Buscar por pago'
                     value={selectedStatusPayment}
                     onChange={v =>
                       setSelectedStatusPayment(

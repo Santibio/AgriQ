@@ -265,7 +265,7 @@ export default function SalesList({ sales }: SalesListProps) {
               />
             ))
           ) : (
-            <EmptyListMsg text='No se encontraron ventas con esos filtros.' />
+            <EmptyListMsg text='No se encontraron ventas con esos Búsqueda.' />
           )}
         </div>
       </div>
@@ -286,7 +286,7 @@ export default function SalesList({ sales }: SalesListProps) {
             <>
               <DrawerHeader className='flex flex-col gap-1'>
                 <h2 className='text-xl font-semibold'>
-                  Filtros y Ordenamiento
+                  Búsqueda y Ordenamiento
                 </h2>
               </DrawerHeader>
               <DrawerBody className='pb-10 pt-2'>
@@ -303,7 +303,7 @@ export default function SalesList({ sales }: SalesListProps) {
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por fecha'
+                    label='Buscar por fecha'
                     value={selectedDateFilter}
                     onValueChange={handleDateFilterChange}
                   >
@@ -313,7 +313,7 @@ export default function SalesList({ sales }: SalesListProps) {
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por método de pago'
+                    label='Buscar por método de pago'
                     value={selectedPaymentMethodFilter}
                     onValueChange={handlePaymentMethodFilterChange}
                   >

@@ -41,7 +41,7 @@ export default function FilterDrawer({
         {() => (
           <>
             <DrawerHeader className='flex flex-col gap-1'>
-              <h2 className='text-lg font-semibold'>Filtrar por categoría</h2>
+              <h2 className='text-lg font-semibold'>Buscar por categoría</h2>
               {selectedFilters.size > 0 && (
                 <p className='text-sm text-gray-500'>
                   {selectedFilters.size} filtro{selectedFilters.size > 1 && 's'}{' '}

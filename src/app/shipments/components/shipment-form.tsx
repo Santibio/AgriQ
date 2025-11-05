@@ -38,9 +38,11 @@ const quantityToCheck = (
   if (isEditing) {
     return batch.sentQuantity
   }
+
   if (isOriginDeposit) {
-    return batch.depositQuantity
+    return batch.depositQuantity || batch.sentQuantity
   }
+
   return batch.marketQuantity
 }
 
@@ -190,7 +192,7 @@ export default function ShipmentForm({
     <>
       <form
         onSubmit={handleSubmit}
-        className='flex flex-col justify-between gap-6'
+        className='flex flex-col justify-between gap-6 pb-20'
       >
         <div className='pb-1 flex-1 w-full'>
           <div className='flex flex-col gap-6'>
@@ -217,7 +219,7 @@ export default function ShipmentForm({
                       </span>
                     </div>
                   </div>
-                  {isOriginDeposit && (
+                  {!isViewing && isOriginDeposit && (
                     <Checkbox
                       isSelected={!!selected[batch.id]}
                       onChange={() => handleSelect(batch.id)}
@@ -226,7 +228,7 @@ export default function ShipmentForm({
                   )}
                 </div>
                 <div className='flex items-center gap-10 mt-2'>
-                  {isOriginDeposit && (
+                  {!isViewing && isOriginDeposit && (
                     <div className='flex flex-col'>
                       <span className='text-sm text-gray-600 text-nowrap font-semibold mt-[-10px]'>
                         En depósito quedará:
@@ -256,10 +258,10 @@ export default function ShipmentForm({
                     onChange={e =>
                       handleQuantityChange(batch.id, e.target.value)
                     }
-                    label='Enviar'
+                    label={isViewing ? 'Enviado' : 'Enviar'}
                     placeholder='0'
                     size='sm'
-                    isDisabled={!selected[batch.id]}
+                    isDisabled={!selected[batch.id] || isViewing}
                   />
                 </div>
               </Card>

@@ -81,7 +81,7 @@ export default function MovementCountDashboard() {
           <p className='text-slate-500'>Movimientos {labelMap[timeFilter]}</p>
         </div>
 
-        {/* --- Filtros de Tiempo --- */}
+        {/* --- Búsqueda de Tiempo --- */}
         <div className='flex justify-center gap-2'>
           <Chip
             onClick={() => setTimeFilter('day')}

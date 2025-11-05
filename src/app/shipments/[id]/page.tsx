@@ -38,6 +38,7 @@ export default async function ShipmentEditPage({
       },
     },
   })
+
   if (!shipment) return notFound()
 
   const batchs = await db.batch.findMany({

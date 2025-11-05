@@ -270,7 +270,7 @@ export default function StockDistribution() {
           ) : (
             <div className='text-center py-10'>
               <p className='text-slate-500'>
-                No hay stock para mostrar con los filtros actuales.
+                No hay stock para mostrar con los Búsqueda actuales.
               </p>
             </div>
           )}

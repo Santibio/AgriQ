@@ -265,7 +265,7 @@ export default function DiscardList({ discards }: DiscardListProps) {
             )
           })
         ) : (
-          <EmptyListMsg text='No se encontraron descartes con esos filtros.' />
+          <EmptyListMsg text='No se encontraron descartes con esos Búsqueda.' />
         )}
       </div>
       <Drawer
@@ -280,7 +280,7 @@ export default function DiscardList({ discards }: DiscardListProps) {
             <>
               <DrawerHeader className='flex flex-col gap-1'>
                 <h2 className='text-xl font-semibold'>
-                  Filtros y Ordenamiento
+                  Búsqueda y Ordenamiento
                 </h2>
               </DrawerHeader>
               <DrawerBody className='pb-10 pt-2'>
@@ -297,7 +297,7 @@ export default function DiscardList({ discards }: DiscardListProps) {
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por fecha'
+                    label='Buscar por fecha'
                     value={selectedDateFilter}
                     onValueChange={handleDateFilterChange}
                   >
@@ -307,7 +307,7 @@ export default function DiscardList({ discards }: DiscardListProps) {
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por motivo'
+                    label='Buscar por motivo'
                     value={selectedReasonFilter}
                     onValueChange={handleReasonFilterChange}
                   >

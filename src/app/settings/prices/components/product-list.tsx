@@ -42,15 +42,15 @@ export default function ProductsList({ products }: ProductsListProps) {
     })
   }
   const handleApplyFilters = () => {
-    onOpenChange() // Cerrar el drawer de filtros
+    onOpenChange() // Cerrar el drawer de Búsqueda
 
-    // Si no hay filtros seleccionados, mostrar todos los productos
+    // Si no hay Búsqueda seleccionados, mostrar todos los productos
     if (selectedFilters.size === 0) {
       setFilteredProducts(products)
       return
     }
 
-    // Convertir los filtros seleccionados a un array de objetos {category, type, presentation}
+    // Convertir los Búsqueda seleccionados a un array de objetos {category, type, presentation}
     const activeFilters = Array.from(selectedFilters).map(filterId => {
       const [category, type, presentation] = filterId.split('-')
       return { category, type, presentation }
@@ -189,8 +189,8 @@ export default function ProductsList({ products }: ProductsListProps) {
               onPress={onOpen}
             >
               {selectedFilters.size > 0
-                ? `Filtros (${selectedFilters.size})`
-                : 'Filtros'}
+                ? `Búsqueda (${selectedFilters.size})`
+                : 'Búsqueda'}
             </Button>
           </div>
 

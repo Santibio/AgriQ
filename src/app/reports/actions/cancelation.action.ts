@@ -3,7 +3,7 @@
 import db from '@/lib/db'
 import { CancelReason } from '@prisma/client' // Importa tu enum de Prisma
 
-// Definimos los tipos para los filtros y la respuesta
+// Definimos los tipos para los Búsqueda y la respuesta
 export type TimeFilter = 'month' | 'quarter' | 'half' | 'year'
 
 export interface CancellationReasonStat {

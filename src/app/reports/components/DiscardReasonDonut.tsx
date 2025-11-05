@@ -256,7 +256,7 @@ export default function DiscardReasonDonut() {
             <Download className='w-4 h-4 text-slate-600' />
           </Button>
         </div>
-        {/* Filtros */}
+        {/* Búsqueda */}
         <div className='flex gap-2 justify-between mb-4'>
           <Button
             onPress={() => setTimeFilter('month')}

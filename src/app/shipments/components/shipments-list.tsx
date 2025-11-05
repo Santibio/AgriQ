@@ -365,7 +365,7 @@ export default function ShipmentsList({
             )
           })
         ) : (
-          <EmptyListMsg text='No se encontraron envíos con esos filtros.' />
+          <EmptyListMsg text='No se encontraron envíos con esos Búsqueda.' />
         )}
       </ul>
       <Drawer
@@ -380,7 +380,7 @@ export default function ShipmentsList({
             <>
               <DrawerHeader className='flex flex-col gap-1'>
                 <h2 className='text-xl font-semibold'>
-                  Filtros y Ordenamiento
+                  Búsqueda y Ordenamiento
                 </h2>
               </DrawerHeader>
               <DrawerBody className='pb-10 pt-2'>
@@ -395,7 +395,7 @@ export default function ShipmentsList({
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por fecha'
+                    label='Buscar por fecha'
                     value={selectedDateFilter}
                     onValueChange={handleDateFilterChange}
                   >
@@ -405,7 +405,7 @@ export default function ShipmentsList({
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por estado'
+                    label='Buscar por estado'
                     value={selectedStatusFilter}
                     onValueChange={handleStatusFilterChange}
                   >

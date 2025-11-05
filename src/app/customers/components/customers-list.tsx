@@ -263,7 +263,7 @@ export default function CustomerList({ customers }: CustomerListProps) {
             <>
               <DrawerHeader className='flex flex-col gap-1'>
                 <h2 className='text-xl font-semibold'>
-                  Filtros y Ordenamiento
+                  Búsqueda y Ordenamiento
                 </h2>
               </DrawerHeader>
               <DrawerBody className='pb-10 pt-2'>
@@ -278,7 +278,7 @@ export default function CustomerList({ customers }: CustomerListProps) {
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por estado'
+                    label='Buscar por estado'
                     value={selectedStatusFilter}
                     onValueChange={handleStatusFilterChange}
                   >
@@ -288,7 +288,7 @@ export default function CustomerList({ customers }: CustomerListProps) {
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Filtrar por condición fiscal'
+                    label='Buscar por condición fiscal'
                     value={selectedFiscalConditionFilter}
                     onValueChange={handleFiscalConditionFilterChange}
                   >

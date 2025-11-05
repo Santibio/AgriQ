@@ -2,7 +2,7 @@
 
 import db from '@/lib/db'
 
-// Definimos los tipos para los filtros y la respuesta
+// Definimos los tipos para los Búsqueda y la respuesta
 export type TimeFilter = 'week' | 'month' | 'year'
 export type MetricFilter = 'price' | 'quantity'
 export type SortOrder = 'top' | 'bottom'
@@ -14,7 +14,7 @@ export interface ClientSaleRank {
 }
 
 /**
- * Obtiene el ranking de clientes (más o menos compradores) según varios filtros.
+ * Obtiene el ranking de clientes (más o menos compradores) según varios Búsqueda.
  * @param timeFilter - El período de tiempo ('week', 'month', 'year').
  * @param metricFilter - La métrica para ordenar ('quantity' o 'price').
  * @param sortOrder - El orden ('top' para mejores, 'bottom' para peores).

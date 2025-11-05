@@ -18,7 +18,7 @@ export default function FormWrapper({
   showButton = true,
 }: FormWrapperProps) {
   return (
-    <Form onSubmit={onSubmit} className='flex flex-col justify-between gap-6'>
+    <Form onSubmit={onSubmit} className='flex flex-col justify-between gap-6 pb-20'>
       {children}
       {showButton && (
         <div className='pb-2 w-full'>
