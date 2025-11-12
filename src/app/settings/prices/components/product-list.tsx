@@ -139,6 +139,7 @@ export default function ProductsList({ products }: ProductsListProps) {
       setIsLoading(false)
     }
   }
+  console.log("local", localPrices)
 
   return (
     <>
@@ -200,10 +201,10 @@ export default function ProductsList({ products }: ProductsListProps) {
               placeholder='Nuevo precio (ej: 12,34)'
               value={bulkPrice !== undefined ? bulkPrice : undefined}
               radius='sm'
+              min={0}
               className='flex-1'
               type='number'
-              inputMode='decimal'
-              onChange={value => {
+              onValueChange={value => {
                 setBulkPrice(Number(value))
               }}
               isClearable
@@ -212,6 +213,7 @@ export default function ProductsList({ products }: ProductsListProps) {
                   <span className='text-default-400 text-small'>$</span>
                 </div>
               }
+              hideStepper
               formatOptions={{
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
@@ -295,11 +297,12 @@ export default function ProductsList({ products }: ProductsListProps) {
                           size='sm'
                           min={0}
                           value={localPrices[id]}
-                          onChange={val =>
-                            setLocalPrices(prev => ({
+                          onValueChange={val => {
+                            return setLocalPrices(prev => ({
                               ...prev,
                               [id]: Number(val),
-                            }))
+                            }));
+                          }
                           }
                           className='w-[100px]'
                           hideStepper
@@ -313,7 +316,6 @@ export default function ProductsList({ products }: ProductsListProps) {
                           formatOptions={{
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
-                            useGrouping: false,
                           }}
                         />
                       </CardBody>
