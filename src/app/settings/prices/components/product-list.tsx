@@ -139,7 +139,6 @@ export default function ProductsList({ products }: ProductsListProps) {
       setIsLoading(false)
     }
   }
-  console.log("local", localPrices)
 
   return (
     <>
@@ -301,9 +300,8 @@ export default function ProductsList({ products }: ProductsListProps) {
                             return setLocalPrices(prev => ({
                               ...prev,
                               [id]: Number(val),
-                            }));
-                          }
-                          }
+                            }))
+                          }}
                           className='w-[100px]'
                           hideStepper
                           startContent={
