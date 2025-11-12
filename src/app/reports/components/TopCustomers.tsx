@@ -227,8 +227,8 @@ export default function ClientDonutDashboard() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (error) {
-      console.error('Error al exportar el reporte de clientes:', error);
+    } catch (err) {
+      console.error('Error al exportar el reporte de clientes:', err);
       alert('Ocurrió un error al exportar el reporte de clientes');
     } finally {
       setIsDownloading(false);

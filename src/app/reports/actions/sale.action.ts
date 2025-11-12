@@ -112,8 +112,6 @@ export interface SalesChartData {
   products?: string[]
   totalSales: number
   percentageChange: number
-  // Add other fields that might be needed for the CSV export
-  [key: string]: any
 }
 
 // Definir un tipo para la venta con detalles del pedido

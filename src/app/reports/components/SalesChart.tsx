@@ -173,8 +173,8 @@ export default function SalesChart() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (error) {
-      console.error('Error al exportar el reporte:', error);
+    } catch (err) {
+      console.error('Error al exportar el reporte:', err);
       alert('Ocurrió un error al exportar el reporte');
     } finally {
       setIsDownloading(false);
