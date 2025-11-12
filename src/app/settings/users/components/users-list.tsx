@@ -220,7 +220,7 @@ export default function UserList({ users }: UserListProps) {
               )
             })
           ) : (
-            <EmptyListMsg text='No se encontraron usuarios con esos Búsqueda.' />
+            <EmptyListMsg text='No se encontraron usuarios.' />
           )}
         </ul>
       </div>

@@ -196,16 +196,15 @@ export default function ProductsList({ products }: ProductsListProps) {
 
           {/* Edición masiva */}
           <div className='flex items-center gap-2 mt-1'>
-            <Input
-              placeholder='Nuevo precio'
-              value={bulkPrice?.toString()}
-              min={0}
+            <NumberInput
+              placeholder='Nuevo precio (ej: 12,34)'
+              value={bulkPrice !== undefined ? bulkPrice : undefined}
               radius='sm'
               className='flex-1'
               type='number'
-              onValueChange={val => {
-                if (isNaN(Number(val))) return
-                setBulkPrice(Number(val))
+              inputMode='decimal'
+              onChange={value => {
+                setBulkPrice(Number(value))
               }}
               isClearable
               startContent={
@@ -213,6 +212,11 @@ export default function ProductsList({ products }: ProductsListProps) {
                   <span className='text-default-400 text-small'>$</span>
                 </div>
               }
+              formatOptions={{
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+                useGrouping: false,
+              }}
             />
 
             <Button
@@ -306,6 +310,11 @@ export default function ProductsList({ products }: ProductsListProps) {
                               </span>
                             </div>
                           }
+                          formatOptions={{
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                            useGrouping: false,
+                          }}
                         />
                       </CardBody>
                     </Card>

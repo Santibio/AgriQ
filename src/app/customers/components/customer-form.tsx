@@ -63,7 +63,11 @@ export default function CustomerForm({ customer }: CustomerFormProps) {
         return toast.error('Ocurrió un error al procesar la solicitud.')
       }
 
-      toast.success('Cliente agregado correctamente')
+      if (isEditing) {
+        toast.success('Cliente editado correctamente')
+      } else {
+        toast.success('Cliente creado correctamente')
+      }
 
       router.push(paths.customers())
     } catch (error) {

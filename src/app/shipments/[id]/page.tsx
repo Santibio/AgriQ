@@ -58,16 +58,19 @@ export default async function ShipmentEditPage({
     sentQuantity: detail.quantity,
   }))
 
-  const allBatchs = [
-    ...batchsToEdit.map(batch => ({ ...batch })),
-    ...batchs
-      .filter(
-        batch => !batchsToEdit.some(editedBatch => editedBatch.id === batch.id),
-      )
-      .map(batch => ({ ...batch, filtered: true })),
-  ]
-
   const canEdit = shipment?.status === 'PENDING'
+
+  const allBatchs = canEdit
+    ? [
+        ...batchsToEdit.map(batch => ({ ...batch })),
+        ...batchs
+          .filter(
+            batch =>
+              !batchsToEdit.some(editedBatch => editedBatch.id === batch.id),
+          )
+          .map(batch => ({ ...batch, filtered: true })),
+      ]
+    : [...batchsToEdit.map(batch => ({ ...batch }))]
 
   return (
     <FormPage

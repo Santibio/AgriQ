@@ -88,6 +88,7 @@ export default function DiscardList({ batchs }: DiscardListProps) {
     }
   }
 
+  console.log('🚀 ~ DiscardList ~ batchs:', batchs)
   return (
     <>
       <ul className='flex gap-2 flex-col pb-20'>
@@ -117,7 +118,6 @@ export default function DiscardList({ batchs }: DiscardListProps) {
                   <div className='flex gap-2 justify-between items-center'>
                     <span
                       className='rounded-lg  text-slate-400 font-semibold'
-                      key={batch.productId}
                     >
                       {capitalize(batch.product.name)}
                     </span>

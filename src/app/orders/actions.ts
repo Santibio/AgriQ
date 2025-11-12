@@ -685,6 +685,10 @@ export async function setOrderStatusToCancel(
             },
           })
 
+          console.log(
+            '🚀 ~ setOrderStatusToCancel ~ order.statusPayment:',
+            order.statusPayment,
+          )
           if (order.statusPayment === StatusPayment.PAID) {
             // Actualizar el lote: mover de reservado a vendido
             await tx.batch.update({
@@ -698,9 +702,7 @@ export async function setOrderStatusToCancel(
                 },
               },
             })
-            await tx.sale.delete({
-              where: { orderId: orderId },
-            })
+            console.log('🚀 ~ setOrderStatusToCancel ~ where.orderId:', orderId)
           } else {
             await tx.batch.update({
               where: { id: detail.batchId },
@@ -714,6 +716,12 @@ export async function setOrderStatusToCancel(
               },
             })
           }
+        }
+
+        if (order.statusPayment === StatusPayment.PAID) {
+          await tx.sale.delete({
+            where: { orderId: orderId },
+          })
         }
 
         // 1. Actualizar la orden

@@ -36,7 +36,7 @@ export default async function Shipments() {
       title='Lista de descartes'
       actions={
         canCreateDiscard ? (
-          <AddButton href={paths.discardAdd()}>Registrar descarte</AddButton>
+          <AddButton href={paths.discardAdd()}>Crear descarte</AddButton>
         ) : null
       }
     >
