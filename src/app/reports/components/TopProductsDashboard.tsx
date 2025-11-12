@@ -17,6 +17,7 @@ import {
 import CardWithShadow from '@/components/card-with-shadow'
 import { Button, Tab, Tabs } from '@heroui/react'
 import { capitalize } from '@/lib/utils'
+import { convertToArgentinePeso } from '@/lib/helpers/number'
 
 export default function TogglableProductsDashboard() {
   const [data, setData] = useState<SalesRank[]>([])
@@ -56,12 +57,6 @@ export default function TogglableProductsDashboard() {
         )
       : 1
 
-  const formatCurrency = (value: number) =>
-    `$${new Intl.NumberFormat('es-AR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value)}`
-
   const handleToggleSortOrder = () => {
     setSortOrder(prev => (prev === 'top' ? 'bottom' : 'top'))
   }
@@ -84,9 +79,9 @@ export default function TogglableProductsDashboard() {
     ]
     const rows = data.map(
       (item, index) =>
-        `${index + 1},"${item.name}",${item.totalQuantity},"${formatCurrency(
-          item.totalPrice,
-        )}"`,
+        `${index + 1},"${item.name}",${
+          item.totalQuantity
+        },"${convertToArgentinePeso(item.totalPrice)}"`,
     )
 
     const csvContent = [headers.join(','), ...rows].join('\n')
@@ -149,7 +144,7 @@ export default function TogglableProductsDashboard() {
               </p>
               <p className='text-sm font-semibold text-slate-800'>
                 {metricFilter === 'price'
-                  ? formatCurrency(product.totalPrice)
+                  ? convertToArgentinePeso(product.totalPrice)
                   : `${product.totalQuantity} u.`}
               </p>
             </div>

@@ -16,6 +16,7 @@ import {
 } from '../actions/sale.action'
 import CardWithShadow from '@/components/card-with-shadow'
 import { Button } from '@heroui/react'
+import { convertToArgentinePeso } from '@/lib/helpers/number'
 
 // --- Componente Wrapper para ApexCharts (reutilizado) ---
 const ApexChart = ({
@@ -98,13 +99,11 @@ export default function SalesChart() {
     fetchData()
   }, [timePeriod])
 
-  const formatCurrency = (value: number) =>
-    `$${new Intl.NumberFormat('es-AR').format(value)}`
   const formatTotal = (value: number) => {
     if (value >= 1000) {
       return `$${(value / 1000).toFixed(1)}k`
     }
-    return formatCurrency(value)
+    return convertToArgentinePeso(value)
   }
 
   const chartOptions: ApexOptions = {
@@ -118,7 +117,7 @@ export default function SalesChart() {
     fill: { type: 'gradient', gradient: { opacityFrom: 0.5, opacityTo: 0.1 } },
     tooltip: {
       theme: 'dark',
-      y: { formatter: value => formatCurrency(value) },
+      y: { formatter: value => convertToArgentinePeso(value) },
     },
     colors: ['#3b82f6'],
     xaxis: { categories: data?.categories || [] },
@@ -128,23 +127,58 @@ export default function SalesChart() {
     if (isDownloading || !data || data.series.length === 0) return
     setIsDownloading(true)
 
-    const headers = ['Período', 'Ventas']
-    const rows = data.categories.map(
-      (cat, index) => `"${cat}",${data.series[index]}`,
-    )
-    const csvContent = [headers.join(','), ...rows].join('\n')
-    const blob = new Blob([`\uFEFF${csvContent}`], {
-      type: 'text/csv;charset=utf-8;',
-    })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    const date = new Date().toISOString().split('T')[0]
-    link.setAttribute(`download`, `reporte_ventas_${timePeriod}_${date}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    try {
+      // Obtener todos los datos de ventas (sin límite)
+      const allSales = data.categories.map((category, index) => ({
+        periodo: category,
+        ventas: data.series[index],
+        // Agregar más datos si están disponibles en el objeto data
+        ...(data.products && { producto: data.products[index] }),
+        // Agregar más campos según sea necesario
+      }));
 
-    setTimeout(() => setIsDownloading(false), 1000)
+      // Ordenar por ventas (de mayor a menor)
+      const sortedSales = [...allSales].sort((a, b) => b.ventas - a.ventas);
+
+      // Crear encabezados del CSV
+      const headers = ['Período', 'Ventas (ARS)'];
+      
+      // Si hay datos de productos, agregar la columna de producto
+      if (data.products) {
+        headers.splice(1, 0, 'Producto');
+      }
+
+      // Crear filas del CSV con todos los datos
+      const csvRows = [
+        headers.join(','),
+        ...sortedSales.map(sale => {
+          const row = [
+            `"${sale.periodo}"`,
+            ...(data.products ? [`"${sale.producto || ''}"`] : []),
+            convertToArgentinePeso(sale.ventas).replace('$', '').replace('.', '').replace(',', '.')
+          ];
+          return row.join(',');
+        })
+      ];
+
+      const csvContent = csvRows.join('\n');
+      const blob = new Blob([`\uFEFF${csvContent}`], {
+        type: 'text/csv;charset=utf-8;',
+      });
+      
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      const date = new Date().toISOString().split('T')[0];
+      link.setAttribute('download', `reporte_ventas_completo_${timePeriod}_${date}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error al exportar el reporte:', error);
+      alert('Ocurrió un error al exportar el reporte');
+    } finally {
+      setIsDownloading(false);
+    }
   }
 
   const getSubtitle = () => {

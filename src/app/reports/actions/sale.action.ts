@@ -98,7 +98,7 @@ export async function getSalesRanking({
         return sortOrder === 'top' ? valueB - valueA : valueA - valueB
       })
 
-    return ranked.slice(0, 5) // Devolvemos solo los 5 primeros del ranking
+    return ranked
   } catch (error) {
     return []
   }
@@ -109,8 +109,11 @@ export type TimePeriod = 'today' | '7d' | '30d' | '90d'
 export interface SalesChartData {
   series: number[]
   categories: string[]
+  products?: string[]
   totalSales: number
   percentageChange: number
+  // Add other fields that might be needed for the CSV export
+  [key: string]: any
 }
 
 // Definir un tipo para la venta con detalles del pedido

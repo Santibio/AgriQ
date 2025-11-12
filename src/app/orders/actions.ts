@@ -702,7 +702,6 @@ export async function setOrderStatusToCancel(
                 },
               },
             })
-            console.log('🚀 ~ setOrderStatusToCancel ~ where.orderId:', orderId)
           } else {
             await tx.batch.update({
               where: { id: detail.batchId },

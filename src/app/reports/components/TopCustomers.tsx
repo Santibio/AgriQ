@@ -11,6 +11,7 @@ import {
 } from '../actions/customers.action'
 import CardWithShadow from '@/components/card-with-shadow'
 import { Button, Tab, Tabs } from '@heroui/react'
+import { convertToArgentinePeso } from '@/lib/helpers/number'
 
 // --- Componente Wrapper para ApexCharts (reutilizado) ---
 const ApexChart = ({
@@ -106,9 +107,6 @@ export default function ClientDonutDashboard() {
     }
   }
 
-  const formatCurrency = (value: number) =>
-    `$${new Intl.NumberFormat('es-AR').format(value)}`
-
   const chartData = useMemo((): ChartSlice[] => {
     const top3 = data.slice(0, 3)
     const others = data.slice(3)
@@ -169,28 +167,72 @@ export default function ClientDonutDashboard() {
     stroke: { width: 3 },
   }
 
-  const handleCsvExport = () => {
-    if (isDownloading || chartData.length === 0) return
-    setIsDownloading(true)
+  const handleCsvExport = async () => {
+    if (isDownloading || chartData.length === 0) return;
+    setIsDownloading(true);
 
-    const headers = [
-      'Cliente',
-      `Valor (${metricFilter === 'price' ? 'ARS' : 'Unidades'})`,
-    ]
-    const rows = chartData.map(item => `"${item.name}",${item.value}`)
+    try {
+      // Usar la acción existente para obtener los datos
+      const allCustomers = await getClientSalesRanking({
+        timeFilter,
+        metricFilter,
+        sortOrder: 'top' // Siempre ordenar de mayor a menor para la exportación
+      });
+      
+      // Mapear los datos al formato esperado
+      const formattedCustomers = allCustomers.map(customer => ({
+        name: customer.name,
+        value: metricFilter === 'price' ? customer.totalPrice : customer.totalQuantity,
+        purchaseCount: customer.totalQuantity, // Asumiendo que cada compra es una unidad
+        lastPurchase: new Date().toISOString() // Agregar lógica real si está disponible
+      }));
 
-    const csvContent = [headers.join(','), ...rows].join('\n')
-    const blob = new Blob([`\uFEFF${csvContent}`], {
-      type: 'text/csv;charset=utf-8;',
-    })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    const date = new Date().toISOString().split('T')[0]
-    link.setAttribute('download', `top_clientes_${timeFilter}_${date}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    setTimeout(() => setIsDownloading(false), 1000)
+      // Ordenar por valor (de mayor a menor)
+      const sortedCustomers = [...formattedCustomers].sort((a, b) => b.value - a.value);
+
+      // Crear encabezados del CSV
+      const headers = [
+        'Cliente',
+        `Valor (${metricFilter === 'price' ? 'ARS' : 'Unidades'})`,
+        'Cantidad de Compras',
+        'Última Compra'
+      ];
+
+      // Crear filas del CSV con todos los clientes
+      const csvRows = [
+        headers.join(','),
+        ...sortedCustomers.map(customer => {
+          const formattedValue = metricFilter === 'price' 
+            ? convertToArgentinePeso(customer.value)
+            : Math.round(customer.value);
+            
+          return [
+            `"${customer.name}"`,
+            `"${formattedValue}"`,
+            customer.purchaseCount || '',
+            customer.lastPurchase ? new Date(customer.lastPurchase).toLocaleDateString() : ''
+          ].join(',');
+        })
+      ];
+
+      const csvContent = csvRows.join('\n');
+      const blob = new Blob([`\uFEFF${csvContent}`], {
+        type: 'text/csv;charset=utf-8;',
+      });
+      
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      const date = new Date().toISOString().split('T')[0];
+      link.setAttribute('download', `clientes_completo_${timeFilter}_${date}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error al exportar el reporte de clientes:', error);
+      alert('Ocurrió un error al exportar el reporte de clientes');
+    } finally {
+      setIsDownloading(false);
+    }
   }
 
   const renderContent = () => {
@@ -248,7 +290,7 @@ export default function ClientDonutDashboard() {
                     <div className='flex justify-between w-full text-sm'>
                       <span className='font-bold text-slate-800 whitespace-nowrap'>
                         {metricFilter === 'price'
-                          ? formatCurrency(slice.value)
+                          ? convertToArgentinePeso(slice.value)
                           : `${Math.round(slice.value)} u.`}
                       </span>
                     </div>
@@ -268,7 +310,7 @@ export default function ClientDonutDashboard() {
         <div className='flex justify-between items-center mb-4'>
           <div>
             <h3 className='text-lg font-semibold text-slate-800'>
-              Top 3 Clientes
+              Top Clientes
             </h3>
             <p className='text-xs text-slate-400'>
               Por {metricFilter === 'price' ? 'Facturación' : 'Cantidad'}

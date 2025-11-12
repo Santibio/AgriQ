@@ -49,7 +49,6 @@ export default function ProductionForm({
   const [isLoading, setIsloading] = useState<boolean>(false)
 
   const onSubmit = async (data: AddProductionInputs) => {
-    console.log('🚀 ~ onSubmit ~ data:', data)
     try {
       setIsloading(true)
       const response = isEditing

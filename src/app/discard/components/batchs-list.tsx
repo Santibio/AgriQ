@@ -88,7 +88,6 @@ export default function DiscardList({ batchs }: DiscardListProps) {
     }
   }
 
-  console.log('🚀 ~ DiscardList ~ batchs:', batchs)
   return (
     <>
       <ul className='flex gap-2 flex-col pb-20'>
