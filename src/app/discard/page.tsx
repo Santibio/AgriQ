@@ -25,6 +25,7 @@ export default async function Shipments() {
     orderBy: {
       createdAt: 'desc',
     },
+    take: 100,
   })
 
   const user = await getCurrentUser()

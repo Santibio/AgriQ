@@ -10,6 +10,7 @@ export async function getSells() {
         include: { customer: true, details: true },
       },
     },
+    take: 100,
   })
   return sells
 }

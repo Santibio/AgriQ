@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import {
   Batch,
-  CancelReason,
   Customer,
+  DiscardReason,
   FiscalCondition,
   Location,
   MovementType,
@@ -18,14 +18,30 @@ import {
 
 const prisma = new PrismaClient()
 
-// --- CONFIGURACIÓN DE LA SIMULACIÓN ---
-const NUM_ORDERS_PER_MONTH = 50
-const NUM_CANCELLED_ORDERS = 15
-// Usamos una fecha fija para que el seed sea repetible
+// --- CONFIGURACIÓN MANUAL POR MES ---
+
+// 1. Elige la fecha que quieres cargar (Ej: Noviembre 2024)
+const MES_A_CARGAR = 11 // 1 = Enero, ..., 11 = Noviembre, 12 = Diciembre
+const ANIO_A_CARGAR = 2025
+
+// 2. ¿Quieres borrar toda la DB antes de empezar?
+// Pon TRUE si es el primer mes que cargas.
+// Pon FALSE si quieres sumar este mes a los datos anteriores.
+const LIMPIAR_DB = true
+
+// 3. Configuración de Cantidades (Tus requisitos)
+const NUM_ORDERS_PER_MONTH = 200 // 480 pedidos completados
+const NUM_DISCARDS_PER_MONTH = 20 // 20 movimientos de descarte
+const TOTAL_BATCH_STOCK_IN_MONTH = 25 // 200 unidades (lotes) de entrada
+const MAX_BATCH_SIZE = 50
+const NUM_DAYS_IN_MONTH_SIM = 20
+
+// Fecha de referencia para validaciones (Hoy)
 const SIM_TODAY = new Date()
 
+// --- FIN DE CONFIGURACIÓN ---
+
 // --- DATOS INICIALES (Usuarios, Clientes, Productos) ---
-// (Pega aquí tus arrays 'initialUsers', 'initialProducts', e 'initialCustomers')
 const initialUsers = [
   {
     username: 'admin',
@@ -599,26 +615,27 @@ const initialProducts = [
 ]
 
 const initialCustomers = [
+  // --- Clientes Originales ---
   {
     name: 'Juan',
-    lastName: 'Pérez',
-    phone: '+549111234567',
-    email: 'juan.perez@example.com',
-    fiscalCondition: FiscalCondition.RESPONSIBLE, // <-- Usando tu enum
+    lastName: 'Martinez',
+    phone: '+549111234567', // 13 caracteres OK
+    email: 'juan.martinez@example.com',
+    fiscalCondition: FiscalCondition.RESPONSIBLE,
   },
   {
     name: 'María',
     lastName: 'González',
-    phone: '+549351765432',
+    phone: '+549351765432', // 13 caracteres OK
     email: 'maria.gonzalez@example.com',
-    fiscalCondition: FiscalCondition.MONOTAX, // <-- Usando tu enum
+    fiscalCondition: FiscalCondition.MONOTAX,
   },
   {
     name: 'Carlos',
     lastName: 'Rodríguez',
     phone: '+549221987654',
     email: 'carlos.r@example.com',
-    fiscalCondition: FiscalCondition.FINAL_CONSUMER, // <-- Usando tu enum
+    fiscalCondition: FiscalCondition.FINAL_CONSUMER,
   },
   {
     name: 'Ana',
@@ -626,14 +643,113 @@ const initialCustomers = [
     phone: '+549261456789',
     email: 'ana.martinez@example.com',
     fiscalCondition: FiscalCondition.MONOTAX,
-    active: false, // Sobreescribimos el default
+    active: true,
   },
   {
     name: 'Empresa',
     lastName: 'Exenta S.A.',
     phone: '+549115555444',
     email: 'compras@exenta.com',
-    fiscalCondition: FiscalCondition.EXEMPT, // <-- Usando tu enum
+    fiscalCondition: FiscalCondition.EXEMPT,
+  },
+
+  // --- GASTRONOMÍA (Restaurantes y Hoteles) ---
+  {
+    name: 'Restaurante',
+    lastName: 'La Toscana',
+    phone: '+549351444555',
+    email: 'compras@latoscana.com',
+    fiscalCondition: FiscalCondition.RESPONSIBLE,
+  },
+  {
+    name: 'Bistro',
+    lastName: 'El Gourmet',
+    phone: '+549351222333',
+    email: 'chef@elgourmet.com.ar',
+    fiscalCondition: FiscalCondition.MONOTAX,
+  },
+  {
+    name: 'Hotel',
+    lastName: 'Sierras Hotel',
+    phone: '+549354155666', // CORREGIDO: Ajustado a 13 chars
+    email: 'proveedores@sierrashotel.com',
+    fiscalCondition: FiscalCondition.RESPONSIBLE,
+  },
+  {
+    name: 'Pizzería',
+    lastName: 'Don Luis',
+    phone: '+549351999888',
+    email: 'admin@pizzeriadonluis.com',
+    fiscalCondition: FiscalCondition.RESPONSIBLE,
+  },
+
+  // --- COMERCIOS (Verdulerías y Dietéticas) ---
+  {
+    name: 'Verdulería',
+    lastName: 'El Abasto',
+    phone: '+549113334444',
+    email: 'pedidos@elabasto.com',
+    fiscalCondition: FiscalCondition.MONOTAX,
+  },
+  {
+    name: 'Dietética',
+    lastName: 'Vida Sana',
+    phone: '+549351777111',
+    email: 'contacto@vidasana.com.ar',
+    fiscalCondition: FiscalCondition.MONOTAX,
+  },
+  {
+    name: 'Mercado',
+    lastName: 'Orgánico Sur',
+    phone: '+549261555999',
+    email: 'info@organicosur.com',
+    fiscalCondition: FiscalCondition.RESPONSIBLE,
+  },
+
+  // --- INDUSTRIA Y PROCESADORES ---
+  {
+    name: 'Especias',
+    lastName: 'Cuyo S.R.L.',
+    phone: '+549264123123',
+    email: 'compras@especiascuyo.com',
+    fiscalCondition: FiscalCondition.RESPONSIBLE,
+  },
+  {
+    name: 'Cooperativa',
+    lastName: 'Agrícola Local',
+    phone: '+549353111222',
+    email: 'administracion@cooperativa.org.ar',
+    fiscalCondition: FiscalCondition.EXEMPT,
+  },
+  {
+    name: 'Té & Hierbas',
+    lastName: 'Patagonia',
+    phone: '+549299000111',
+    email: 'insumos@tepatagonia.com',
+    fiscalCondition: FiscalCondition.RESPONSIBLE,
+  },
+
+  // --- CONSUMIDORES FINALES / EMPRENDEDORES ---
+  {
+    name: 'Marta',
+    lastName: 'Dulces Artesanales',
+    phone: '+549354888777',
+    email: 'marta.dulces@gmail.com',
+    fiscalCondition: FiscalCondition.FINAL_CONSUMER,
+  },
+  {
+    name: 'Lucas',
+    lastName: 'Chef Privado',
+    phone: '+549116667777',
+    email: 'lucas.chef@hotmail.com',
+    fiscalCondition: FiscalCondition.FINAL_CONSUMER,
+  },
+  {
+    name: 'Fermentos',
+    lastName: 'Vivos',
+    phone: '+549351000999',
+    email: 'fermentos@outlook.com',
+    fiscalCondition: FiscalCondition.MONOTAX,
   },
 ]
 
@@ -651,8 +767,11 @@ function getRandomElement<T>(arr: T[]): T {
 
 /** Genera una fecha aleatoria dentro de un rango */
 function getRandomDate(start: Date, end: Date): Date {
+  // Evitar fechas futuras si 'end' es SIM_TODAY
+  const actualEnd = end > SIM_TODAY ? SIM_TODAY : end
+  if (start >= actualEnd) return actualEnd
   return new Date(
-    start.getTime() + Math.random() * (end.getTime() - start.getTime()),
+    start.getTime() + Math.random() * (actualEnd.getTime() - start.getTime()),
   )
 }
 
@@ -661,7 +780,7 @@ function addMinutes(date: Date, minutes: number): Date {
   return new Date(date.getTime() + minutes * 60000)
 }
 
-// --- FUNCIONES DE TRANSACCIONES (Modificadas para aceptar fecha) ---
+// --- FUNCIONES DE TRANSACCIONES ---
 
 /** T1: Crea un lote de stock inicial en DEPOSIT */
 async function createStock(
@@ -705,121 +824,41 @@ async function createStock(
   })
 }
 
-/** T2: Envía (SENT) e Inmediatamente Recibe (RECEIVED_MARKET) stock */
-async function shipAndReceive(
-  prisma: PrismaClient,
-  {
-    batch,
-    depositUserId,
-    sellerUserId,
-    quantity,
-    date,
-  }: {
-    batch: Batch
-    depositUserId: number
-    sellerUserId: number
-    quantity: number
-    date: Date // <-- Parámetro de fecha
-  },
-) {
-  const sentDate = date
-  const receivedDate = addMinutes(date, 5) // 5 minutos después
-
-  return prisma.$transaction(async tx => {
-    // 1. Envío (SENT)
-    const sentMovement = await tx.movement.create({
-      data: {
-        userId: depositUserId,
-        type: MovementType.SENT,
-        createdAt: sentDate,
-      },
-    })
-    const shipment = await tx.shipment.create({
-      data: {
-        movementId: sentMovement.id,
-        status: ShipmentStatus.PENDING,
-        origin: Location.DEPOSIT,
-        destination: Location.MARKET,
-        createdAt: sentDate,
-        updatedAt: sentDate,
-      },
-    })
-    await tx.batch.update({
-      where: { id: batch.id },
-      data: {
-        depositQuantity: { decrement: quantity },
-        sentQuantity: { increment: quantity },
-        updatedAt: sentDate,
-      },
-    })
-    await tx.movementDetail.create({
-      data: {
-        movementId: sentMovement.id,
-        batchId: batch.id,
-        quantity: quantity,
-      },
-    })
-
-    // 2. Recepción (RECEIVED_MARKET) - 5 mins después
-    await tx.shipment.update({
-      where: { id: shipment.id },
-      data: { status: ShipmentStatus.RECEIVED_OK, updatedAt: receivedDate },
-    })
-    const updatedBatch = await tx.batch.update({
-      where: { id: batch.id },
-      data: {
-        sentQuantity: { decrement: quantity },
-        marketQuantity: { increment: quantity },
-        receivedQuantity: { increment: quantity },
-        updatedAt: receivedDate,
-      },
-    })
-    const recMovement = await tx.movement.create({
-      data: {
-        userId: sellerUserId,
-        type: MovementType.RECEIVED_MARKET,
-        createdAt: receivedDate,
-      },
-    })
-    await tx.movementDetail.create({
-      data: {
-        movementId: recMovement.id,
-        batchId: batch.id,
-        quantity: quantity,
-      },
-    })
-    return updatedBatch
-  })
+/** T3: Simula el flujo completo de una venta: Pide, Cobra y Entrega */
+// Definimos un tipo para los items del carrito para mayor claridad
+type CartItem = {
+  batch: Batch
+  product: Product
+  quantity: number
 }
 
-/** T3: Simula el flujo completo de una venta: Pide, Cobra y Entrega */
+/** T3: Simula el flujo completo de una venta MULTI-PRODUCTO */
 async function createFullOrderFlow(
   prisma: PrismaClient,
   {
     customer,
     seller,
-    batch,
-    product,
-    quantity,
+    items, // <--- Ahora recibimos un array de items
     date,
   }: {
     customer: Customer
     seller: User
-    batch: Batch
-    product: Product
-    quantity: number
-    date: Date // <-- Parámetro de fecha
+    items: CartItem[]
+    date: Date
   },
 ) {
-  // Simulamos el flujo en el tiempo
   const orderDate = date
-  const saleDate = addMinutes(orderDate, getRandomInt(5, 60 * 24)) // 5m a 1 día después
-  const deliveryDate = addMinutes(saleDate, getRandomInt(5, 60 * 8)) // 5m a 8hs después
+  const saleDate = addMinutes(orderDate, getRandomInt(5, 60 * 2))
+  const deliveryDate = addMinutes(saleDate, getRandomInt(5, 60 * 4))
 
   return prisma.$transaction(async tx => {
-    const total = product.price * quantity
+    // Calcular total de la orden
+    const total = items.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0,
+    )
 
-    // 1. Crear Pedido (ORDERED)
+    // 1. Crear Pedido (ORDERED) Header
     const order = await tx.order.create({
       data: {
         customerId: customer.id,
@@ -830,24 +869,8 @@ async function createFullOrderFlow(
         updatedAt: orderDate,
       },
     })
-    await tx.orderDetail.create({
-      data: {
-        orderId: order.id,
-        productName: product.name,
-        quantity: quantity,
-        price: product.price,
-        createdAt: orderDate,
-        updatedAt: orderDate,
-      },
-    })
-    await tx.batch.update({
-      where: { id: batch.id },
-      data: {
-        marketQuantity: { decrement: quantity },
-        reservedQuantity: { increment: quantity },
-        updatedAt: orderDate,
-      },
-    })
+
+    // Crear el Movimiento de Reserva (Uno solo para toda la orden)
     const orderMovement = await tx.movement.create({
       data: {
         userId: seller.id,
@@ -856,13 +879,40 @@ async function createFullOrderFlow(
         createdAt: orderDate,
       },
     })
-    await tx.movementDetail.create({
-      data: {
-        movementId: orderMovement.id,
-        batchId: batch.id,
-        quantity: quantity,
-      },
-    })
+
+    // Iterar items para: Detalles de Orden, Actualizar Lotes, Detalles de Movimiento
+    for (const item of items) {
+      // a. Order Detail
+      await tx.orderDetail.create({
+        data: {
+          orderId: order.id,
+          productName: item.product.name,
+          quantity: item.quantity,
+          price: item.product.price,
+          createdAt: orderDate,
+          updatedAt: orderDate,
+        },
+      })
+
+      // b. Actualizar Lote (Reserva)
+      await tx.batch.update({
+        where: { id: item.batch.id },
+        data: {
+          marketQuantity: { decrement: item.quantity },
+          reservedQuantity: { increment: item.quantity },
+          updatedAt: orderDate,
+        },
+      })
+
+      // c. Movement Detail (Vincula este lote al movimiento de la orden)
+      await tx.movementDetail.create({
+        data: {
+          movementId: orderMovement.id,
+          batchId: item.batch.id,
+          quantity: item.quantity,
+        },
+      })
+    }
 
     // 2. Cobrar Pedido (SOLD)
     await tx.order.update({
@@ -873,6 +923,7 @@ async function createFullOrderFlow(
         updatedAt: saleDate,
       },
     })
+
     const saleMovement = await tx.movement.create({
       data: {
         userId: seller.id,
@@ -881,6 +932,7 @@ async function createFullOrderFlow(
         createdAt: saleDate,
       },
     })
+
     await tx.sale.create({
       data: {
         orderId: order.id,
@@ -889,7 +941,7 @@ async function createFullOrderFlow(
           PaymentMethod.CASH,
           PaymentMethod.WIRE,
         ]),
-        paymentReceipt: `RECIBO-SEED-${order.id}`,
+        paymentReceipt: '',
         discount: 0,
         subtotal: total,
         total: total,
@@ -897,27 +949,32 @@ async function createFullOrderFlow(
         updatedAt: saleDate,
       },
     })
-    await tx.batch.update({
-      where: { id: batch.id },
-      data: {
-        reservedQuantity: { decrement: quantity },
-        soltQuantity: { increment: quantity },
-        updatedAt: saleDate,
-      },
-    })
-    await tx.movementDetail.create({
-      data: {
-        movementId: saleMovement.id,
-        batchId: batch.id,
-        quantity: quantity,
-      },
-    })
+
+    // Mover stock de Reservado a Sold para cada item
+    for (const item of items) {
+      await tx.batch.update({
+        where: { id: item.batch.id },
+        data: {
+          reservedQuantity: { decrement: item.quantity },
+          soltQuantity: { increment: item.quantity },
+          updatedAt: saleDate,
+        },
+      })
+      await tx.movementDetail.create({
+        data: {
+          movementId: saleMovement.id,
+          batchId: item.batch.id,
+          quantity: item.quantity,
+        },
+      })
+    }
 
     // 3. Entregar Pedido (DELIVERED)
     await tx.order.update({
       where: { id: order.id },
       data: { statusDoing: StatusDoing.DELIVERED, updatedAt: deliveryDate },
     })
+
     const delMovement = await tx.movement.create({
       data: {
         userId: seller.id,
@@ -926,40 +983,42 @@ async function createFullOrderFlow(
         createdAt: deliveryDate,
       },
     })
-    await tx.movementDetail.create({
-      data: {
-        movementId: delMovement.id,
-        batchId: batch.id,
-        quantity: quantity,
-      },
-    })
+
+    for (const item of items) {
+      await tx.movementDetail.create({
+        data: {
+          movementId: delMovement.id,
+          batchId: item.batch.id,
+          quantity: item.quantity,
+        },
+      })
+    }
 
     return order
   })
 }
 
-/** T4: Crea un pedido PENDIENTE (sin cobrar ni vender) */
+/** T4: Crea un pedido PENDIENTE (solo reserva stock, sin cobrar ni entregar) */
 async function createPendingOrder(
   prisma: PrismaClient,
   {
     customer,
     seller,
-    batch,
-    product,
-    quantity,
+    items, // <-- Cambio a items
     date,
   }: {
     customer: Customer
     seller: User
-    batch: Batch
-    product: Product
-    quantity: number
+    items: CartItem[]
     date: Date
   },
 ) {
   return prisma.$transaction(async tx => {
-    const total = product.price * quantity
-    // 1. Crear Pedido (ORDERED)
+    const total = items.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0,
+    )
+
     const order = await tx.order.create({
       data: {
         customerId: customer.id,
@@ -970,24 +1029,7 @@ async function createPendingOrder(
         updatedAt: date,
       },
     })
-    await tx.orderDetail.create({
-      data: {
-        orderId: order.id,
-        productName: product.name,
-        quantity: quantity,
-        price: product.price,
-        createdAt: date,
-        updatedAt: date,
-      },
-    })
-    await tx.batch.update({
-      where: { id: batch.id },
-      data: {
-        marketQuantity: { decrement: quantity },
-        reservedQuantity: { increment: quantity },
-        updatedAt: date,
-      },
-    })
+
     const orderMovement = await tx.movement.create({
       data: {
         userId: seller.id,
@@ -996,181 +1038,252 @@ async function createPendingOrder(
         createdAt: date,
       },
     })
-    await tx.movementDetail.create({
-      data: {
-        movementId: orderMovement.id,
-        batchId: batch.id,
-        quantity: quantity,
-      },
-    })
+
+    for (const item of items) {
+      await tx.orderDetail.create({
+        data: {
+          orderId: order.id,
+          productName: item.product.name,
+          quantity: item.quantity,
+          price: item.product.price,
+          createdAt: date,
+          updatedAt: date,
+        },
+      })
+      await tx.batch.update({
+        where: { id: item.batch.id },
+        data: {
+          marketQuantity: { decrement: item.quantity },
+          reservedQuantity: { increment: item.quantity },
+          updatedAt: date,
+        },
+      })
+      await tx.movementDetail.create({
+        data: {
+          movementId: orderMovement.id,
+          batchId: item.batch.id,
+          quantity: item.quantity,
+        },
+      })
+    }
     return order
   })
 }
-
-/** T5: Crea un pedido CANCELADO (y devuelve el stock) */
-async function createCancelledOrder(
+/** T6: Crea un movimiento de descarte y resta el stock de DEPOSIT */
+async function createDiscard(
   prisma: PrismaClient,
   {
-    customer,
-    seller,
     batch,
-    product,
+    userId,
     quantity,
     date,
   }: {
-    customer: Customer
-    seller: User
     batch: Batch
-    product: Product
+    userId: number
     quantity: number
-    date: Date
+    date: Date // <-- Parámetro de fecha
   },
 ) {
-  const orderDate = date
-  const cancelDate = addMinutes(orderDate, getRandomInt(10, 60 * 24)) // 10m a 1 día después
-
   return prisma.$transaction(async tx => {
-    const total = product.price * quantity
-    // 1. Crear Pedido (ORDERED) y Reservar
-    const order = await tx.order.create({
-      data: {
-        customerId: customer.id,
-        statusDoing: StatusDoing.PENDING,
-        statusPayment: StatusPayment.UNPAID,
-        total: total,
-        createdAt: orderDate,
-        updatedAt: orderDate,
-      },
-    })
-    // ... (detalle y movimiento de reserva omitidos por brevedad, pero necesarios)
-    await tx.orderDetail.create({
-      data: {
-        orderId: order.id,
-        productName: product.name,
-        quantity: quantity,
-        price: product.price,
-        createdAt: orderDate,
-        updatedAt: orderDate,
-      },
-    })
+    // 1. Actualizar Batch: Restar de DEPOSIT y sumar a DISCARDED
     await tx.batch.update({
       where: { id: batch.id },
       data: {
-        marketQuantity: { decrement: quantity },
-        reservedQuantity: { increment: quantity },
-        updatedAt: orderDate,
-      },
-    })
-    const orderMovement = await tx.movement.create({
-      data: {
-        userId: seller.id,
-        type: MovementType.ORDERED,
-        orderId: order.id,
-        createdAt: orderDate,
-      },
-    })
-    await tx.movementDetail.create({
-      data: {
-        movementId: orderMovement.id,
-        batchId: batch.id,
-        quantity: quantity,
+        depositQuantity: { decrement: quantity },
+        discardedQuantity: { increment: quantity },
+        updatedAt: date,
       },
     })
 
-    // 2. Cancelar Pedido (CANCELLED) y Devolver stock
-    await tx.order.update({
-      where: { id: order.id },
+    // 2. Crear Movimiento de Descarte
+    const movement = await tx.movement.create({
       data: {
-        statusDoing: StatusDoing.CANCELLED,
-        statusPayment: StatusPayment.CANCELLED,
-        cancelReason: CancelReason.CUSTOMER_REQUEST, // Razón de cancelación
-        updatedAt: cancelDate,
+        userId: userId,
+        type: MovementType.DISCARDED,
+        createdAt: date,
       },
     })
-    await tx.batch.update({
-      where: { id: batch.id },
+
+    // 3. Crear Registro de Descarte (Discard)
+    await tx.discard.create({
       data: {
-        reservedQuantity: { decrement: quantity }, // Sale de reservado
-        marketQuantity: { increment: quantity }, // Vuelve a mercado
-        updatedAt: cancelDate,
+        movementId: movement.id,
+        reason: getRandomElement([
+          DiscardReason.DAMAGED,
+          DiscardReason.EXPIRED,
+          DiscardReason.OTHER,
+        ]),
+        createdAt: date,
+        updatedAt: date,
       },
     })
-    const cancelMovement = await tx.movement.create({
-      data: {
-        userId: seller.id,
-        type: MovementType.CANCELLED,
-        orderId: order.id,
-        createdAt: cancelDate,
-      },
-    })
+
+    // 4. Crear Detalle de Movimiento
     await tx.movementDetail.create({
-      data: {
-        movementId: cancelMovement.id,
-        batchId: batch.id,
-        quantity: quantity,
-      },
+      data: { movementId: movement.id, batchId: batch.id, quantity: quantity },
     })
-    return order
+    return movement
   })
 }
 
-// --- FUNCIÓN PRINCIPAL DEL SEED ---
+type ShipmentItem = {
+  batch: Batch
+  quantity: number
+}
 
-async function main() {
-  console.log('Start seeding...')
-  console.log(`Simulando hasta la fecha: ${SIM_TODAY.toISOString()}`)
+/** Envío Masivo: Mueve múltiples lotes en un solo Shipment/Movement */
+async function createBulkShipmentAndReceive(
+  prisma: PrismaClient,
+  {
+    items,
+    depositUser,
+    sellerUser,
+    date,
+  }: {
+    items: ShipmentItem[]
+    depositUser: User
+    sellerUser: User
+    date: Date
+  },
+) {
+  const sentDate = date
+  const receivedDate = addMinutes(date, 60) // Se recibe 1 hora después
 
-  console.log('Deleting existing records...')
-  // (Mismo orden de borrado que antes)
-  await prisma.movementDetail.deleteMany()
-  await prisma.discard.deleteMany()
-  await prisma.orderDetail.deleteMany()
-  await prisma.sale.deleteMany()
-  await prisma.shipment.deleteMany()
-  await prisma.movement.deleteMany()
-  await prisma.order.deleteMany()
-  await prisma.customer.deleteMany()
-  await prisma.batch.deleteMany()
-  await prisma.user.deleteMany()
-  await prisma.product.deleteMany()
+  return prisma.$transaction(async tx => {
+    // --- 1. ENVÍO (SENT) ---
+    // Crear el Movimiento Cabecera
+    const sentMovement = await tx.movement.create({
+      data: {
+        userId: depositUser.id,
+        type: MovementType.SENT,
+        createdAt: sentDate,
+      },
+    })
 
-  // --- 1. Crear Modelos Simples ---
-  console.log('Creating simple models (Users, Products, Customers)...')
-  await prisma.user.createMany({ data: initialUsers })
-  await prisma.product.createMany({ data: initialProducts })
-  await prisma.customer.createMany({ data: initialCustomers })
+    // Crear el Shipment Cabecera
+    const shipment = await tx.shipment.create({
+      data: {
+        movementId: sentMovement.id,
+        status: ShipmentStatus.PENDING,
+        origin: Location.DEPOSIT,
+        destination: Location.MARKET,
+        createdAt: sentDate,
+        updatedAt: sentDate,
+      },
+    })
 
-  // --- 2. Obtener IDs para Relaciones ---
-  console.log('Fetching created models for relations...')
-  const users = await prisma.user.findMany()
-  const products = await prisma.product.findMany({ where: { active: true } })
-  const customers = await prisma.customer.findMany({ where: { active: true } })
+    // Procesar cada lote del envío
+    for (const item of items) {
+      // Actualizar Stock del Lote
+      await tx.batch.update({
+        where: { id: item.batch.id },
+        data: {
+          depositQuantity: { decrement: item.quantity },
+          sentQuantity: { increment: item.quantity },
+          updatedAt: sentDate,
+        },
+      })
+      // Crear Detalle del Movimiento
+      await tx.movementDetail.create({
+        data: {
+          movementId: sentMovement.id,
+          batchId: item.batch.id,
+          quantity: item.quantity,
+        },
+      })
+    }
 
-  const depositUser = users.find(u => u.role === Role.DEPOSIT)
-  const sellerUser = users.find(u => u.role === Role.SELLER)
+    // --- 2. RECEPCIÓN (RECEIVED_MARKET) ---
+    // Actualizar Shipment
+    await tx.shipment.update({
+      where: { id: shipment.id },
+      data: { status: ShipmentStatus.RECEIVED_OK, updatedAt: receivedDate },
+    })
 
-  if (!depositUser || !sellerUser) {
-    throw new Error('Faltan los usuarios DEPOSIT o SELLER')
-  }
+    // Crear Movimiento de Recepción
+    const recMovement = await tx.movement.create({
+      data: {
+        userId: sellerUser.id,
+        type: MovementType.RECEIVED_MARKET,
+        createdAt: receivedDate,
+      },
+    })
 
-  // --- 3. Generar Stock (Lotes) y Moverlos al Mercado ---
-  // (Todo esto sucede en el "pasado", hace 12-11 meses)
-  const oneYearAgo = new Date(SIM_TODAY)
-  oneYearAgo.setFullYear(SIM_TODAY.getFullYear() - 1) // 21 Oct 2024
+    // Procesar recepción de lotes
+    for (const item of items) {
+      await tx.batch.update({
+        where: { id: item.batch.id },
+        data: {
+          sentQuantity: { decrement: item.quantity },
+          marketQuantity: { increment: item.quantity },
+          receivedQuantity: { increment: item.quantity },
+          updatedAt: receivedDate,
+        },
+      })
+      await tx.movementDetail.create({
+        data: {
+          movementId: recMovement.id,
+          batchId: item.batch.id,
+          quantity: item.quantity,
+        },
+      })
+    }
+  })
+}
 
-  const elevenMonthsAgo = new Date(oneYearAgo)
-  elevenMonthsAgo.setMonth(oneYearAgo.getMonth() + 1) // 21 Nov 2024
+// --- FUNCIÓN CENTRAL DE SIMULACIÓN MENSUAL ---
+async function simulateMonth(
+  prisma: PrismaClient,
+  monthStart: Date,
+  monthEnd: Date,
+  users: User[],
+  products: Product[],
+  customers: Customer[],
+) {
+  const depositUser = users.find(u => u.role === Role.DEPOSIT)!
+  const sellerUser = users.find(u => u.role === Role.SELLER)!
+  const monthDuration = monthEnd.getTime() - monthStart.getTime()
 
-  console.log('Generating initial stock (Batches) in the past (1 year ago)...')
-  let batchCounter = 1
-  for (const product of products) {
-    const batchesToCreate = getRandomInt(2, 5) // Más lotes
-    for (let i = 0; i < batchesToCreate; i++) {
-      const stockDate = getRandomDate(oneYearAgo, elevenMonthsAgo)
-      const quantity = getRandomInt(200, 1000)
+  console.log(
+    ` -> Simulating from ${monthStart.toISOString().split('T')[0]} to ${
+      monthEnd.toISOString().split('T')[0]
+    }`,
+  )
 
-      // 1. Crear Lote
-      const batch = await createStock(prisma, {
+  // Configuración
+  const batchesPerDay = Math.ceil(
+    TOTAL_BATCH_STOCK_IN_MONTH / NUM_DAYS_IN_MONTH_SIM,
+  )
+  let batchCounter = (await prisma.batch.count()) + 1
+  const ordersPerDay = Math.floor(NUM_ORDERS_PER_MONTH / NUM_DAYS_IN_MONTH_SIM)
+  const discardPerDay = NUM_DISCARDS_PER_MONTH / NUM_DAYS_IN_MONTH_SIM
+  let ordersCreatedCount = 0
+
+  // --- BUCLE DIARIO ---
+  for (let day = 0; day < NUM_DAYS_IN_MONTH_SIM; day++) {
+    const dayStart = addMinutes(
+      monthStart,
+      (day * (monthDuration / NUM_DAYS_IN_MONTH_SIM)) / 60000,
+    )
+    const dayEnd = addMinutes(
+      monthStart,
+      ((day + 1) * (monthDuration / NUM_DAYS_IN_MONTH_SIM)) / 60000,
+    )
+
+    if (dayEnd > SIM_TODAY) break
+
+    // Array para acumular lo producido en el día antes de enviarlo
+    const dailyProduction: ShipmentItem[] = []
+
+    // 1. Producción de Stock (Ingreso en Depósito)
+    for (let i = 0; i < batchesPerDay; i++) {
+      const product = getRandomElement(products)
+      // Se produce temprano (entre 06:00 y 12:00)
+      const stockDate = getRandomDate(dayStart, addMinutes(dayStart, 60 * 6))
+      const quantity = getRandomInt(50, MAX_BATCH_SIZE)
+
+      // a. Crear Lote (STORED)
+      let batch = await createStock(prisma, {
         productId: product.id,
         userId: depositUser.id,
         quantity: quantity,
@@ -1178,171 +1291,257 @@ async function main() {
         date: stockDate,
       })
 
-      // 2. Mover la mayoría al mercado
-      const quantityToShip = Math.floor(quantity * 0.8) // Mover 80%
-      const shipDate = addMinutes(stockDate, 60) // 1 hora después
-
-      await shipAndReceive(prisma, {
-        batch: batch,
-        depositUserId: depositUser.id,
-        sellerUserId: sellerUser.id,
-        quantity: quantityToShip,
-        date: shipDate,
-      })
-    }
-  }
-  console.log(' -> Finished creating and shipping initial stock.')
-
-  // --- 4. Generar Pedidos Históricos (Mes a Mes) ---
-  console.log(
-    `Generating ${NUM_ORDERS_PER_MONTH} orders per month for 12 months...`,
-  )
-
-  const monthStart = new Date(oneYearAgo)
-
-  for (let month = 0; month < 12; month++) {
-    const monthEnd = new Date(monthStart)
-    monthEnd.setMonth(monthStart.getMonth() + 1)
-
-    // Evitar crear pedidos en el "futuro"
-    if (monthEnd > SIM_TODAY) break
-
-    console.log(
-      ` -> Simulating Month ${month + 1}/${12} (${
-        monthStart.toISOString().split('T')[0]
-      })`,
-    )
-
-    // Obtenemos lotes CON STOCK en el mercado
-    let availableBatches = await prisma.batch.findMany({
-      where: { marketQuantity: { gt: 10 } }, // Dejar un colchón
-      include: { product: true },
-    })
-
-    if (availableBatches.length === 0) {
-      console.warn(` -> No stock available for Month ${month + 1}. Skipping.`)
-      monthStart.setMonth(monthStart.getMonth() + 1) // Avanzar al siguiente mes
-      continue
-    }
-
-    const orderPromises = []
-    for (let i = 0; i < NUM_ORDERS_PER_MONTH; i++) {
-      const randomBatch = getRandomElement(availableBatches)
-      const randomCustomer = getRandomElement(customers)
-      const randomDate = getRandomDate(monthStart, monthEnd)
-      let quantityToOrder = getRandomInt(1, 5)
-
-      if (quantityToOrder > randomBatch.marketQuantity) {
-        quantityToOrder = randomBatch.marketQuantity
+      // b. Descarte (Opcional)
+      if (i < discardPerDay) {
+        const discardDate = addMinutes(stockDate, getRandomInt(5, 30))
+        const discardQuantity = getRandomInt(1, 5)
+        if (batch.depositQuantity >= discardQuantity) {
+          await createDiscard(prisma, {
+            batch: batch,
+            userId: depositUser.id,
+            quantity: discardQuantity,
+            date: discardDate,
+          })
+          // Recargar batch actualizado
+          batch = (await prisma.batch.findUnique({
+            where: { id: batch.id },
+          })) as Batch
+        }
       }
 
-      if (quantityToOrder > 0) {
-        orderPromises.push(
-          createFullOrderFlow(prisma, {
-            customer: randomCustomer,
-            seller: sellerUser,
-            batch: randomBatch,
-            product: randomBatch.product,
-            quantity: quantityToOrder,
-            date: randomDate,
-          }),
-        )
-        // Actualización "optimista" del stock local para evitar sobre-vender
-        randomBatch.marketQuantity -= quantityToOrder
-        // Si el lote se agota, sacarlo de la lista
-        if (randomBatch.marketQuantity <= 10) {
-          availableBatches = availableBatches.filter(
-            b => b.id !== randomBatch.id,
+      // c. Agregar a la lista de "Pendiente de Envío"
+      // (No enviamos todavía, solo acumulamos)
+      if (batch.depositQuantity > 0) {
+        dailyProduction.push({
+          batch: batch,
+          quantity: batch.depositQuantity, // Se envía todo lo que quedó en depósito
+        })
+      }
+    }
+
+    // 2. Realizar Envíos Masivos (Máximo 2 por día)
+    if (dailyProduction.length > 0) {
+      // Decidir si hacemos 1 o 2 envíos
+      const numberOfShipments = getRandomInt(1, 2)
+
+      // Dividir la producción en partes
+      const chunkSize = Math.ceil(dailyProduction.length / numberOfShipments)
+
+      for (let s = 0; s < numberOfShipments; s++) {
+        const chunk = dailyProduction.slice(s * chunkSize, (s + 1) * chunkSize)
+
+        if (chunk.length > 0) {
+          // Hora del envío: Uno al mediodía, otro a la tarde (aprox)
+          const shipmentHourOffset = s === 0 ? 360 : 720 // +6hs o +12hs desde inicio del día
+          const shipmentDate = addMinutes(
+            dayStart,
+            shipmentHourOffset + getRandomInt(0, 60),
           )
-          if (availableBatches.length === 0) break // Salir si no hay más stock
+
+          await createBulkShipmentAndReceive(prisma, {
+            items: chunk,
+            depositUser: depositUser,
+            sellerUser: sellerUser,
+            date: shipmentDate,
+          })
         }
       }
     }
 
-    try {
-      await Promise.all(orderPromises)
-    } catch (error) {
-      console.error(
-        ` -> Error creating orders for Month ${month + 1}: `,
-        (error as Error).message,
-      )
-    }
+    // 3. Ventas (Consumen del Mercado)
+    let availableBatches = await prisma.batch.findMany({
+      where: { marketQuantity: { gt: 5 } },
+      include: { product: true },
+    })
 
-    monthStart.setMonth(monthStart.getMonth() + 1) // Avanzar al siguiente mes
+    for (let i = 0; i < ordersPerDay; i++) {
+      if (availableBatches.length < 3) break
+
+      const randomCustomer = getRandomElement(customers)
+      // Las ventas ocurren después de los envíos (tarde/noche)
+      const salesStart = addMinutes(dayStart, 600) // 10 horas después del inicio
+      const randomDate = getRandomDate(salesStart, dayEnd)
+
+      const maxLines = Math.min(10, availableBatches.length)
+      const targetLines = getRandomInt(3, maxLines)
+
+      const cart: CartItem[] = []
+      const tempAvailable = [...availableBatches]
+
+      for (let line = 0; line < targetLines; line++) {
+        if (tempAvailable.length === 0) break
+        const batchIndex = getRandomInt(0, tempAvailable.length - 1)
+        const selectedBatch = tempAvailable[batchIndex]
+        tempAvailable.splice(batchIndex, 1)
+
+        let quantityToOrder = getRandomInt(6, 20)
+        if (quantityToOrder > selectedBatch.marketQuantity)
+          quantityToOrder = selectedBatch.marketQuantity
+
+        if (quantityToOrder > 0) {
+          cart.push({
+            batch: selectedBatch,
+            product: selectedBatch.product,
+            quantity: quantityToOrder,
+          })
+        }
+      }
+
+      if (cart.length > 0) {
+        cart.sort((a, b) => a.batch.id - b.batch.id)
+        try {
+          await createFullOrderFlow(prisma, {
+            customer: randomCustomer,
+            seller: sellerUser,
+            items: cart,
+            date: randomDate,
+          })
+          ordersCreatedCount++
+          // Optimistic update
+          for (const item of cart) {
+            const originalBatch = availableBatches.find(
+              b => b.id === item.batch.id,
+            )
+            if (originalBatch) {
+              originalBatch.marketQuantity -= item.quantity
+              if (originalBatch.marketQuantity < 6)
+                availableBatches = availableBatches.filter(
+                  b => b.id !== originalBatch.id,
+                )
+            }
+          }
+        } catch (error) {}
+      }
+    }
   }
 
-  console.log('Finished generating historical orders.')
-
-  // --- 5. Generar Órdenes Especiales (Hoy y Canceladas) ---
-
-  // Obtenemos los últimos lotes con stock
-  const finalAvailableBatches = await prisma.batch.findMany({
-    where: { marketQuantity: { gt: 5 } },
+  // --- FASE DE LIQUIDACIÓN (CLEANUP) ---
+  console.log('  - 🧹 Liquidando stock restante...')
+  const leftovers = await prisma.batch.findMany({
+    where: { marketQuantity: { gt: 0 } },
     include: { product: true },
   })
 
-  if (finalAvailableBatches.length > 0) {
-    // 5a. Crear Órdenes Canceladas (en la última semana)
-    console.log(`Creating ${NUM_CANCELLED_ORDERS} cancelled orders...`)
-    const oneWeekAgo = new Date(SIM_TODAY)
-    oneWeekAgo.setDate(SIM_TODAY.getDate() - 7)
+  const liquidationDate = monthEnd > SIM_TODAY ? SIM_TODAY : monthEnd
 
-    const cancelledPromises = []
-    for (let i = 0; i < NUM_CANCELLED_ORDERS; i++) {
-      const randomBatch = getRandomElement(finalAvailableBatches)
-      const randomCustomer = getRandomElement(customers)
-      const randomDate = getRandomDate(oneWeekAgo, SIM_TODAY)
-      const quantity = 1
-
-      // Asegurarnos que el stock no fue "optimistamente" reducido
-      const realBatch = await prisma.batch.findUnique({
-        where: { id: randomBatch.id },
+  while (leftovers.length > 0) {
+    const batchChunk = leftovers.splice(0, 10)
+    const cart: CartItem[] = []
+    for (const batch of batchChunk) {
+      cart.push({
+        batch: batch,
+        product: batch.product,
+        quantity: batch.marketQuantity,
       })
-      if (realBatch && realBatch.marketQuantity > quantity) {
-        cancelledPromises.push(
-          createCancelledOrder(prisma, {
-            customer: randomCustomer,
-            seller: sellerUser,
-            batch: realBatch,
-            product: randomBatch.product,
-            quantity: quantity,
-            date: randomDate,
-          }),
-        )
-      }
     }
-    await Promise.all(cancelledPromises)
-    console.log(` -> ${cancelledPromises.length} cancelled orders created.`)
 
-    // 5b. Crear la Orden Pendiente de HOY
-    console.log('Creating one PENDING order for today...')
-    const todayBatch = getRandomElement(finalAvailableBatches)
-    const todayCustomer = getRandomElement(customers)
-
-    const realTodayBatch = await prisma.batch.findUnique({
-      where: { id: todayBatch.id },
-    })
-
-    if (realTodayBatch && realTodayBatch.marketQuantity > 0) {
-      const order = await createPendingOrder(prisma, {
-        customer: todayCustomer,
-        seller: sellerUser,
-        batch: realTodayBatch,
-        product: todayBatch.product,
-        quantity: 1,
-        date: SIM_TODAY, // Exactamente hoy
-      })
-      console.log(
-        ` -> Created PENDING order #${order.id} for today (not paid, not sold).`,
-      )
-    } else {
-      console.log(" -> Skipped creating today's order, no stock left.")
+    if (cart.length > 0) {
+      const bulkCustomer = getRandomElement(customers)
+      cart.sort((a, b) => a.batch.id - b.batch.id)
+      try {
+        await createFullOrderFlow(prisma, {
+          customer: bulkCustomer,
+          seller: sellerUser,
+          items: cart,
+          date: addMinutes(liquidationDate, -getRandomInt(60, 300)),
+        })
+        ordersCreatedCount++
+      } catch (e) {}
     }
+  }
+  console.log(`  - ✅ Mes finalizado. Total Pedidos: ${ordersCreatedCount}.`)
+}
+
+// --- FUNCIÓN PRINCIPAL DEL SEED ---
+
+async function main() {
+  // A. Calcular fechas de inicio y fin del mes seleccionado
+  // Nota: En JS los meses van de 0 (Ene) a 11 (Dic), por eso restamos 1.
+  const monthStart = new Date(ANIO_A_CARGAR, MES_A_CARGAR - 1, 1)
+  const monthEnd = new Date(ANIO_A_CARGAR, MES_A_CARGAR, 1) // El día 1 del mes siguiente
+
+  console.log('----------------------------------------------------------')
+  console.log(`🚀 INICIANDO SEED MANUAL PARA: ${MES_A_CARGAR}/${ANIO_A_CARGAR}`)
+  console.log(`   Desde: ${monthStart.toLocaleDateString()}`)
+  console.log(`   Hasta: ${monthEnd.toLocaleDateString()}`)
+  console.log('----------------------------------------------------------')
+
+  // B. Limpieza de Base de Datos (Solo si LIMPIAR_DB es true)
+  if (LIMPIAR_DB) {
+    console.log(
+      '⚠️  ALERTA: Borrando base de datos completa (LIMPIAR_DB = true)...',
+    )
+    await prisma.movementDetail.deleteMany()
+    await prisma.discard.deleteMany()
+    await prisma.orderDetail.deleteMany()
+    await prisma.sale.deleteMany()
+    await prisma.shipment.deleteMany()
+    await prisma.movement.deleteMany()
+    await prisma.order.deleteMany()
+    await prisma.customer.deleteMany()
+    await prisma.batch.deleteMany()
+    await prisma.user.deleteMany()
+    await prisma.product.deleteMany()
+
+    // C. Crear Modelos Básicos (Solo si limpiamos la DB)
+    console.log('🌱 Creando usuarios, productos y clientes base...')
+    await prisma.user.createMany({ data: initialUsers })
+    await prisma.product.createMany({ data: initialProducts })
+    await prisma.customer.createMany({ data: initialCustomers })
   } else {
-    console.warn(' -> Skipped special orders, no available stock found.')
+    console.log('ℹ️  MODO INCREMENTAL: Se conservan los datos existentes.')
   }
 
-  console.log('Finish seeding. ✅')
+  // D. Recuperar datos necesarios (Siempre necesario)
+  const users = await prisma.user.findMany()
+  const products = await prisma.product.findMany({ where: { active: true } })
+  const customers = await prisma.customer.findMany({ where: { active: true } })
+
+  if (users.length === 0 || products.length === 0) {
+    throw new Error(
+      '❌ No hay usuarios o productos. Pon LIMPIAR_DB = true para inicializarlos.',
+    )
+  }
+
+  // E. Ejecutar la Simulación del Mes
+  await simulateMonth(prisma, monthStart, monthEnd, users, products, customers)
+
+  // F. Solo si el mes cargado es el ACTUAL, generamos el pendiente de "Hoy"
+  const isCurrentMonth =
+    SIM_TODAY.getMonth() === MES_A_CARGAR - 1 &&
+    SIM_TODAY.getFullYear() === ANIO_A_CARGAR
+
+  if (isCurrentMonth) {
+    console.log(
+      '\n🕒 Mes actual detectado: Generando orden PENDIENTE del día...',
+    )
+    const sellerUser = users.find(u => u.role === Role.SELLER)!
+    const availableBatches = await prisma.batch.findMany({
+      where: { marketQuantity: { gt: 0 } },
+      include: { product: true },
+    })
+
+    if (availableBatches.length > 0) {
+      const batch = getRandomElement(availableBatches)
+      const customer = getRandomElement(customers)
+      await createPendingOrder(prisma, {
+        customer,
+        seller: sellerUser,
+        items: [
+          {
+            batch,
+            product: batch.product,
+            quantity: 1,
+          },
+        ],
+        date: new Date(), // Hora actual real
+      })
+      console.log('   -> Orden pendiente creada.')
+    }
+  }
+
+  console.log('----------------------------------------------------------')
+  console.log('✅ Carga del mes finalizada exitosamente.')
 }
 
 // --- EJECUCIÓN DEL SCRIPT ---

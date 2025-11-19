@@ -59,6 +59,7 @@ export async function getShipments() {
     orderBy: {
       createdAt: 'desc',
     },
+    take: 100,
   })
   return shipments
 }
