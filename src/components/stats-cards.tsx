@@ -78,7 +78,7 @@ export default async function StatsCards() {
 
     {
       title: 'Ventas de la semana',
-      value: `${convertToArgentinePeso(stats.salesStats.monthlySales)}`,
+      value: `${convertToArgentinePeso(stats.salesStats.weeklySales)}`,
       change: `${stats.salesStats.salesChange >= 0 ? '+' : ''}${Math.round(
         stats.salesStats.salesChange,
       )}%`,

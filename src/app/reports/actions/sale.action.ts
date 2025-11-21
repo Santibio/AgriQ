@@ -256,22 +256,24 @@ export async function getSalesChartData(
       })
     } else if (timePeriod === '90d') {
       series = Array(3).fill(0)
-      const monthFormat = new Intl.DateTimeFormat('es-AR', { month: 'short' })
-      for (let i = 2; i >= 0; i--) {
-        const date = new Date(today)
-        date.setMonth(today.getMonth() - i)
-        categories.push(
-          monthFormat.format(date).replace('.', '').toLocaleUpperCase(),
-        )
-      }
+      // --- CAMBIO: Usar intervalos de 30 días en lugar de meses calendario ---
+      series = Array(3).fill(0)
+      categories = ['60-90 días', '30-60 días', 'Últimos 30 días']
+      const dayInMillis = 24 * 60 * 60 * 1000
+
       currentSales.forEach(sale => {
-        const monthsAgo =
-          today.getMonth() -
-          sale.createdAt.getMonth() +
-          12 * (today.getFullYear() - sale.createdAt.getFullYear())
-        const seriesIndex = 2 - monthsAgo
-        if (seriesIndex >= 0 && seriesIndex < 3) {
-          series[seriesIndex] += getSaleTotal(sale)
+        // Calculamos cuántos días pasaron
+        const daysAgo = Math.floor(
+          (now.getTime() - sale.createdAt.getTime()) / dayInMillis,
+        )
+        
+        // Asignamos al bucket correspondiente
+        if (daysAgo < 30) {
+          series[2] += getSaleTotal(sale) // Últimos 30 días
+        } else if (daysAgo < 60) {
+          series[1] += getSaleTotal(sale) // 30-60 días
+        } else if (daysAgo <= 90) { // Aseguramos capturar hasta el día 90
+          series[0] += getSaleTotal(sale) // 60-90 días
         }
       })
     }

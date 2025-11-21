@@ -14,8 +14,8 @@ interface Stats {
     productionChange: number
   }
   salesStats: {
-    monthlySales: number
-    lastMonthSales: number
+    weeklySales: number
+    lastWeekSales: number
     salesChange: number
   }
   ordersStats: {

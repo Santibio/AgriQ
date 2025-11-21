@@ -100,9 +100,6 @@ export default function SalesChart() {
   }, [timePeriod])
 
   const formatTotal = (value: number) => {
-    if (value >= 1000) {
-      return `$${(value / 1000).toFixed(1)}k`
-    }
     return convertToArgentinePeso(value)
   }
 
@@ -135,49 +132,49 @@ export default function SalesChart() {
         // Agregar más datos si están disponibles en el objeto data
         ...(data.products && { producto: data.products[index] }),
         // Agregar más campos según sea necesario
-      }));
-
-      // Ordenar por ventas (de mayor a menor)
-      const sortedSales = [...allSales].sort((a, b) => b.ventas - a.ventas);
+      }))
 
       // Crear encabezados del CSV
-      const headers = ['Período', 'Ventas (ARS)'];
-      
+      const headers = ['Período', 'Ventas (ARS)']
+
       // Si hay datos de productos, agregar la columna de producto
       if (data.products) {
-        headers.splice(1, 0, 'Producto');
+        headers.splice(1, 0, 'Producto')
       }
 
-      // Crear filas del CSV con todos los datos
+      // ...
       const csvRows = [
         headers.join(','),
-        ...sortedSales.map(sale => {
+        ...allSales.map(sale => {
+          // Agregamos comillas a cada valor
           const row = [
             `"${sale.periodo}"`,
-            ...(data.products ? [`"${sale.producto || ''}"`] : []),
-            convertToArgentinePeso(sale.ventas).replace('$', '').replace('.', '').replace(',', '.')
-          ];
-          return row.join(',');
-        })
-      ];
+            `"${convertToArgentinePeso(sale.ventas)}"`,
+          ]
+          return row.join(',')
+        }),
+      ]
 
-      const csvContent = csvRows.join('\n');
+      const csvContent = csvRows.join('\n')
       const blob = new Blob([`\uFEFF${csvContent}`], {
         type: 'text/csv;charset=utf-8;',
-      });
-      
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      const date = new Date().toISOString().split('T')[0];
-      link.setAttribute('download', `reporte_ventas_completo_${timePeriod}_${date}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      })
+
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      const date = new Date().toISOString().split('T')[0]
+      link.setAttribute(
+        'download',
+        `reporte_ventas_completo_${timePeriod}_${date}.csv`,
+      )
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     } catch (err) {
-      console.error('Error al exportar el reporte:', err);
-      alert('Ocurrió un error al exportar el reporte');
+      console.error('Error al exportar el reporte:', err)
+      alert('Ocurrió un error al exportar el reporte')
     } finally {
-      setIsDownloading(false);
+      setIsDownloading(false)
     }
   }
 
@@ -220,7 +217,7 @@ export default function SalesChart() {
       <>
         <div className='flex justify-between items-start'>
           <div>
-            <h3 className='leading-none text-4xl font-bold pb-1 text-slate-800'>
+            <h3 className='leading-none text-3xl font-bold pb-1 text-slate-800'>
               {formatTotal(totalSales)}
             </h3>
             <p className='text-base font-normal text-slate-500'>
