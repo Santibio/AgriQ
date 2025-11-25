@@ -179,7 +179,7 @@ export default function CustomerList({ customers }: CustomerListProps) {
         </Button>
       </div>
 
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
+      <div className='grid grid-cols-1 gap-4'>
         {filteredAndSortedCustomers.length > 0 ? (
           filteredAndSortedCustomers.map(customer => {
             const { color: fiscalColor, label: fiscalLabel } =

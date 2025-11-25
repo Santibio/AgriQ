@@ -195,7 +195,6 @@ export default function ClientDonutDashboard() {
         'Cliente',
         `Valor (${metricFilter === 'price' ? 'ARS' : 'Unidades'})`,
         'Cantidad de Compras',
-        'Última Compra'
       ];
 
       // Crear filas del CSV con todos los clientes
@@ -210,7 +209,6 @@ export default function ClientDonutDashboard() {
             `"${customer.name}"`,
             `"${formattedValue}"`,
             customer.purchaseCount || '',
-            customer.lastPurchase ? new Date(customer.lastPurchase).toLocaleDateString() : ''
           ].join(',');
         })
       ];
