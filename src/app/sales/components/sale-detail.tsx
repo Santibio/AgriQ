@@ -55,6 +55,10 @@ export default function SaleDetail({
       backdrop='blur'
       placement='bottom'
       size='full'
+      style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
     >
       <DrawerContent>
         {() => (

@@ -274,6 +274,10 @@ export default function DiscardList({ discards }: DiscardListProps) {
         backdrop='blur'
         placement='bottom'
         size='2xl'
+        style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
       >
         <DrawerContent>
           {() => (

@@ -155,6 +155,10 @@ export default function FormWrapper({
       backdrop='blur'
       placement='bottom'
       size='xl'
+      style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
     >
       <DrawerContent>
         {() => (

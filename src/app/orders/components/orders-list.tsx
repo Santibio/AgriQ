@@ -133,12 +133,12 @@ const STATUS_PAYMENT_MAP: Record<
   UNPAID: {
     icon: <AlertCircle className='h-4 w-4' />,
     className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    label: 'Pendiente de pago',
+    label: 'Pendiente de cobro',
   },
   PAID: {
     icon: <CheckCircle2 className='h-4 w-4' />,
     className: 'bg-green-100 text-green-800 border-green-200',
-    label: 'Pagado',
+    label: 'Cobrado',
   },
   CANCELLED: {
     icon: <XCircle className='h-4 w-4' />,
@@ -626,6 +626,10 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
         backdrop='blur'
         placement='bottom'
         size='xl'
+        style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
       >
         <DrawerContent>
           {() => (
@@ -672,6 +676,10 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
         backdrop='blur'
         placement='bottom'
         size='3xl'
+        style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
       >
         <DrawerContent>
           {() => (
@@ -726,9 +734,9 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
                     }
                   >
                     <Checkbox value={StatusPayment.UNPAID}>
-                      Pendiente de pago
+                      Pendiente de cobro
                     </Checkbox>
-                    <Checkbox value={StatusPayment.PAID}>Pagado</Checkbox>
+                    <Checkbox value={StatusPayment.PAID}>Cobrado</Checkbox>
                     <Checkbox value={StatusPayment.CANCELLED}>
                       Cancelado
                     </Checkbox>

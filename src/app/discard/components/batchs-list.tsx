@@ -140,6 +140,10 @@ export default function DiscardList({ batchs }: DiscardListProps) {
         onOpenChange={onOpenChange}
         backdrop='blur'
         placement='bottom'
+        style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
       >
         <DrawerContent>
           {() => (

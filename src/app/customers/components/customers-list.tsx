@@ -257,6 +257,10 @@ export default function CustomerList({ customers }: CustomerListProps) {
         backdrop='blur'
         placement='bottom'
         size='2xl'
+        style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
       >
         <DrawerContent>
           {() => (

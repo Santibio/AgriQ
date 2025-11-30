@@ -36,6 +36,10 @@ export default function FilterDrawer({
       placement='bottom'
       backdrop='blur'
       size='2xl'
+      style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
     >
       <DrawerContent>
         {() => (

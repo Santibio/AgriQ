@@ -222,6 +222,10 @@ export default function ProductionsList({ productions }: ProductionsListProps) {
         backdrop='blur'
         placement='bottom'
         size='xl'
+        style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
       >
         <DrawerContent>
           {() => (

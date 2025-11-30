@@ -53,6 +53,10 @@ export default function ShipmentDiscrepancy({
         placement='bottom'
         backdrop='blur'
         size='full'
+        style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
       >
         <DrawerContent>
           {() => (

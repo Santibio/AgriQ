@@ -60,6 +60,10 @@ export default function ShipmentAction({ userRole }: { userRole: string }) {
         onOpenChange={onOpenChange}
         placement='bottom'
         backdrop='blur'
+        style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
       >
         <DrawerContent>
           {() => (

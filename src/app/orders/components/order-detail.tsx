@@ -54,6 +54,10 @@ export default function OrderDetail({
       backdrop='blur'
       placement='bottom'
       size='full'
+      style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
     >
       <DrawerContent>
         {() => (

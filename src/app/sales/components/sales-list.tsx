@@ -280,6 +280,10 @@ export default function SalesList({ sales }: SalesListProps) {
         backdrop='blur'
         placement='bottom'
         size='2xl'
+        style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
       >
         <DrawerContent>
           {() => (
@@ -313,7 +317,7 @@ export default function SalesList({ sales }: SalesListProps) {
                   </RadioGroup>
 
                   <RadioGroup
-                    label='Buscar por método de pago'
+                    label='Buscar por método de cobro'
                     value={selectedPaymentMethodFilter}
                     onValueChange={handlePaymentMethodFilterChange}
                   >

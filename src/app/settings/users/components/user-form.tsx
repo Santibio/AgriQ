@@ -139,7 +139,7 @@ export default function UserForm({ user }: UserFormProps) {
         isLoading,
       }}
     >
-      <div className='flex flex-col gap-4'>
+      <div className='flex flex-col gap-4 w-full'>
         <Controller
           name='name'
           control={control}

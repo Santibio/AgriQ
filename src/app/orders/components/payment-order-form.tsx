@@ -162,7 +162,7 @@ export default function PaymentOrderForm({ order }: ProductionFormProps) {
         />
         <div className='space-y-4'>
           <Select
-            label='Forma de pago'
+            label='Forma de cobro'
             selectedKeys={[paymentMethod]}
             onSelectionChange={keys => {
               const selected = Array.from(keys)[0] as PaymentMethod
