@@ -448,7 +448,7 @@ export default function OrderList({ list, canCreateOrder }: OrderListProps) {
         return toast.error('Ocurrió un error al procesar la solicitud.')
       }
 
-      toast.success('Pedido entregada correctamente')
+      toast.success('Pedido entregado correctamente')
     } catch (error) {
       console.error('Error: ', error)
       toast.error(

@@ -35,7 +35,7 @@ interface CancellationModalProps {
 const reasonDetails = {
   CUSTOMER_REQUEST: {
     label: 'Solicitud del Cliente',
-    description: 'El cliente contactó y pidió cancelar su pedido.',
+    description: 'El cliente contactó y pidió que cancelemos su pedido.',
   },
   OUT_OF_STOCK: {
     label: 'Falta de Stock',

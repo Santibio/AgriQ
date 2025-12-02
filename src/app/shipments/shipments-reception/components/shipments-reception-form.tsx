@@ -190,7 +190,7 @@ export default function ShipmentForm({
                 Resumen de recepción
               </ModalHeader>
               <Divider />
-              <ModalBody>
+              <ModalBody className='max-h-[calc(100vh-40rem)] overflow-y-auto'>
                 <ul className='pt-5'>
                   {batchs.map(batch => {
                     const enviada = batch.sentQuantity
