@@ -52,7 +52,7 @@ export default function ShipmentDiscrepancy({
         onOpenChange={onOpenChange}
         placement='bottom'
         backdrop='blur'
-        size='full'
+        size="2xl"
         style={{
           maxWidth: '600px',
           margin: '0 auto',
@@ -98,11 +98,10 @@ export default function ShipmentDiscrepancy({
                               </span>
                             </span>
                             <span
-                              className={`text-gray-600 ${
-                                discrepancy !== 0
-                                  ? 'text-red-500 font-bold'
-                                  : ''
-                              }`}
+                              className={`text-gray-600 ${discrepancy !== 0
+                                ? 'text-red-500 font-bold'
+                                : ''
+                                }`}
                             >
                               Discrepancia: <span>{discrepancy}</span>
                             </span>
