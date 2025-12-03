@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { Search, Boxes, AlertCircle, Download } from 'lucide-react'
+import moment from 'moment'
 import { getProductionBatches, ProductionBatch } from '../actions/batchs.action'
 import CardWithShadow from '@/components/card-with-shadow'
 import { Button, Input } from '@heroui/react'
@@ -51,8 +52,6 @@ export default function ProductionDashboard() {
   }, [])
 
   const filteredBatches = useMemo(() => {
-    const now = new Date()
-    const oneDayInMillis = 24 * 60 * 60 * 1000
 
     return rawData.filter(batch => {
       const searchMatch = batch.product.name
@@ -60,12 +59,20 @@ export default function ProductionDashboard() {
         .includes(searchTerm.toLowerCase())
       if (!searchMatch) return false
 
-      const diffInMillis = now.getTime() - new Date(batch.createdAt).getTime()
-      const diffInDays = Math.floor(diffInMillis / oneDayInMillis)
+      const batchDate = moment(batch.createdAt)
+      const now = moment()
 
-      if (timeFilter === 'day' && diffInDays > 0) return false
-      if (timeFilter === 'week' && diffInDays > 7) return false
-      if (timeFilter === 'month' && diffInDays > 30) return false
+      if (timeFilter === 'day') {
+        return batchDate.isSame(now, 'day')
+      }
+
+      if (timeFilter === 'week') {
+        return batchDate.isAfter(now.subtract(7, 'days'))
+      }
+
+      if (timeFilter === 'month') {
+        return batchDate.isAfter(now.subtract(30, 'days'))
+      }
 
       return true
     })
@@ -138,11 +145,10 @@ export default function ProductionDashboard() {
           {filteredBatches.slice(0, 5).map((batch, index) => (
             <li
               key={batch.id}
-              className={`flex items-center justify-between p-3 ${
-                index < filteredBatches.length - 1
-                  ? 'border-b border-slate-100'
-                  : ''
-              }`}
+              className={`flex items-center justify-between p-3 ${index < filteredBatches.length - 1
+                ? 'border-b border-slate-100'
+                : ''
+                }`}
             >
               <div>
                 <p className='font-semibold text-slate-800 capitalize'>
@@ -201,33 +207,30 @@ export default function ProductionDashboard() {
             <Button
               onPress={() => setTimeFilter('day')}
               size='sm'
-              className={`pransition-colors flex-1 ${
-                timeFilter === 'day'
-                  ? 'bg-slate-800 text-white'
-                  : 'bg-zinc-100 text-zinc-500'
-              }`}
+              className={`pransition-colors flex-1 ${timeFilter === 'day'
+                ? 'bg-slate-800 text-white'
+                : 'bg-zinc-100 text-zinc-500'
+                }`}
             >
               Hoy
             </Button>
             <Button
               onPress={() => setTimeFilter('week')}
               size='sm'
-              className={`pransition-colors flex-1 ${
-                timeFilter === 'week'
-                  ? 'bg-slate-800 text-white'
-                  : 'bg-zinc-100 text-zinc-500'
-              }`}
+              className={`pransition-colors flex-1 ${timeFilter === 'week'
+                ? 'bg-slate-800 text-white'
+                : 'bg-zinc-100 text-zinc-500'
+                }`}
             >
               Semana
             </Button>
             <Button
               onPress={() => setTimeFilter('month')}
               size='sm'
-              className={`pransition-colors flex-1 ${
-                timeFilter === 'month'
-                  ? 'bg-slate-800 text-white'
-                  : 'bg-zinc-100 text-zinc-500'
-              }`}
+              className={`pransition-colors flex-1 ${timeFilter === 'month'
+                ? 'bg-slate-800 text-white'
+                : 'bg-zinc-100 text-zinc-500'
+                }`}
             >
               Mes
             </Button>
